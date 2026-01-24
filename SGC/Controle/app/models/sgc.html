@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sistema de gestão e acompanhamento de chamados">
+
+  <link rel="icon" type="image/jpg" href="/assets/img/logo.jpg">
+  <title>SGC - Chamados</title>
+
+  <!-- Fontes e Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="../views/sgc.css">
+</head>
+
+<body class="dark">
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <!-- Logo -->
+      <div class="sidebar-header">
+        <div class="logo-content">
+          <div class="logo-mark">SGC</div>
+          <div class="logo-text">
+            <h1>Sistema de</h1>
+            <p>Gerenciamento de Chamados</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="sidebar-controls">
+        <button id="toggle-theme" class="icon-btn" title="Alternar tema">
+          <i data-lucide="sun" class="icon"></i>
+        </button>
+        <button id="toggle-sidebar" class="icon-btn" title="Recolher sidebar">
+          <i data-lucide="chevron-left" class="icon"></i>
+        </button>
+      </div>
+
+      <!-- New Ticket Button
+      <div class="new-ticket-wrapper">
+        <button id="btn-new-ticket" class="btn-new-ticket">
+          <i data-lucide="plus" class="icon"></i>
+          <span class="btn-text">Novo Chamado</span>
+        </button>
+      </div>
+	-->
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="list">
+          <i data-lucide="list" class="icon"></i>
+          <span class="nav-text">Lista de Chamados</span>
+        </button>
+        <button class="nav-item" data-view="dashboard">
+          <i data-lucide="bar-chart-3" class="icon"></i>
+          <span class="nav-text">Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="cnpj">
+          <i data-lucide="table" class="icon"></i>
+          <span class="nav-text">Tabela CNPJ</span>
+        </button>
+        <button class="nav-item" data-view="procedures">
+          <i data-lucide="workflow" class="icon"></i>
+          <span class="nav-text">Procedimentos</span>
+        </button>
+        <button class="nav-item" data-view="trash">
+          <i data-lucide="trash-2" class="icon"></i>
+          <span class="nav-text">Lixeira</span>
+        </button>
+        <button class="nav-item" data-view="suporte" type="button">
+          <i data-lucide="headphones" class="icon"></i>
+          <span class="nav-text">Suporte</span>
+        </button>
+      </nav>
+
+      <!-- User Info -->
+      <div class="sidebar-footer">
+        <div id="avatar" class="user-avatar"></div>
+        <div class="user-info">
+          <p class="user-name" , <span id="usuario"></span>!</p>
+          <p class="user-role">Administrador</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="search-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="search" id="global-search" placeholder="Pesquisar por número, status, CNPJ, razão social..."
+            class="search-input">
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- List View -->
+        <section id="view-list" class="view-section active">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Lista de Chamados</h2>
+              <p class="section-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
+            </div>
+            <button class="btn-primary" onclick="showNewTicketForm()">
+              Novo Chamado
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Data Emissão</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Vencimento</th>
+                    <th>Valor (R$)</th>
+                    <th>Forma Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhum chamado cadastrado. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Form View -->
+        <section id="view-form" class="view-section">
+          <div class="form-container">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações do chamado abaixo</p>
+              </div>
+            </div>
+
+            <form id="ticket-form" class="card">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="situacao">Status *</label>
+                  <select id="situacao" required>
+                    <option value="" disabled selected>Selecione o status</option>
+                    <option value="Aberto">Aberto</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Processando">Processando</option>
+                    <option value="Escriturar">Escriturar</option>
+                    <option value="Solucionado">Solucionado</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="numero">Número do Chamado *</label>
+                  <input type="text" id="numero" placeholder="Ex: CH-2025-001" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="dataEmissao">Data de Emissão *</label>
+                  <input type="date" id="dataEmissao" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="pedido">Pedido</label>
+                  <input type="text" id="pedido" placeholder="Número do pedido">
+                </div>
+
+                <div class="form-group">
+                  <label for="notaFiscal">Nota Fiscal *</label>
+                  <input type="text" id="notaFiscal" placeholder="Número da NF" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="vencimento">Vencimento *</label>
+                  <input type="date" id="vencimento" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="valor">Valor (R$) *</label>
+                  <input type="text" id="valor" placeholder="0,00" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="forma">Forma de Pagamento *</label>
+                  <select id="forma" required>
+                    <option value="">Selecione</option>
+                    <option value="Deposito em conta">Depósito em conta</option>
+                    <option value="Boleto">Boleto</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="razao">Razão Social *</label>
+                  <input type="text" id="razao" placeholder="Empresa" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="cnpj">CNPJ *</label>
+                  <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="setor">Setor</label>
+                  <select id="setor">
+                    <option value="">Selecione</option>
+                    <option value="Rh">Rh - 213</option>
+                    <option value="Almox">Almox - 217</option>
+                    <option value="Compras">Compras - 218</option>
+                    <option value="Projetos">Projetos - 413</option>
+                    <option value="Dsi">Dsi - 214</option>
+                    <option value="Facilites">Facilites - 215</option>
+                    <option value="Diretoria">Diretoria - 101</option>
+                    <option value="SupervisaoObras">Supervisão de Obras - 4151</option>
+                    <option value="Movimentacao">Movimentação - 4141</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="codEtica">Código de Ética</label>
+                  <select id="codEtica">
+                    <option value="nao">Não</option>
+                    <option value="sim">Sim</option>
+                  </select>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="requisitante">Nome do Requisitante</label>
+                  <input type="text" id="requisitante" placeholder="Nome completo">
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="obs">Observação</label>
+                  <textarea id="obs" placeholder="Anotações adicionais..." rows="4"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-outline" onclick="cancelForm()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary">
+                  Salvar Chamado
+                </button>
+              </div>
+
+              <input type="hidden" id="editing-id" value="">
+              <input type="hidden" id="ticket-type" value="ticket">
+            </form>
+          </div>
+        </section>
+
+        <!-- Dashboard View -->
+        <section id="view-dashboard" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Dashboard</h2>
+              <p class="section-subtitle">Visão geral dos principais indicadores do sistema</p>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card" style="animation-delay: 0ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Total de Chamados</p>
+                  <p class="stat-value" id="stat-total">0</p>
+                </div>
+                <div class="stat-icon gradient-primary">
+                  <i data-lucide="bar-chart-3"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="animation-delay: 100ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Em Aberto</p>
+                  <p class="stat-value" id="stat-open">0</p>
+                </div>
+                <div class="stat-icon gradient-info">
+                  <i data-lucide="clock"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="animation-delay: 200ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Solucionados</p>
+                  <p class="stat-value" id="stat-solved">0</p>
+                </div>
+                <div class="stat-icon gradient-success">
+                  <i data-lucide="check-circle-2"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="animation-delay: 300ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Vencidos</p>
+                  <p class="stat-value" id="stat-overdue">0</p>
+                </div>
+                <div class="stat-icon gradient-danger">
+                  <i data-lucide="x-circle"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-panels">
+            <div class="card">
+              <h3 class="panel-title">Distribuição por Status</h3>
+              <div class="progress-list">
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Aberto</span>
+                    <span id="progress-open-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-open-fill" class="progress-fill bg-info" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Solucionado</span>
+                    <span id="progress-solved-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-solved-fill" class="progress-fill bg-success" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Vencido</span>
+                    <span id="progress-overdue-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-overdue-fill" class="progress-fill bg-danger" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="panel-title">Resumo Rápido</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <span>Taxa de Resolução</span>
+                  <span id="resolution-rate" class="summary-value">0%</span>
+                </div>
+                <div class="summary-item">
+                  <span>Chamados Pendentes</span>
+                  <span id="pending-count" class="summary-value">0</span>
+                </div>
+                <div class="summary-item">
+                  <span>Necessitam Atenção</span>
+                  <span id="attention-count" class="summary-value text-danger">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CNPJ View -->
+        <section id="view-cnpj" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Tabela CNPJ</h2>
+              <p class="section-subtitle">Listagem agregada por CNPJ dos chamados</p>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn-export-cnpj" onclick="exportCnpj()">Exportar CNPJ</button>
+              <button class="btn-import-cnpj" onclick="importCnpj()">Importar CNPJ</button>
+              <button class="btn-primary" onclick="newCnpj()">Novo CNPJ</button>
+            </div>
+
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th>Setor</th>
+                    <th>Código de Ética</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="cnpj-tbody">
+                  <tr>
+                    <td colspan="6" class="empty-state">
+                      Nenhum registro com CNPJ encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Procedures View -->
+        <section id="view-procedures" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Procedimentos</h2>
+              <p class="section-subtitle">Documentação e guias de processos do sistema</p>
+            </div>
+
+            <button class="btn-new-process" onclick="newProcess()">
+              <i data-lucide="plus" class="icon-sm"></i>
+              Novo Procedimento
+            </button>
+          </div>
+
+          <div class="procedures-grid" id="procedures-grid">
+            <!-- Procedimentos serão carregados via JavaScript -->
+          </div>
+        </section>
+
+        <!-- Trash View -->
+        <section id="view-trash" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Lixeira</h2>
+              <p class="section-subtitle">Chamados excluídos podem ser restaurados ou excluídos permanentemente</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Data Emissão</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Vencimento</th>
+                    <th>Valor (R$)</th>
+                    <th>Forma Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="trash-tbody">
+                  <!-- Chamados deletados serão carregados via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Suporte View -->
+        <section id="view-suporte" class="view-section">
+          <div class="suporte-background-gradient"></div>
+          <div class="suporte-estrelas"></div>
+
+          <!-- Header -->
+          <div class="suporte-header">
+            <div class="suporte-logo">
+              <i class="fas fa-headset"></i> SGC Ajuda
+            </div>
+          </div>
+
+          <div class="suporte-container">
+
+            <!-- Lado Esquerdo: Informações e FAQ -->
+            <div class="suporte-info-section">
+              <div class="suporte-page-title">
+                <h1>Como podemos ajudar?</h1>
+                <p>Tem alguma dúvida, sugestão ou encontrou um problema? Nossa equipe está pronta para te ouvir.</p>
+              </div>
+
+              <div class="suporte-contact-cards">
+                <div class="suporte-contact-card">
+                  <div class="suporte-contact-icon"><i class="fas fa-envelope"></i></div>
+                  <div class="suporte-contact-info">
+                    <h4>E-mail</h4>
+                    <span>suporte@sgc.com</span>
+                  </div>
+                </div>
+                <div class="suporte-contact-card">
+                  <div class="suporte-contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                  <div class="suporte-contact-info">
+                    <h4>Escritório</h4>
+                    <span>São Paulo, SP - Brasil</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="suporte-faq-section">
+                <h3>Perguntas Frequentes</h3>
+
+                <details class="suporte-faq-item">
+                  <summary>Como criar um novo chamado?</summary>
+                  <div class="suporte-faq-answer">
+                    Clique no botão "Novo Chamado" na barra superior ou na sidebar. Preencha todos os campos
+                    obrigatórios marcados com asterisco (*) e clique em "Salvar Chamado".
+                  </div>
+                </details>
+
+                <details class="suporte-faq-item">
+                  <summary>Como editar um chamado existente?</summary>
+                  <div class="suporte-faq-answer">
+                    Na lista de chamados, clique no botão de editar (ícone de lápis) na coluna Ações. Modifique os
+                    campos desejados e clique em "Salvar Chamado".
+                  </div>
+                </details>
+
+                <details class="suporte-faq-item">
+                  <summary>Como restaurar um chamado da lixeira?</summary>
+                  <div class="suporte-faq-answer">
+                    Acesse a seção "Lixeira" no menu lateral. Localize o chamado que deseja restaurar e clique no botão
+                    de restauração. O chamado voltará para a lista principal.
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            <!-- Lado Direito: Formulário -->
+            <div class="suporte-form-section">
+  <h2>Envie uma mensagem</h2>
+
+  <form id="supportForm"
+        action="https://formsubmit.co/estevamm.lab@gmail.com"
+        method="POST"
+        data-form>
+
+    <div class="suporte-form-group">
+      <label for="support-name">Seu Nome</label>
+      <i class="fas fa-user suporte-input-icon"></i>
+      <input type="text"
+             id="support-name"
+             name="nome"
+             class="suporte-form-control"
+             placeholder="Digite seu nome completo"
+             required>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-email">E-mail para contato</label>
+      <i class="fas fa-envelope suporte-input-icon"></i>
+      <input type="email"
+             id="support-email"
+             name="email"
+             class="suporte-form-control"
+             placeholder="seu@email.com"
+             required>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-subject">Assunto</label>
+      <i class="fas fa-tag suporte-input-icon"></i>
+      <select id="support-subject"
+              name="assunto"
+              class="suporte-form-control"
+              required>
+        <option value="" disabled selected>Selecione o motivo</option>
+        <option value="Relatar um problema">Relatar um problema</option>
+        <option value="Dúvida sobre o sistema">Dúvida sobre o sistema</option>
+        <option value="Sugestão de melhoria">Sugestão de melhoria</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-message">Mensagem</label>
+      <textarea id="support-message"
+                name="mensagem"
+                class="suporte-form-control"
+                placeholder="Descreva detalhadamente como podemos ajudar..."
+                required></textarea>
+    </div>
+
+    <!-- Configurações extras do FormSubmit (opcional, mas recomendado) -->
+    <input type="hidden" name="_subject" value="Novo chamado de suporte">
+    <input type="hidden" name="_captcha" value="false">
+
+    <button type="submit" data-button class="suporte-btn-submit">
+      Enviar Mensagem <i class="fas fa-paper-plane"></i>
+    </button>
+  </form>
+</div>
+
+
+          </div>
+
+          <!-- Toast de Sucesso -->
+          <div id="suporte-toast" class="suporte-toast">
+            <i class="fas fa-check-circle"></i> Mensagem enviada com sucesso!
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Salvo com sucesso!</div>
+
+  <!-- JS externo -->
+  <script src="../controllers/sgc.js"></script>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>
