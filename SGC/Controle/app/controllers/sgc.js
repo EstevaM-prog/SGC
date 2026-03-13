@@ -1873,3 +1873,91 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+function startHeaderClock() {
+    const timeEl = document.getElementById('live-time');
+    const dateEl = document.getElementById('live-date');
+
+    if (!timeEl || !dateEl) return;
+
+    function update() {
+        const now = new Date();
+        
+        // Hora: 14:30:05
+        timeEl.textContent = now.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        // Data: quinta-feira, 12 de março
+        dateEl.textContent = now.toLocaleDateString('pt-BR', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
+        });
+    }
+
+    update();
+    setInterval(update, 1000);
+}
+
+// Inicia assim que o documento carregar
+document.addEventListener('DOMContentLoaded', startHeaderClock);
+
+async function getPublicWeather() {
+    const tempElement = document.getElementById('live-temp');
+    const weatherWrapper = document.getElementById('weather-wrapper');
+    const weatherIcon = document.getElementById('weather-icon');
+
+    // Coordenadas de Cajamar (ou use a sua localização)
+    const lat = -23.35;
+    const lon = -46.87;
+
+    try {
+        // API Pública Open-Meteo (Não precisa de Key)
+        const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
+        );
+
+        if (!response.ok) throw new Error('Erro na API');
+
+        const data = await response.json();
+        const temp = Math.round(data.current_weather.temperature);
+        const code = data.current_weather.weathercode;
+
+        // Atualiza a temperatura no seu HTML
+        tempElement.textContent = `${temp}°C`;
+        
+        // Mapeia o código do clima para um ícone do Lucide
+        updateWeatherIconByCode(code);
+
+        // Mostra o widget
+        weatherWrapper.style.display = 'flex';
+
+    } catch (error) {
+        console.error("Erro ao buscar clima público:", error);
+    }
+}
+
+// Mapeamento de códigos da API para ícones
+function updateWeatherIconByCode(code) {
+    const iconElement = document.getElementById('weather-icon');
+    let iconName = 'sun';
+
+    // Códigos WMO (Weather Interpretation Codes)
+    if (code === 0) iconName = 'sun';
+    else if (code >= 1 && code <= 3) iconName = 'cloud-sun';
+    else if (code >= 45 && code <= 48) iconName = 'cloud';
+    else if (code >= 51 && code <= 67) iconName = 'cloud-rain';
+    else if (code >= 71 && code <= 77) iconName = 'snowflake';
+    else if (code >= 80 && code <= 99) iconName = 'cloud-lightning';
+
+    iconElement.setAttribute('data-lucide', iconName);
+    lucide.createIcons(); // Recarrega os ícones do Lucide
+}
+
+// Chama a função
+getPublicWeather();
+// Atualiza a cada 15 minutos
+setInterval(getPublicWeather, 900000);

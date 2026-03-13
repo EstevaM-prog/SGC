@@ -1713,3 +1713,63 @@ textarea.suporte-form-control {
   border-color: var(--primary);
   ring: 2px var(--primary-alpha);
 }
+
+/* Container da Top Bar - Garante o alinhamento horizontal de todos os itens */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 64px; /* Ajuste conforme sua altura padrão */
+    gap: 1.5rem;
+}
+
+/* Estilização específica do Relógio e Data */
+.clock-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Alinha o texto à direita */
+    min-width: fit-content;
+    margin-left: auto; /* Empurra o relógio para a direita, antes do user-info */
+}
+
+.time-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--foreground);
+}
+
+#live-time {
+    font-size: 0.95rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums; /* Evita que os números fiquem balançando */
+}
+
+#live-date {
+    font-size: 0.75rem;
+    color: #64748b; /* Cinza médio para não brigar com a hora */
+    text-transform: capitalize;
+}
+
+/* Responsividade: Esconde a data em telas menores */
+@media (max-width: 768px) {
+    #live-date { display: none; }
+    .search-wrapper { max-width: 200px; }
+}
+
+.weather-info {
+    border-right: 1px solid rgba(0,0,0,0.1);
+    padding-right: 12px;
+    margin-right: 12px;
+    height: 24px; /* Alinha com a altura do relógio */
+}
+
+#weather-icon {
+    transition: all 0.3s ease;
+}
+
+/* Cor baseada no tema do seu dashboard */
+.text-warning {
+    color: #f59e0b;
+}

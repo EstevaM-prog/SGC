@@ -115,6 +115,20 @@
             class="search-input">
         </div>
 
+        <!-- Clock as Date bar -->
+        <div class="clock-content">
+            <div class="time-wrapper">
+                <div id="weather-wrapper" class="weather-info" style="display: none; align-items: center; gap: 5px; margin-right: 10px;">
+                    <i data-lucide="sun" id="weather-icon" class="w-4 h-4 text-warning"></i>
+                    <span id="live-temp" style="font-weight: 600; font-size: 0.9rem;">--°C</span>
+                </div>
+                
+                <i data-lucide="clock" class="w-4 h-4 text-muted-foreground"></i>
+                <span id="live-time">00:00:00</span>
+            </div>
+            <span id="live-date">Carregando data...</span>
+        </div>
+
         <!-- User Info -->
         <div class="sidebar-footer">
           <a href="../models/profile.html" class="profile-link" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
