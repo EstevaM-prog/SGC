@@ -437,7 +437,7 @@ h6 {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
-  margin-top: auto;
+  margin-top: 10px;
 }
 
 /* Buttons */

@@ -245,7 +245,7 @@
 
                 <div class="form-group">
                   <label for="notaFiscal">Nota Fiscal *</label>
-                  <input type="text" id="notaFiscal" placeholder="Número da NF" required>
+                  <input type="text" id="notaFiscal" minlength="1" maxlength="120" placeholder="Número da NF" required>
                 </div>
 
                 <div class="form-group">
@@ -270,12 +270,12 @@
 
                 <div class="form-group">
                   <label for="razao">Razão Social *</label>
-                  <input type="text" id="razao" placeholder="Empresa" required>
+                  <input type="text" id="razao" placeholder="Empresa" minlength="2" maxlength="144" required>
                 </div>
 
                 <div class="form-group">
                   <label for="cnpj">CNPJ *</label>
-                  <input type="text" id="cnpj" placeholder="00.000.000/0000-00" maxlength="18" required>
+                  <input type="text" id="cnpj" placeholder="00.000.000/0000-00" minlength="11" maxlength="18" required>
                 </div>
 
                 <div class="form-group">
@@ -305,12 +305,12 @@
 
                 <div class="form-group full-width">
                   <label for="requisitante">Nome do Requisitante</label>
-                  <input type="text" id="requisitante" placeholder="Nome completo">
+                  <input type="text" id="requisitante" min="1" maxlength="255" placeholder="Nome completo">
                 </div>
 
                 <div class="form-group full-width">
                   <label for="obs">Observação</label>
-                  <textarea id="obs" placeholder="Anotações adicionais..." rows="4"></textarea>
+                  <textarea id="obs" maxlength="255" placeholder="Anotações adicionais..." rows="4"></textarea>
                 </div>
               </div>
 
