@@ -40,72 +40,95 @@
         </div>
       </div>
 
-      <!-- Controls -->
-      <div class="sidebar-controls">
-        <button id="toggle-theme" class="icon-btn" title="Alternar tema">
-          <i data-lucide="sun" class="icon"></i>
-        </button>
-        <button id="toggle-sidebar" class="icon-btn" title="Recolher sidebar">
-          <i data-lucide="chevron-left" class="icon"></i>
-        </button>
-      </div>
-
-      <!-- New Ticket Button
+      <!-- New Ticket Button -->
       <div class="new-ticket-wrapper">
         <button id="btn-new-ticket" class="btn-new-ticket">
           <i data-lucide="plus" class="icon"></i>
           <span class="btn-text">Novo Chamado</span>
         </button>
       </div>
-	-->
 
       <!-- Navigation -->
       <nav class="sidebar-nav">
-        <button class="nav-item active" data-view="list">
-          <i data-lucide="list" class="icon"></i>
-          <span class="nav-text">Lista de Chamados</span>
-        </button>
         <button class="nav-item" data-view="dashboard">
           <i data-lucide="bar-chart-3" class="icon"></i>
           <span class="nav-text">Dashboard</span>
         </button>
+
+        <button class="nav-item active" data-view="list">
+          <i data-lucide="list" class="icon"></i>
+          <span class="nav-text">Lista de Chamados</span>
+        </button>
+
+        <button class="nav-item" data-view="shopping">
+          <i data-lucide="shopping-cart" class="icon"></i>
+          <span class="nav-text">Compras</span>
+        </button>
+
+        <button class="nav-item" data-view="freight">
+          <i data-lucide="truck" class="icon"></i>
+          <span class="nav-text">Fretes</span>
+        </button>
+        
         <button class="nav-item" data-view="cnpj">
           <i data-lucide="table" class="icon"></i>
           <span class="nav-text">Tabela CNPJ</span>
         </button>
+
         <button class="nav-item" data-view="procedures">
           <i data-lucide="workflow" class="icon"></i>
           <span class="nav-text">Procedimentos</span>
         </button>
+
         <button class="nav-item" data-view="trash">
           <i data-lucide="trash-2" class="icon"></i>
           <span class="nav-text">Lixeira</span>
         </button>
+
         <button class="nav-item" data-view="suporte" type="button">
           <i data-lucide="headphones" class="icon"></i>
           <span class="nav-text">Suporte</span>
         </button>
       </nav>
 
-      <!-- User Info -->
-      <div class="sidebar-footer">
-        <div id="avatar" class="user-avatar"></div>
-        <div class="user-info">
-          <p class="user-name" , <span id="usuario"></span>!</p>
-          <p class="user-role">Administrador</p>
-        </div>
-      </div>
     </aside>
 
     <!-- Main Content -->
     <main class="main-content">
       <!-- Top Bar -->
       <header class="top-bar">
+        <div class="sidebar-controls">
+
+        <!-- Controls -->
+         <button id="toggle-sidebar" class="icon-btn" title="Recolher sidebar">
+          <i data-lucide="panel-left" class="icon"></i>
+        </button>
+        <button id="toggle-theme" class="icon-btn" title="Alternar tema">
+          <i data-lucide="sun" class="icon"></i>
+        </button>
+      </div>
+
+        <!-- Search bar -->
         <div class="search-wrapper">
           <i data-lucide="search" class="search-icon"></i>
           <input type="search" id="global-search" placeholder="Pesquisar por número, status, CNPJ, razão social..."
             class="search-input">
         </div>
+
+        <!-- User Info -->
+        <div class="sidebar-footer">
+          <a href="../models/profile.html" class="profile-link" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
+              
+              <div class="user-info">
+                  <p class="user-name" style="margin: 0; font-weight: 600;">Hello, <span id="usuario"></span>!</p>
+                  <p class="user-role" style="margin: 0; font-size: 0.8rem; opacity: 0.7;">Administrador</p>
+              </div>
+
+              <div id="avatar" class="user-avatar" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; items-center: center; 
+              justify-content: center; background-color: #e2e8f0; flex-shrink: 0;">
+              </div>
+          </a>
+      </div>
       </header>
 
       <!-- Content Area -->
@@ -116,11 +139,23 @@
             <div>
               <h2 class="section-title">Lista de Chamados</h2>
               <p class="section-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
+              
             </div>
             <button class="btn-primary" onclick="showNewTicketForm()">
               Novo Chamado
             </button>
           </div>
+          
+          <div class="filter-call list">
+              <label for="situacao" class="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por:</label>
+              <select id="situacao" class="custom-select">
+                <option value="Aberto">Aberto</option>
+                <option value="Processando">Processando</option>
+                <option value="Escriturar">Escriturar</option>
+                <option value="Solucionado">Solucionado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
 
           <div class="card">
             <div class="table-wrapper">
@@ -233,15 +268,16 @@
                   <label for="setor">Setor</label>
                   <select id="setor">
                     <option value="">Selecione</option>
+                    <option value="Diretoria">Diretoria - 101</option>
                     <option value="Rh">Rh - 213</option>
-                    <option value="Almox">Almox - 217</option>
-                    <option value="Compras">Compras - 218</option>
-                    <option value="Projetos">Projetos - 413</option>
                     <option value="Dsi">Dsi - 214</option>
                     <option value="Facilites">Facilites - 215</option>
-                    <option value="Diretoria">Diretoria - 101</option>
-                    <option value="SupervisaoObras">Supervisão de Obras - 4151</option>
+                    <option value="Almox">Almox - 217</option>
+                    <option value="Compras">Compras - 218</option>
+                    <option value="Compras">Marketing - 219</option>
+                    <option value="Projetos">Projetos - 413</option>
                     <option value="Movimentacao">Movimentação - 4141</option>
+                    <option value="SupervisaoObras">Supervisão de Obras - 4151</option>
                   </select>
                 </div>
 
@@ -286,6 +322,16 @@
               <h2 class="section-title">Dashboard</h2>
               <p class="section-subtitle">Visão geral dos principais indicadores do sistema</p>
             </div>
+
+            <div class="filter-dashboard">
+              <label for="filter_data" class="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por:</label>
+              <select id="filter_data" class="custom-select">
+                <option value="Day">Hoje</option>
+                <option value="Week">Semana</option>
+                <option value="Month">Mês</option>
+                <option value="Year">Ano</option>
+              </select>
+            </div>
           </div>
 
           <div class="stats-grid">
@@ -325,15 +371,30 @@
               </div>
             </div>
 
+            
             <div class="stat-card" style="animation-delay: 300ms">
               <div class="stat-content-wrapper">
-                <div>
-                  <p class="stat-label">Vencidos</p>
-                  <p class="stat-value" id="stat-overdue">0</p>
-                </div>
-                <div class="stat-icon gradient-danger">
-                  <i data-lucide="x-circle"></i>
-                </div>
+                  <div>
+                      <p class="stat-label">Escriturar</p>
+                      <p class="stat-value" id="stat-overdue">0</p>
+                  </div>
+                  <div class="stat-icon gradient-info"> 
+                      <i data-lucide="file-input"></i>
+                  </div>
+              </div>
+            </div>
+            
+
+             
+            <div class="stat-card" style="animation-delay: 400ms">
+              <div class="stat-content-wrapper">
+                  <div>
+                      <p class="stat-label">Processando</p>
+                      <p class="stat-value" id="stat-overdue">0</p>
+                  </div>
+                  <div class="stat-icon gradient-warning">
+                      <i data-lucide="settings-2"></i>
+                  </div>
               </div>
             </div>
           </div>
@@ -388,6 +449,94 @@
                   <span id="attention-count" class="summary-value text-danger">0</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Shopping View -->
+        <section id="view-shopping" class="view-section">
+          <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações da compra abaixo</p>
+              </div>
+              <button class="btn-primary" onclick="showNewTicketFormShopping()">
+              Novo Chamado
+            </button>
+            </div>
+
+            
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Nº Solicitação</th>
+                    <th>Pedido</th>
+                    <th>Prazo de entrega</th>
+                    <th>Valor (R$)</th>
+                    <th>Prazo Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhuma compra cadastrada. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Freight View -->
+        <section id="view-freight" class="view-section">
+          <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações do frete abaixo</p>
+              </div>
+              <button class="btn-primary" onclick="showNewTicketFormFreight()">
+              Novo Chamado
+            </button>
+            </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Nº Solicitação</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Dacte</th>
+                    <th>Valor (R$)</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhum frete contratado. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>

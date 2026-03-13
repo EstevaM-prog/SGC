@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(240 5.9% 90%)",
+                        background: "hsl(0 0% 100%)",
+                        foreground: "hsl(240 10% 3.9%)",
+                        primary: "hsl(240 5.9% 10%)",
+                        "primary-foreground": "hsl(0 0% 98%)",
+                        muted: "hsl(240 4.8% 95.9%)",
+                        "muted-foreground": "hsl(240 3.8% 46.1%)",
+                        card: "hsl(0 0% 100%)",
+                        destructive: "hsl(0 84.2% 60.2%)",
+                        "destructive-foreground": "hsl(0 0% 98%)",
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-foreground">
+
+    <div class="flex min-h-screen items-center justify-center px-4 py-12">
+        <div class="w-full max-w-md space-y-8">
+            
+            <div class="flex items-center gap-2">
+                <a href="../models/sgc.html" class="text-muted-foreground hover:text-foreground transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                </a>
+                <h1 class="text-2xl font-bold tracking-tight text-foreground">My Profile</h1>
+            </div>
+
+            <div class="flex flex-col items-center gap-4 rounded-2xl border bg-card p-8 shadow-sm text-center">
+                <div id="profile-avatar" class="h-24 w-24 rounded-full bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold border-2 border-primary/5 overflow-hidden">
+                    <span id="profile-avatar-initials">?</span>
+                    <img id="profile-img" class="hidden h-full w-full object-cover" src="" alt="Profile">
+                </div>
+
+                <label for="file-input" class="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-1 text-sm font-medium hover:bg-muted transition-colors cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Change Photo
+                    <input type="file" id="file-input" class="hidden" accept="image/*" onchange="uploadPhoto(event)">
+                </label>
+            </div>
+
+            <div class="space-y-3">
+                <div class="flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-muted-foreground">Username</p>
+                        <p id="profile-username" class="truncate text-sm font-semibold text-foreground italic text-muted-foreground">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-muted-foreground">Email Address</p>
+                        <p id="profile-email" class="truncate text-sm font-semibold text-foreground italic text-muted-foreground">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 rounded-2xl border bg-card px-5 py-4 shadow-sm">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-muted-foreground">Password</p>
+                        <p class="text-sm font-semibold text-foreground tracking-widest">••••••••</p>
+                    </div>
+                    <button onclick="updatePassword()" class="shrink-0 rounded-md border border-input bg-background px-3 py-1 text-sm font-medium hover:bg-muted transition-all active:scale-95">Update</button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="editProfile()" class="w-full h-11 bg-primary text-primary-foreground font-semibold rounded-md hover:shadow-lg transition-all active:scale-[0.98]">
+                    Edit Profile
+                </button>
+                <button onclick="handleLogout()" class="w-full h-11 border border-destructive text-destructive font-semibold rounded-md hover:bg-destructive hover:text-destructive-foreground transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../controllers/profile.js"></script>
+</body>
+</html>

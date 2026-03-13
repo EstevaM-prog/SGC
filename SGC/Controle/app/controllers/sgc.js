@@ -1,33 +1,46 @@
+function carregarNomeUsuario() {
+    // 1. Busca a sessão ativa e o banco de usuários
+    const sessionData = localStorage.getItem('active_session');
+    const userDbData = localStorage.getItem('user_db');
 
-// Verifica se já existe um nome salvo
-let nome = localStorage.getItem("nome");
+    if (sessionData) {
+        try {
+            const sessionDTO = JSON.parse(sessionData);
+            const userDb = userDbData ? JSON.parse(userDbData) : null;
+            const nome = sessionDTO.username;
 
-// Se não existir, pergunta ao usuário
-if (!nome) {
-  nome = prompt("Qual é o seu nome?");
+            // 2. Atualiza o texto do nome no HTML
+            const elementoNome = document.getElementById("nome-usuario") || document.getElementById("usuario");
+            if (elementoNome) {
+                elementoNome.innerText = nome;
+            }
 
-  if (nome && nome.trim() !== "") {
-    // Salva no localStorage
-    localStorage.setItem("nome", nome);
-    alert("Olá " + nome + ". Muito prazer");
-  }
+            // 3. Lógica do Avatar (Foto ou Inicial)
+            const avatar = document.getElementById("avatar");
+            if (avatar) {
+                // Verificamos se o usuário tem foto salva no user_db
+                if (userDb && userDb.profilePic) {
+                    // Limpa o conteúdo (remove iniciais antigas) e insere a imagem
+                    avatar.innerHTML = `<img src="${userDb.profilePic}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                } else if (nome) {
+                    // Se não tiver foto, coloca a inicial
+                    const primeiraLetra = nome.trim().charAt(0).toUpperCase();
+                    avatar.textContent = primeiraLetra;
+                }
+            }
+
+            console.log("Interface atualizada para o usuário:", nome);
+
+        } catch (e) {
+            console.error("Erro ao processar dados:", e);
+        }
+    } else {
+        console.log("Nenhuma sessão ativa encontrada.");
+    }
 }
 
-// Pega o nome salvo
-const nomeSalvo = localStorage.getItem("nome");
-
-// Exibe no HTML
-if (nomeSalvo) {
-  document.getElementById("usuario").textContent = nomeSalvo;
-}
-
-// --- Avatar ---
-const avatar = document.getElementById("avatar");
-
-if (nome) {
-  const primeiraLetra = nome.trim().charAt(0).toUpperCase();
-  avatar.textContent = primeiraLetra;
-}
+// Executa quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', carregarNomeUsuario);
 
 // Ensure STORAGE_KEY is defined for legacy functions
 const STORAGE_KEY = 'chamados_db_v1';
@@ -510,6 +523,7 @@ function loadDashboardStats() {
   renderDonutChart('chart-escriturar', escriturar, total, 'Escriturar', '#7c3aed', '#a78bfa');
   renderDonutChart('chart-solucionado', solucionado, total, 'Solucionado', '#06b6d4', '#14b8a6');
   renderDonutChart('chart-open', open, total, 'Em Aberto', '#2563eb', '#60a5fa');
+  renderDonutChart('chart-solucionado', solucionado, total, 'Processando', '#06b6d4', '#14b8a6');
 }
 
 // render simple SVG donut chart into a container

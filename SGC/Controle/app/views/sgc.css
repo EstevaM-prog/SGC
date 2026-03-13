@@ -125,7 +125,8 @@ h6 {
 }
 
 .sidebar.collapsed .sidebar-footer {
-  justify-content: center;
+  justify-content: flex-end; /* Alinha na direita */
+  padding-right: 10px; /* Pequeno ajuste para não colar na borda */
 }
 
 /* Sidebar Header */
@@ -283,6 +284,8 @@ h6 {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  transition: all 0.3s ease; /* Adiciona suavidade na transição */
+  overflow: hidden; /* Evita que o texto "vaze" durante a animação */
 }
 
 .user-avatar {
@@ -434,6 +437,7 @@ h6 {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
+  margin-top: auto;
 }
 
 /* Buttons */
@@ -1671,4 +1675,41 @@ textarea.suporte-form-control {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.profile-link {
+    text-decoration: none; /* Remove o sublinhado */
+    color: inherit;       /* Mantém a cor original do texto */
+    display: flex;        /* Mantém o alinhamento horizontal */
+    align-items: center;
+    gap: 12px;            /* Espaço entre avatar e texto */
+    width: 100%;
+    transition: opacity 0.2s;
+}
+
+.profile-link:hover {
+    opacity: 0.8;         /* Efeito visual ao passar o mouse */
+    cursor: pointer;
+}
+
+.custom-select {
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 0.5rem;
+  background-color: var(--card-background);
+  color: var(--foreground);
+  cursor: pointer;
+  appearance: none; /* Remove a seta padrão */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  ring: 2px var(--primary-alpha);
 }
