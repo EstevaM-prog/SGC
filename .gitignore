@@ -7,9 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+dist-ssr/
 *.local
 
 # Environment variables
@@ -17,15 +22,20 @@ dist-ssr
 .env.test
 .env.production
 .env.local
+**/.env
+**/.env.local
 
 # Database
+server/dev.db
+server/dev.db-journal
 prisma/dev.db
-prisma/dev.db-journal
+*.db
+*.db-journal
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
@@ -34,4 +44,5 @@ prisma/dev.db-journal
 *.sw?
 
 # Generated files
+**/src/generated/prisma
 /src/generated/prisma
