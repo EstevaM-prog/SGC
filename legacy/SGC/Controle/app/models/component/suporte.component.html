@@ -1,0 +1,140 @@
+<!-- Suporte View -->
+        <section id="view-suporte" class="view-section">
+          <div class="suporte-background-gradient"></div>
+          <div class="suporte-estrelas"></div>
+
+          <!-- Header -->
+          <div class="suporte-header">
+            <div class="suporte-logo">
+              <i class="fas fa-headset"></i> SGC Ajuda
+            </div>
+          </div>
+
+          <div class="suporte-container">
+
+            <!-- Lado Esquerdo: Informações e FAQ -->
+            <div class="suporte-info-section">
+              <div class="suporte-page-title">
+                <h1>Como podemos ajudar?</h1>
+                <p>Tem alguma dúvida, sugestão ou encontrou um problema? Nossa equipe está pronta para te ouvir.</p>
+              </div>
+
+              <div class="suporte-contact-cards">
+                <div class="suporte-contact-card">
+                  <div class="suporte-contact-icon"><i class="fas fa-envelope"></i></div>
+                  <div class="suporte-contact-info">
+                    <h4>E-mail</h4>
+                    <span>suporte@sgc.com</span>
+                  </div>
+                </div>
+                <div class="suporte-contact-card">
+                  <div class="suporte-contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                  <div class="suporte-contact-info">
+                    <h4>Escritório</h4>
+                    <span>São Paulo, SP - Brasil</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="suporte-faq-section">
+                <h3>Perguntas Frequentes</h3>
+
+                <details class="suporte-faq-item">
+                  <summary>Como criar um novo chamado?</summary>
+                  <div class="suporte-faq-answer">
+                    Clique no botão "Novo Chamado" na barra superior ou na sidebar. Preencha todos os campos
+                    obrigatórios marcados com asterisco (*) e clique em "Salvar Chamado".
+                  </div>
+                </details>
+
+                <details class="suporte-faq-item">
+                  <summary>Como editar um chamado existente?</summary>
+                  <div class="suporte-faq-answer">
+                    Na lista de chamados, clique no botão de editar (ícone de lápis) na coluna Ações. Modifique os
+                    campos desejados e clique em "Salvar Chamado".
+                  </div>
+                </details>
+
+                <details class="suporte-faq-item">
+                  <summary>Como restaurar um chamado da lixeira?</summary>
+                  <div class="suporte-faq-answer">
+                    Acesse a seção "Lixeira" no menu lateral. Localize o chamado que deseja restaurar e clique no botão
+                    de restauração. O chamado voltará para a lista principal.
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            <!-- Lado Direito: Formulário -->
+            <div class="suporte-form-section">
+  <h2>Envie uma mensagem</h2>
+
+  <form id="supportForm"
+        action="https://formsubmit.co/estevamm.lab@gmail.com"
+        method="POST"
+        data-form>
+
+    <div class="suporte-form-group">
+      <label for="support-name">Seu Nome</label>
+      <i class="fas fa-user suporte-input-icon"></i>
+      <input type="text"
+             id="support-name"
+             name="nome"
+             class="suporte-form-control"
+             placeholder="Digite seu nome completo"
+             required>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-email">E-mail para contato</label>
+      <i class="fas fa-envelope suporte-input-icon"></i>
+      <input type="email"
+             id="support-email"
+             name="email"
+             class="suporte-form-control"
+             placeholder="seu@email.com"
+             required>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-subject">Assunto</label>
+      <i class="fas fa-tag suporte-input-icon"></i>
+      <select id="support-subject"
+              name="assunto"
+              class="suporte-form-control"
+              required>
+        <option value="" disabled selected>Selecione o motivo</option>
+        <option value="Relatar um problema">Relatar um problema</option>
+        <option value="Dúvida sobre o sistema">Dúvida sobre o sistema</option>
+        <option value="Sugestão de melhoria">Sugestão de melhoria</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="suporte-form-group">
+      <label for="support-message">Mensagem</label>
+      <textarea id="support-message"
+                name="mensagem"
+                class="suporte-form-control"
+                placeholder="Descreva detalhadamente como podemos ajudar..."
+                required></textarea>
+    </div>
+
+    <!-- Configurações extras do FormSubmit (opcional, mas recomendado) -->
+    <input type="hidden" name="_subject" value="Novo chamado de suporte">
+    <input type="hidden" name="_captcha" value="false">
+
+    <button type="submit" data-button class="suporte-btn-submit">
+      Enviar Mensagem <i class="fas fa-paper-plane"></i>
+    </button>
+  </form>
+</div>
+
+
+          </div>
+
+          <!-- Toast de Sucesso -->
+          <div id="suporte-toast" class="suporte-toast">
+            <i class="fas fa-check-circle"></i> Mensagem enviada com sucesso!
+          </div>
+        </section>

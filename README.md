@@ -1,74 +1,16 @@
-# SGC - Sistema de Gerenciamento de Chamados
+# React + Vite
 
-Aplicação web para controle, acompanhamento e gestão de chamados administrativos.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## 📌 Funcionalidades
+Currently, two official plugins are available:
 
-- Cadastro de chamados
-- Listagem e gerenciamento de chamados
-- Dashboard com indicadores
-- Consulta de CNPJ
-- Procedimentos internos
-- Lixeira de chamados
-- Área de suporte
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## 🛠 Tecnologias Utilizadas
+## React Compiler
 
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- Arquitetura MVC
-- SPA (Single Page Application)
-- Git e GitHub
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## 🧱 Arquitetura MVC
+## Expanding the ESLint configuration
 
-O projeto segue o padrão MVC:
-
-- **Model**: Responsável pelas regras de negócio e manipulação de dados
-- **View**: Interface do usuário (HTML)
-- **Controller**: Controla eventos, fluxo da aplicação e comunicação entre Model e View
-
-## 📁 Estrutura do Projeto
-
-```text
-SGC
-├── index.html
-├── main.js
-├── assets
-│   ├── css
-│   └── js
-└── app
-    ├── controllers
-    ├── models
-    └── views
-
----
-
-### 6️⃣ Como executar o projeto
-```md
-## 🚀 Como Executar o Projeto
-
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/sgc.git
-
-2. Acesse a pasta do projeto:
-```bash
-cd sgc
-
-3. Abra o arquivo index.html no navegador
-    ou utilize uma extensão como Live Server no VS Code.
-
----
-
-### 7️⃣ Branches (importante, você usa develop)
-```md
-## 🌱 Branches
-
-- `main` → versão estável do sistema
-- `develop` → desenvolvimento e novas funcionalidades
-
-## 👤 Autor
-
-Desenvolvido por **Felipe Estevam**
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.

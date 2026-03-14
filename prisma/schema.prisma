@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Chamado {
+  id           String    @id @default(cuid())
+  situacao     String?
+  numero       String?
+  dataEmissao  String?
+  pedido       String?
+  notaFiscal   String?
+  vencimento   String?
+  valor        Float?    @default(0)
+  forma        String?
+  razao        String?
+  cnpj         String?
+  setor        String?
+  codEtica     String?   @default("nao")
+  requisitante String?
+  obs          String?
+  deleted      Boolean   @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model ShoppingTicket {
+  id            String    @id @default(cuid())
+  situacao      String?
+  numero        String?
+  solicitacao   String?
+  pedido        String?
+  prazoEntrega  String?
+  valor         Float?    @default(0)
+  prazoPagto    String?
+  razao         String?
+  cnpj          String?
+  requisitante  String?
+  obs           String?
+  deleted       Boolean   @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model FreightTicket {
+  id            String    @id @default(cuid())
+  situacao      String?
+  numero        String?
+  solicitacao   String?
+  pedido        String?
+  prazoEntrega  String?
+  valor         Float?    @default(0)
+  prazoPagto    String?
+  razao         String?
+  cnpj          String?
+  requisitante  String?
+  obs           String?
+  deleted       Boolean   @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model Procedimento {
+  id          String   @id @default(cuid())
+  titulo      String
+  descricao   String?
+  categoria   String?
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Tabela de Lixeiras para log ou registros específicos deletados
+model Lixeira {
+  id          String   @id @default(cuid())
+  originalId  String   // ID do item original
+  tipo        String   // 'CNpj', 'Shopping', 'Frete'
+  conteudo    String   // Dados em formato JSON
+  deletedAt   DateTime @default(now())
+}

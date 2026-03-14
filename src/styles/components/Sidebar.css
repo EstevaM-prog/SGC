@@ -1,0 +1,193 @@
+/* ═══════════════════════════════════════════════════════════════
+   GLASS SIDEBAR  — iPhone-style Glassmorphism + Total Collapse
+═══════════════════════════════════════════════════════════════ */
+.sidebar-glass {
+  width: 280px;
+  min-width: 280px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  background: rgba(255, 255, 255, 0.60);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.07);
+}
+
+body.dark .sidebar-glass {
+  background: rgba(12, 15, 25, 0.75);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.55);
+}
+
+.sidebar-glass.collapsed {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Logo header */
+.sg-header {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+body.dark .sg-header {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.sg-logo-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 16px hsla(199, 89%, 48%, 0.4);
+  flex-shrink: 0;
+}
+
+.sg-logo-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sg-logo-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.sg-logo-sub {
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+/* Novo Chamado Button */
+.sg-new-btn-wrap {
+  padding: 0.8rem 0.9rem 0.4rem;
+  flex-shrink: 0;
+}
+
+.sg-new-btn {
+  width: 100%;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.22s ease;
+  box-shadow: 0 4px 16px hsla(199, 89%, 48%, 0.32);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sg-new-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px hsla(199, 89%, 48%, 0.45);
+}
+
+.sg-new-btn.active {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Nav Menu */
+.sg-nav {
+  flex: 1;
+  padding: 0.4rem 0.7rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sg-nav::-webkit-scrollbar { width: 3px; }
+.sg-nav::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.18); border-radius: 4px; }
+
+.sg-nav-item {
+  width: 100%;
+  padding: 10px 13px;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted-foreground);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+  text-align: left;
+  position: relative;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.sg-nav-item:hover {
+  background: rgba(255, 255, 255, 0.4);
+  color: var(--foreground);
+}
+
+body.dark .sg-nav-item:hover { background: rgba(255, 255, 255, 0.08); }
+
+.sg-nav-item.active {
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+body.dark .sg-nav-item.active { background: rgba(255, 255, 255, 0.1); }
+
+/* Active bar indicator */
+.sg-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  height: 64%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .sidebar-glass {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+  }
+
+  .sidebar-glass.mobile-open { transform: translateX(0); }
+}

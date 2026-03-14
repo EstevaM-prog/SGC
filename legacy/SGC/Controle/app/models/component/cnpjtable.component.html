@@ -1,0 +1,96 @@
+<!-- CNPJ View -->
+        <section id="view-cnpj" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Tabela CNPJ</h2>
+              <p class="section-subtitle">Listagem agregada por CNPJ dos chamados</p>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn-export-cnpj" onclick="exportCnpj()">Exportar CNPJ</button>
+              <button class="btn-import-cnpj" onclick="importCnpj()">Importar CNPJ</button>
+              <button class="btn-primary" onclick="newCnpj()">Novo CNPJ</button>
+            </div>
+
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th>Setor</th>
+                    <th>Código de Ética</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="cnpj-tbody">
+                  <tr>
+                    <td colspan="6" class="empty-state">
+                      Nenhum registro com CNPJ encontrado.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Procedures View -->
+        <section id="view-procedures" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Procedimentos</h2>
+              <p class="section-subtitle">Documentação e guias de processos do sistema</p>
+            </div>
+
+            <button class="btn-new-process" onclick="newProcess()">
+              <i data-lucide="plus" class="icon-sm"></i>
+              Novo Procedimento
+            </button>
+          </div>
+
+          <div class="procedures-grid" id="procedures-grid">
+            <!-- Procedimentos serão carregados via JavaScript -->
+          </div>
+        </section>
+
+        <!-- Trash View -->
+        <section id="view-trash" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Lixeira</h2>
+              <p class="section-subtitle">Chamados excluídos podem ser restaurados ou excluídos permanentemente</p>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Data Emissão</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Vencimento</th>
+                    <th>Valor (R$)</th>
+                    <th>Forma Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="trash-tbody">
+                  <!-- Chamados deletados serão carregados via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>

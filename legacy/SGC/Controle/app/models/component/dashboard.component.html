@@ -1,0 +1,184 @@
+<link rel="stylesheet" href="/SGC/Controle/app/views/sgc.css">
+
+<!-- Dashboard View -->
+        <section id="view-dashboard" class="view-section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Dashboard</h2>
+              <p class="section-subtitle">Visão geral dos principais indicadores do sistema</p>
+            </div>
+
+            <div class="filter-dashboard">
+              <label for="filter_data" class="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por:</label>
+              <select id="filter_data" class="custom-select">
+                <option value="Day">Hoje</option>
+                <option value="Week">Semana</option>
+                <option value="Month">Mês</option>
+                <option value="Year">Ano</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card" style="animation-delay: 0ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Total de Chamados</p>
+                  <p class="stat-value" id="stat-total">0</p>
+                </div>
+                <div class="stat-icon gradient-primary">
+                  <i data-lucide="bar-chart-3"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="animation-delay: 100ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Em Aberto</p>
+                  <p class="stat-value" id="stat-open">0</p>
+                </div>
+                <div class="stat-icon gradient-info">
+                  <i data-lucide="clock"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-card" style="animation-delay: 200ms">
+              <div class="stat-content-wrapper">
+                <div>
+                  <p class="stat-label">Solucionados</p>
+                  <p class="stat-value" id="stat-solved">0</p>
+                </div>
+                <div class="stat-icon gradient-success">
+                  <i data-lucide="check-circle-2"></i>
+                </div>
+              </div>
+            </div>
+
+            
+            <div class="stat-card" style="animation-delay: 300ms">
+              <div class="stat-content-wrapper">
+                  <div>
+                      <p class="stat-label">Escriturar</p>
+                      <p class="stat-value" id="stat-overdue">0</p>
+                  </div>
+                  <div class="stat-icon gradient-info"> 
+                      <i data-lucide="file-input"></i>
+                  </div>
+              </div>
+            </div>
+            
+
+             
+            <div class="stat-card" style="animation-delay: 400ms">
+              <div class="stat-content-wrapper">
+                  <div>
+                      <p class="stat-label">Processando</p>
+                      <p class="stat-value" id="stat-overdue">0</p>
+                  </div>
+                  <div class="stat-icon gradient-warning">
+                      <i data-lucide="settings-2"></i>
+                  </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-panels">
+            <div class="card">
+              <h3 class="panel-title">Distribuição por Status</h3>
+              <div class="progress-list">
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Aberto</span>
+                    <span id="progress-open-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-open-fill" class="progress-fill bg-info" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Solucionado</span>
+                    <span id="progress-solved-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-solved-fill" class="progress-fill bg-success" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div class="progress-item">
+                  <div class="progress-header">
+                    <span>Vencido</span>
+                    <span id="progress-overdue-count">0</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="progress-overdue-fill" class="progress-fill bg-danger" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3 class="panel-title">Resumo Rápido</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <span>Taxa de Resolução</span>
+                  <span id="resolution-rate" class="summary-value">0%</span>
+                </div>
+                <div class="summary-item">
+                  <span>Chamados Pendentes</span>
+                  <span id="pending-count" class="summary-value">0</span>
+                </div>
+                <div class="summary-item">
+                  <span>Necessitam Atenção</span>
+                  <span id="attention-count" class="summary-value text-danger">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Shopping View -->
+        <section id="view-shopping" class="view-section">
+          <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações da compra abaixo</p>
+              </div>
+              <button class="btn-primary" onclick="showNewTicketFormShopping()">
+              Novo Chamado
+            </button>
+            </div>
+
+            
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Nº Solicitação</th>
+                    <th>Pedido</th>
+                    <th>Prazo de entrega</th>
+                    <th>Valor (R$)</th>
+                    <th>Prazo Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhuma compra cadastrada. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>

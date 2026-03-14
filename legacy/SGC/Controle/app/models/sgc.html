@@ -1,0 +1,209 @@
+
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- List View -->
+        <section id="view-list" class="view-section active">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Lista de Chamados</h2>
+              <p class="section-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
+              
+            </div>
+            <button class="btn-primary" onclick="showNewTicketForm()">
+              Novo Chamado
+            </button>
+          </div>
+          
+          <div class="filter-call list">
+              <label for="situacao" class="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por:</label>
+              <select id="situacao" class="custom-select">
+                <option value="Aberto">Aberto</option>
+                <option value="Processando">Processando</option>
+                <option value="Escriturar">Escriturar</option>
+                <option value="Solucionado">Solucionado</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Data Emissão</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Vencimento</th>
+                    <th>Valor (R$)</th>
+                    <th>Forma Pagto</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhum chamado cadastrado. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Form View -->
+        <section id="view-form" class="view-section">
+          <div class="form-container">
+            <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações do chamado abaixo</p>
+              </div>
+            </div>
+
+            <form id="ticket-form" class="card">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="situacao">Status *</label>
+                  <select id="situacao" required>
+                    <option value="" disabled selected>Selecione o status</option>
+                    <option value="Aberto">Aberto</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Processando">Processando</option>
+                    <option value="Escriturar">Escriturar</option>
+                    <option value="Solucionado">Solucionado</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="numero">Número do Chamado *</label>
+                  <input type="text" id="numero" placeholder="Ex: CH-2025-001" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="dataEmissao">Data de Emissão *</label>
+                  <input type="date" id="dataEmissao" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="pedido">Pedido</label>
+                  <input type="text" id="pedido" placeholder="Número do pedido">
+                </div>
+
+                <div class="form-group">
+                  <label for="notaFiscal">Nota Fiscal *</label>
+                  <input type="text" id="notaFiscal" minlength="1" maxlength="120" placeholder="Número da NF" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="vencimento">Vencimento *</label>
+                  <input type="date" id="vencimento" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="valor">Valor (R$) *</label>
+                  <input type="text" id="valor" placeholder="0,00" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="forma">Forma de Pagamento *</label>
+                  <select id="forma" required>
+                    <option value="">Selecione</option>
+                    <option value="Deposito em conta">Depósito em conta</option>
+                    <option value="Boleto">Boleto</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="razao">Razão Social *</label>
+                  <input type="text" id="razao" placeholder="Empresa" minlength="2" maxlength="144" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="cnpj">CNPJ *</label>
+                  <input type="text" id="cnpj" placeholder="00.000.000/0000-00" minlength="11" maxlength="18" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="setor">Setor</label>
+                  <select id="setor">
+                    <option value="">Selecione</option>
+                    <option value="Diretoria">Diretoria - 101</option>
+                    <option value="Rh">Rh - 213</option>
+                    <option value="Dsi">Dsi - 214</option>
+                    <option value="Facilites">Facilites - 215</option>
+                    <option value="Almox">Almox - 217</option>
+                    <option value="Compras">Compras - 218</option>
+                    <option value="Compras">Marketing - 219</option>
+                    <option value="Projetos">Projetos - 413</option>
+                    <option value="Movimentacao">Movimentação - 4141</option>
+                    <option value="SupervisaoObras">Supervisão de Obras - 4151</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="codEtica">Código de Ética</label>
+                  <select id="codEtica">
+                    <option value="nao">Não</option>
+                    <option value="sim">Sim</option>
+                  </select>
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="requisitante">Nome do Requisitante</label>
+                  <input type="text" id="requisitante" min="1" maxlength="255" placeholder="Nome completo">
+                </div>
+
+                <div class="form-group full-width">
+                  <label for="obs">Observação</label>
+                  <textarea id="obs" maxlength="255" placeholder="Anotações adicionais..." rows="4"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-outline" onclick="cancelForm()">
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary">
+                  Salvar Chamado
+                </button>
+              </div>
+
+              <input type="hidden" id="editing-id" value="">
+              <input type="hidden" id="ticket-type" value="ticket">
+            </form>
+          </div>
+        </section>
+
+        
+
+        
+
+        
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Salvo com sucesso!</div>
+
+  <!-- JS externo -->
+  <script src="../controllers/sgc.js"></script>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

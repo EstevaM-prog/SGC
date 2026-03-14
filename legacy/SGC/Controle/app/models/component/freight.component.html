@@ -1,0 +1,42 @@
+<!-- Freight View -->
+        <section id="view-freight" class="view-section">
+          <div class="section-header">
+              <div>
+                <h2 class="section-title" id="form-title">Novo Chamado</h2>
+                <p class="section-subtitle">Preencha as informações do frete abaixo</p>
+              </div>
+              <button class="btn-primary" onclick="showNewTicketFormFreight()">
+              Novo Chamado
+            </button>
+            </div>
+
+          <div class="card">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Status</th>
+                    <th>Nº Chamado</th>
+                    <th>Nº Solicitação</th>
+                    <th>Pedido</th>
+                    <th>Nota Fiscal</th>
+                    <th>Dacte</th>
+                    <th>Valor (R$)</th>
+                    <th>Razão Social</th>
+                    <th>CNPJ</th>
+                    <th>Requisitante</th>
+                    <th class="small">Observação</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tickets-tbody">
+                  <tr>
+                    <td colspan="12" class="empty-state">
+                      Nenhum frete contratado. Clique em "Novo Chamado" para começar.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>

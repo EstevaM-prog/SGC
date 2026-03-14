@@ -1,0 +1,28 @@
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATION STYLES
+═══════════════════════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--success);
+  box-shadow: var(--shadow-lg);
+  font-weight: 600;
+  display: none;
+  z-index: 2000;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.toast.show {
+  display: block;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}

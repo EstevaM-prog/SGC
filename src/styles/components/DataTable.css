@@ -1,0 +1,50 @@
+/* ═══════════════════════════════════════════════════════════════
+   DATA TABLE COMPONENT
+═══════════════════════════════════════════════════════════════ */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table thead th {
+  background: var(--muted);
+  padding: 12px;
+  text-align: left;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table tbody td {
+  padding: 14px 12px;
+  border-top: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: var(--transition);
+}
+
+.data-table tbody tr:hover {
+  background: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .table-wrapper {
+    overflow-x: scroll;
+  }
+  .data-table {
+    min-width: 800px;
+  }
+}

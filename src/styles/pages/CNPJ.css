@@ -1,0 +1,35 @@
+/* ═══════════════════════════════════════════════════════════════
+   CNPJ MANAGEMENT PAGE STYLES
+═══════════════════════════════════════════════════════════════ */
+.btn-export-cnpj,
+.btn-import-cnpj {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-export-cnpj { margin-left: 2px; }
+.btn-import-cnpj { margin-left: 4px; }
+
+.btn-export-cnpj:hover,
+.btn-import-cnpj:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

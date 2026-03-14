@@ -1,0 +1,96 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROCEDURES PAGE STYLES
+═══════════════════════════════════════════════════════════════ */
+.btn-new-process,
+.btn-delete-process {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.btn-new-process:hover,
+.btn-delete-process:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-processos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.procedures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1024px) { .procedures-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .procedures-grid { grid-template-columns: 1fr; } }
+
+.procedure-card {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+  cursor: pointer;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.procedure-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+
+.procedure-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  color: white; flex-shrink: 0;
+}
+
+.procedure-icon svg { width: 24px; height: 24px; }
+
+.procedure-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 6px;
+  background: hsla(199, 89%, 48%, 0.1); color: var(--primary);
+  font-size: 0.75rem; font-weight: 600; margin-bottom: 0.5rem;
+}
+
+.procedure-title {
+  font-size: 1.125rem; font-weight: 700; margin: 0 0 0.5rem 0;
+}
+
+.procedure-description {
+  font-size: 0.875rem; color: var(--muted-foreground); margin: 0;
+}
+
+/* Delete button overlay */
+.procedure-delete {
+  position: absolute; top: 1rem; right: 1rem;
+  width: 32px; height: 32px; padding: 0;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--transition);
+  color: var(--muted-foreground); opacity: 0;
+}
+
+.procedure-card:hover .procedure-delete { opacity: 1; }
+
+.procedure-delete:hover {
+  background: hsla(0, 84%, 60%, 0.1);
+  color: var(--destructive);
+  border-color: var(--destructive);
+}
