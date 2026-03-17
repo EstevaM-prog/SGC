@@ -1,25 +1,27 @@
 import React from 'react';
-import { 
-  Plus, 
-  BarChart3, 
-  List, 
-  ShoppingCart, 
-  Truck, 
-  Table, 
-  Workflow, 
-  Trash2, 
-  Headphones
+import {
+  Plus,
+  BarChart3,
+  List,
+  ShoppingCart,
+  Truck,
+  Table,
+  Workflow,
+  Trash2,
+  Headphones,
+  Clock
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { id: 'dashboard',  label: 'Dashboard',        Icon: BarChart3    },
-  { id: 'list',       label: 'Lista de Chamados', Icon: List         },
-  { id: 'shopping',   label: 'Compras',           Icon: ShoppingCart },
-  { id: 'freight',    label: 'Fretes',            Icon: Truck        },
-  { id: 'cnpj',       label: 'Tabela CNPJ',       Icon: Table        },
-  { id: 'procedures', label: 'Procedimentos',     Icon: Workflow     },
-  { id: 'trash',      label: 'Lixeira',           Icon: Trash2       },
-  { id: 'suporte',    label: 'Suporte',           Icon: Headphones   },
+  { id: 'dashboard', label: 'Dashboard', Icon: BarChart3 },
+  { id: 'list', label: 'Lista de Chamados', Icon: List },
+  { id: 'shopping', label: 'Compras', Icon: ShoppingCart },
+  { id: 'freight', label: 'Fretes', Icon: Truck },
+  { id: 'ponto', label: 'Ponto', Icon: Clock },
+  { id: 'cnpj', label: 'Tabela CNPJ', Icon: Table },
+  { id: 'procedures', label: 'Procedimentos', Icon: Workflow },
+  { id: 'trash', label: 'Lixeira', Icon: Trash2 },
+  { id: 'suporte', label: 'Suporte', Icon: Headphones }
 ];
 
 export default function Sidebar({ currentView, setCurrentView, isCollapsed }) {

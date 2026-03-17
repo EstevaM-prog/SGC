@@ -18,7 +18,7 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   useEffect(() => {
     if (!editingId) {
       const saved = localStorage.getItem('sgc_shopping_draft');
-      if (saved) { try { setFormData(JSON.parse(saved)); } catch(e){} }
+      if (saved) { try { setFormData(JSON.parse(saved)); } catch (e) { } }
     }
   }, [editingId]);
 
@@ -30,12 +30,12 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   }, [formData, editingId]);
 
   const active = tickets.filter(t => !t.deleted);
-  const trash  = tickets.filter(t =>  t.deleted);
+  const trash = tickets.filter(t => t.deleted);
 
   const filtered = active.filter(t => !statusFilter || t.situacao === statusFilter);
 
   const formatCurrency = (v) => isNaN(v) ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const formatDate     = (d) => { try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return d; } };
+  const formatDate = (d) => { try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return d; } };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -68,7 +68,7 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
     const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(',', '.'));
     const payload = { ...formData, valor: isNaN(parsedValor) ? 0 : parsedValor };
     if (editingId) { updateTicket(editingId, payload); }
-    else           { addTicket(payload); }
+    else { addTicket(payload); }
     setShowForm(false); setEditingId(null); setFormData(EMPTY_FORM);
     if (!editingId) localStorage.removeItem('sgc_shopping_draft');
   };
@@ -87,6 +87,7 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
           <button className="btn-outline" onClick={() => setShowTrash(v => !v)}>
             {showTrash ? 'Voltar à Lista' : `Lixeira (${trash.length})`}
           </button>
+
           {!showTrash && <button className="btn-primary" onClick={() => setShowForm(true)}>Nova Compra</button>}
         </div>
       </div>
@@ -119,20 +120,20 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
                 ? <tr><td colSpan="12" className="empty-state">{showTrash ? 'Lixeira vazia.' : 'Nenhuma compra cadastrada. Clique em "Nova Compra" para começar.'}</td></tr>
                 : (showTrash ? trash : filtered).map(t => (
                   <tr key={t.id}>
-                    <td><span className={`status-badge status-${(t.situacao||'').toLowerCase().replace(/\s+/g,'-')}`}>{t.situacao}</span></td>
+                    <td><span className={`status-badge status-${(t.situacao || '').toLowerCase().replace(/\s+/g, '-')}`}>{t.situacao}</span></td>
                     <td>{t.numero}</td><td>{t.solicitacao}</td><td>{t.pedido}</td>
                     <td>{formatDate(t.prazoEntrega)}</td>
                     <td>{formatCurrency(t.valor)}</td>
                     <td>{formatDate(t.prazoPagto)}</td>
                     <td>{t.razao}</td><td>{t.cnpj}</td><td>{t.requisitante}</td>
-                    <td className="small" title={t.obs}>{(t.obs||'').length > 60 ? t.obs.slice(0,60)+'…' : t.obs}</td>
+                    <td className="small" title={t.obs}>{(t.obs || '').length > 60 ? t.obs.slice(0, 60) + '…' : t.obs}</td>
                     <td className="actions-cell"><div className="action-buttons">
                       {showTrash ? <>
-                        <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16}/></button>
-                        <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16}/></button>
+                        <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16} /></button>
+                        <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16} /></button>
                       </> : <>
-                        <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16}/></button>
-                        <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16}/></button>
+                        <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16} /></button>
+                        <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16} /></button>
                       </>}
                     </div></td>
                   </tr>

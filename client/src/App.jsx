@@ -12,6 +12,7 @@ import Shopping from './pages/Shopping';
 import Freight from './pages/Freight';
 import Procedimentos from './pages/Procedimentos';
 import Suporte from './pages/Suporte';
+import Ponto from './pages/Ponto';
 
 // Pages – auth
 import Login from './pages/Login';
@@ -23,6 +24,7 @@ import Profile from './pages/Profile';
 import { useTickets } from './hooks/useTickets';
 import { useShoppingTickets } from './hooks/useShoppingTickets';
 import { useFreightTickets } from './hooks/useFreightTickets';
+import { usePontoTickets } from './hooks/usePontoTickets';
 
 // ─── helpers ─────────────────────────────────────────────────────
 const getSettings = () => {
@@ -40,25 +42,26 @@ function App() {
   const settings = getSettings();
 
   // Auth state
-  const [authView, setAuthView]       = useState('login'); // 'login' | 'register' | 'forgot'
+  const [authView, setAuthView] = useState('login'); // 'login' | 'register' | 'forgot'
   const [currentUser, setCurrentUser] = useState(getSession);
-  const [userAvatar, setUserAvatar]   = useState(() => localStorage.getItem('user_avatar') || null);
+  const [userAvatar, setUserAvatar] = useState(() => localStorage.getItem('user_avatar') || null);
 
   // App navigation
-  const [currentView, setCurrentView]           = useState('list');
+  const [currentView, setCurrentView] = useState('list');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(settings.sidebarCollapsed || false);
-  const [isDark, setIsDark]                     = useState(settings.theme ? settings.theme === 'dark' : true);
-  const [searchTerm, setSearchTerm]             = useState('');
-  const [editingTicket, setEditingTicket]       = useState(null);
+  const [isDark, setIsDark] = useState(settings.theme ? settings.theme === 'dark' : true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingTicket, setEditingTicket] = useState(null);
 
   // Data hooks (separate stores!)
-  const chamados  = useTickets();         // chamados_db_v1  → Lista de Chamados (pagamentos)
-  const shopping  = useShoppingTickets(); // compras_db_v1   → Compras
-  const freight   = useFreightTickets();  // fretes_db_v1    → Fretes
+  const chamados = useTickets();         // chamados_db_v1  → Lista de Chamados (pagamentos)
+  const shopping = useShoppingTickets(); // compras_db_v1   → Compras
+  const freight = useFreightTickets();  // fretes_db_v1    → Fretes
+  const ponto = usePontoTickets();    // ponto_db_v1     → Ponto
 
   // Theme sync
   useEffect(() => {
-    document.body.classList.toggle('dark',  isDark);
+    document.body.classList.toggle('dark', isDark);
     document.body.classList.toggle('light', !isDark);
   }, [isDark]);
 
@@ -77,16 +80,16 @@ function App() {
   };
 
   // Chamados handlers
-  const handleEdit       = (t) => { setEditingTicket(t); setCurrentView('form'); };
-  const handleNewTicket  = () => { setEditingTicket(null); setCurrentView('form'); };
+  const handleEdit = (t) => { setEditingTicket(t); setCurrentView('form'); };
+  const handleNewTicket = () => { setEditingTicket(null); setCurrentView('form'); };
   const handleSaveTicket = (data) => {
     if (editingTicket) chamados.updateTicket(data.id, data);
-    else               chamados.addTicket(data);
+    else chamados.addTicket(data);
     setCurrentView('list');
   };
 
   // Auth handlers
-  const handleLogin  = (user) => setCurrentUser(user);
+  const handleLogin = (user) => setCurrentUser(user);
   const handleLogout = () => {
     localStorage.removeItem('session_v1');
     setCurrentUser(null);
@@ -108,7 +111,7 @@ function App() {
   // ─── Auth gate ────────────────────────────────────────────────
   if (!currentUser) {
     if (authView === 'register') return <Register onNavigate={setAuthView} />;
-    if (authView === 'forgot')   return <ForgotPassword onNavigate={setAuthView} />;
+    if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
     return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
   }
 
@@ -150,10 +153,10 @@ function App() {
 
       case 'cnpj':
         return (
-          <CNPJ 
-            tickets={chamados.tickets} 
-            onEdit={handleEdit} 
-            onAddTicket={chamados.addTicket} 
+          <CNPJ
+            tickets={chamados.tickets}
+            onEdit={handleEdit}
+            onAddTicket={chamados.addTicket}
             onUpdateTicket={chamados.updateTicket}
           />
         );
@@ -202,6 +205,18 @@ function App() {
 
       case 'suporte':
         return <Suporte />;
+
+      case 'ponto':
+        return (
+          <Ponto
+            tickets={ponto.tickets}
+            addTicket={ponto.addTicket}
+            updateTicket={ponto.updateTicket}
+            softDeleteTicket={ponto.softDeleteTicket}
+            restoreTicket={ponto.restoreTicket}
+            permanentDeleteTicket={ponto.permanentDeleteTicket}
+          />
+        );
 
       default:
         return (
