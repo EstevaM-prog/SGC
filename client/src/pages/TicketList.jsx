@@ -9,7 +9,7 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
 
   const filteredTickets = validTickets.filter(t => {
     if (statusFilter && t.situacao !== statusFilter) return false;
-    
+
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       const textMatch = (t.numero || '').toLowerCase().includes(q)
@@ -18,7 +18,7 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
         || (t.cnpj || '').toLowerCase().includes(q)
         || (t.situacao || '').toLowerCase().includes(q)
         || (t.pedido || '').toLowerCase().includes(q);
-      
+
       if (!textMatch) return false;
     }
     return true;
@@ -31,19 +31,19 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
           <h2 className="section-title">Lista de Chamados</h2>
           <p className="section-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
         </div>
-        <button className="btn-primary" onClick={onNewTicket}>
+        <button className="btn-secondary" onClick={onNewTicket}>
           Novo Chamado
         </button>
       </div>
-      
+
       <div className="filter-call list" style={{ marginBottom: '1.5rem' }}>
         <label htmlFor="situacao" className="filter-label text-xs font-semibold uppercase text-muted-foreground mr-2">Filtrar por status:</label>
-        <select 
-          id="situacao" 
-          className="custom-select" 
-          value={statusFilter} 
+        <select
+          id="situacao"
+          className="custom-select"
+          value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ width: '200px', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
+          style={{ width: '200px', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: '8px' }}
         >
           <option value="">Todos</option>
           <option value="Aberto">Aberto</option>
@@ -55,12 +55,12 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
       </div>
 
       <div className="card">
-        <DataTable 
-          tickets={filteredTickets} 
-          onEdit={onEdit} 
-          onDelete={onDelete} 
+        <DataTable
+          tickets={filteredTickets}
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
       </div>
-    </section>
+    </section >
   );
 }

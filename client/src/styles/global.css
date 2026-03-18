@@ -14,7 +14,12 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 700;
 }
@@ -51,8 +56,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -96,23 +108,45 @@ body:not(.dark) .card {
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-.btn-primary {
+/* Correção nos seletores (faltava o ponto no segundo e a escrita correta) */
+.btn-primary,
+.btn-secondary {
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white;
-  border: none;
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
   transition: var(--transition);
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+  border: none;
+  justify-content: center;
+  /* Removido para ser tratado individualmente se necessário */
+}
+
+/* Estilo Único do Botão Primário (Solid/Gradient) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
   box-shadow: var(--shadow-md);
 }
 
+/* Estilo Único do Botão Secundário (Outline ou Ghost) */
+.btn-secondary {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+/* Estados de Hover */
 .btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: var(--shadow-lg);
@@ -148,7 +182,8 @@ body:not(.dark) .card {
   border: 1px solid;
 }
 
-.status-aberto, .status-em-andamento {
+.status-aberto,
+.status-em-andamento {
   background: hsla(217, 91%, 60%, 0.1);
   color: var(--info);
   border-color: hsla(217, 91%, 60%, 0.2);
@@ -178,8 +213,15 @@ body:not(.dark) .card {
   border-color: var(--border);
 }
 
-.text-right { text-align: right !important; }
-.empty-state { text-align: center; padding: 3rem 1rem !important; color: var(--muted-foreground); }
+.text-right {
+  text-align: right !important;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem !important;
+  color: var(--muted-foreground);
+}
 
 .action-buttons {
   display: flex;
@@ -207,8 +249,15 @@ body:not(.dark) .card {
   color: var(--foreground);
 }
 
-.action-btn.edit:hover { background: hsla(199, 89%, 48%, 0.1); color: var(--primary); }
-.action-btn.delete:hover { background: hsla(0, 84%, 60%, 0.1); color: var(--destructive); }
+.action-btn.edit:hover {
+  background: hsla(199, 89%, 48%, 0.1);
+  color: var(--primary);
+}
+
+.action-btn.delete:hover {
+  background: hsla(0, 84%, 60%, 0.1);
+  color: var(--destructive);
+}
 
 .custom-select {
   padding: 0.5rem 2rem 0.5rem 0.75rem;
@@ -235,19 +284,95 @@ body:not(.dark) .card {
    RESPONSIVE UTILS
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-  .dashboard-panels { grid-template-columns: 1fr; }
+  .dashboard-panels {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .main-content { width: 100%; }
-  .form-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr; }
-  .procedures-grid { grid-template-columns: 1fr; }
-  .section-header { flex-direction: column; align-items: flex-start; }
+  .main-content {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .procedures-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 640px) {
-  .content-area { padding: 1rem; }
-  .section-title { font-size: 1.5rem; }
-  .card { padding: 1rem; }
+  .content-area {
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+}
+
+
+/* Container que mantém os botões lado a lado */
+.button-group {
+  display: flex;
+  gap: 1rem;
+  /* Espaço entre os botões */
+  justify-content: center;
+  /* Centraliza no Desktop */
+  align-items: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+/* Seus estilos de botão (com pequenos ajustes) */
+.btn-primary,
+.btn-secondary {
+  padding: 10px 24px;
+  /* Aumentei um pouco o padding para toque no celular */
+  min-height: 44px;
+  /* Altura mínima recomendada para acessibilidade mobile */
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  white-space: nowrap;
+  /* Impede que o texto quebre em duas linhas */
+}
+
+/* --- RESPONSIVIDADE PARA CELULAR --- */
+@media (max-width: 600px) {
+  .button-group {
+    flex-direction: column;
+    /* No celular, um fica em cima do outro */
+    gap: 0.75rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    /* Botões ocupam a largura total da tela */
+    font-size: 1rem;
+    /* Texto levemente maior para facilitar leitura */
+  }
 }

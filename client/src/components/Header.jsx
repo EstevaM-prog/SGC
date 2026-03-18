@@ -1,5 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { PanelLeftOpen, PanelLeftClose, Sun, Moon, Search, Clock, CloudSun, Bell } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  PanelLeftOpen,
+  PanelLeftClose,
+  Sun,
+  Moon,
+  Search,
+  Clock,
+  CloudSun,
+  Bell
+} from 'lucide-react';
+import '../styles/components/Notification.css';
 
 export default function Header({
   toggleSidebar,
@@ -15,6 +25,16 @@ export default function Header({
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
 
+  // --- Lógica de Notificações ---
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef(null);
+
+  // Exemplo de dados de notificações (poderiam vir via props)
+  const notifications = [
+    { id: 1, text: "Saldo positivo de 1h 20m hoje!", type: "success", time: "2 min atrás" },
+    { id: 2, text: "Revisão de descarte de dados pendente", type: "alert", time: "1h atrás" }
+  ];
+
   useEffect(() => {
     const tick = () => {
       const now = new Date();
@@ -23,7 +43,19 @@ export default function Header({
     };
     tick();
     const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+
+    // Fechar ao clicar fora
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const initials = (userName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -37,10 +69,7 @@ export default function Header({
         title={isSidebarCollapsed ? 'Abrir menu' : 'Fechar menu'}
         aria-label="Toggle sidebar"
       >
-        {isSidebarCollapsed
-          ? <PanelLeftOpen size={20} />
-          : <PanelLeftClose size={20} />
-        }
+        {isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
       </button>
 
       {/* ── Theme toggle ── */}
@@ -69,9 +98,37 @@ export default function Header({
       </div>
 
       {/* ── Box notification ── */}
-      <button className="tb-icon-btn" title="Notificações" aria-label="Notificações">
-        <Bell size={18} />
-      </button>
+      <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
+        <button
+          type="button" /* Importante para não submeter formulários por erro */
+          className="tb-icon-btn"
+          onClick={(e) => {
+            e.stopPropagation(); // Impede que o clique "suba" para o documento
+            setShowNotifications(!showNotifications);
+          }}
+        >
+          <Bell size={18} />
+        </button>
+
+        {/* Mini Tela de Notificações (Popover) */}
+        {showNotifications && (
+          <div className="tb-notif-popover">
+            <div className="tb-notif-header">
+              <span>Notificações</span>
+              <span className="tb-notif-count">{notifications.length} novas</span>
+            </div>
+            <div className="tb-notif-list">
+              {notifications.map(n => (
+                <div key={n.id} className={`tb-notif-item ${n.type}`}>
+                  <p>{n.text}</p>
+                  <small>{n.time}</small>
+                </div>
+              ))}
+            </div>
+            <button className="tb-notif-all">Ver todas as atividades</button>
+          </div>
+        )}
+      </div>
 
       {/* ── Spacer ── */}
       <div style={{ flex: 1 }} />

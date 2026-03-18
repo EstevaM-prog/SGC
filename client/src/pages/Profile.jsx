@@ -4,15 +4,15 @@ import { ArrowLeft, User, Mail, Lock, Camera, LogOut, Edit, Save, X, Eye, EyeOff
 export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUser }) {
   const storedUser = JSON.parse(localStorage.getItem('user_db') || 'null') || {};
 
-  const [avatar, setAvatar]     = useState(localStorage.getItem('user_avatar') || null);
-  const [editing, setEditing]   = useState(false);
+  const [avatar, setAvatar] = useState(localStorage.getItem('user_avatar') || null);
+  const [editing, setEditing] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [error, setError]       = useState('');
-  const [success, setSuccess]   = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const [form, setForm] = useState({
-    name:     storedUser.name     || currentUser?.name  || '',
-    email:    storedUser.email    || currentUser?.email || '',
+    name: storedUser.name || currentUser?.name || '',
+    email: storedUser.email || currentUser?.email || '',
     password: storedUser.password || '',
   });
 
@@ -53,7 +53,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   const handleSave = (e) => {
     e.preventDefault();
     setError('');
-    if (!form.name.trim())  { setError('O nome não pode estar vazio.'); return; }
+    if (!form.name.trim()) { setError('O nome não pode estar vazio.'); return; }
     if (!form.email.trim()) { setError('O e-mail não pode estar vazio.'); return; }
     if (form.password && form.password.length < 6) {
       setError('A senha deve ter ao menos 6 caracteres.'); return;
@@ -84,8 +84,8 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
 
   const handleCancel = () => {
     setForm({
-      name:     storedUser.name     || currentUser?.name  || '',
-      email:    storedUser.email    || currentUser?.email || '',
+      name: storedUser.name || currentUser?.name || '',
+      email: storedUser.email || currentUser?.email || '',
       password: storedUser.password || '',
     });
     setError('');
@@ -100,7 +100,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
         <button className="auth-link"
           style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: '1.25rem' }}
           onClick={() => onNavigate('list')}>
-          <ArrowLeft size={16}/> Voltar
+          <ArrowLeft size={16} /> Voltar
         </button>
 
         <h1 className="auth-title" style={{ marginBottom: '1.5rem' }}>Meu Perfil</h1>
@@ -119,7 +119,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
             boxShadow: '0 0 0 3px rgba(124,58,237,0.35)',
           }}>
             {avatar
-              ? <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+              ? <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               : <span>{initials}</span>
             }
           </div>
@@ -130,12 +130,12 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
           }}
             onMouseEnter={e => e.currentTarget.style.background = 'var(--muted)'}
             onMouseLeave={e => e.currentTarget.style.background = 'var(--card)'}>
-            <Camera size={14}/> Alterar Foto
-            <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={handlePhoto}/>
+            <Camera size={14} /> Alterar Foto
+            <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={handlePhoto} />
           </label>
         </div>
 
-        {error   && <p className="auth-error">{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
         {success && <p className="auth-success">{success}</p>}
 
         {/* ── VIEW mode ── */}
@@ -143,9 +143,9 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.5rem' }}>
               {[
-                { icon: <User size={18}/>, label: 'Nome',   value: form.name  },
-                { icon: <Mail size={18}/>, label: 'E-mail', value: form.email },
-                { icon: <Lock size={18}/>, label: 'Senha',  value: '••••••••' },
+                { icon: <User size={18} />, label: 'Nome', value: form.name },
+                { icon: <Mail size={18} />, label: 'E-mail', value: form.email },
+                { icon: <Lock size={18} />, label: 'Senha', value: '••••••••' },
               ].map(({ icon, label, value }) => (
                 <div key={label} style={{
                   display: 'flex', alignItems: 'center', gap: '1rem',
@@ -173,7 +173,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                 color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
               }}>
-                <Edit size={16}/> Editar Perfil
+                <Edit size={16} /> Editar Perfil
               </button>
               <button onClick={onLogout} style={{
                 width: '100%', height: 44, border: '1px solid #ef4444', color: '#ef4444',
@@ -182,9 +182,10 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
               }}
                 onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#ef4444'; }}>
-                <LogOut size={16}/> Sair
+                <LogOut size={16} /> Sair
               </button>
             </div>
+
           </>
         ) : (
           /* ── EDIT mode ── */
@@ -192,16 +193,16 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
             <div className="auth-field">
               <label htmlFor="name">Nome</label>
               <div className="auth-input-wrap">
-                <User size={16} className="auth-input-icon"/>
-                <input id="name" type="text" value={form.name} onChange={handleChange} placeholder="Seu nome" required/>
+                <User size={16} className="auth-input-icon" />
+                <input id="name" type="text" value={form.name} onChange={handleChange} placeholder="Seu nome" required />
               </div>
             </div>
 
             <div className="auth-field">
               <label htmlFor="email">E-mail</label>
               <div className="auth-input-wrap">
-                <Mail size={16} className="auth-input-icon"/>
-                <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="voce@exemplo.com" required/>
+                <Mail size={16} className="auth-input-icon" />
+                <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="voce@exemplo.com" required />
               </div>
             </div>
 
@@ -213,11 +214,11 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                 </span>
               </label>
               <div className="auth-input-wrap">
-                <Lock size={16} className="auth-input-icon"/>
+                <Lock size={16} className="auth-input-icon" />
                 <input id="password" type={showPass ? 'text' : 'password'} value={form.password}
-                  onChange={handleChange} placeholder="••••••••"/>
+                  onChange={handleChange} placeholder="••••••••" />
                 <button type="button" className="auth-eye-btn" onClick={() => setShowPass(v => !v)}>
-                  {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
+                  {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -228,14 +229,14 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                 color: 'var(--foreground)', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}>
-                <X size={16}/> Cancelar
+                <X size={16} /> Cancelar
               </button>
               <button type="submit" style={{
                 flex: 2, height: 44, background: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
                 color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}>
-                <Save size={16}/> Salvar Alterações
+                <Save size={16} /> Salvar Alterações
               </button>
             </div>
           </form>

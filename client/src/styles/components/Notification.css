@@ -1,0 +1,145 @@
+.notification-wrapper {
+  position: relative;
+  /* Obrigatório para o popover saber onde se alinhar */
+  display: flex;
+  align-items: center;
+}
+
+/* Ponto vermelho de aviso */
+.tb-notif-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  background-color: #ff4d4d;
+  border-radius: 50%;
+  border: 1.5px solid white;
+}
+
+/* Estilo da mini tela */
+.tb-notif-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  z-index: 9999;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+.tb-notif-header {
+  padding: 12px 16px;
+  background: #f8fafc;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tb-notif-count {
+  color: #64748b;
+  font-weight: normal;
+}
+
+.tb-notif-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s;
+}
+
+.tb-notif-item:hover {
+  background: #f8fafc;
+}
+
+.tb-notif-item p {
+  margin: 0;
+  font-size: 13px;
+  color: #334155;
+}
+
+.tb-notif-item small {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.tb-notif-all {
+  width: 100%;
+  padding: 10px;
+  background: white;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tb-notif-all:hover {
+  text-decoration: underline;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.topbar-glass {
+  /* ... suas outras regras ... */
+  overflow: visible !important;
+  /* CRÍTICO: permite que o popover apareça */
+  position: relative;
+  z-index: 100;
+  /* Garante que o header fique acima do conteúdo da página */
+}
+
+.notification-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  /* Base para o popover se guiar */
+}
+
+.tb-notif-popover {
+  position: absolute;
+  top: 50px;
+  /* Distância do topo (ajuste conforme a altura do seu header) */
+  right: 0;
+  width: 300px;
+  background-color: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  /* Valor altíssimo para ficar na frente de tudo */
+  display: block;
+  /* Garante que seja um bloco */
+  color: #333;
+  /* Cor do texto caso o tema esteja escuro */
+}
+
+/* Estilo para os itens dentro da lista */
+.tb-notif-list {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.tb-notif-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tb-notif-item:hover {
+  background-color: #f8fafc;
+}

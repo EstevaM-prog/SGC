@@ -88,6 +88,7 @@ PORT=3001
 -   ✅ **Gerenciamento de Empresas**: Banco de dados de CNPJs inteligente com Upsert.
 -   ✅ **Procedimentos**: Documentação interna do sistema integrada.
 -   ✅ **Lixeira Segura**: Sistema de exclusão suave (soft-delete) com restauração.
+-   ✅ **Notificações**: Sistema de notificações em tempo real.
 
 ---
 
