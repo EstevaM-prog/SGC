@@ -89,20 +89,7 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
       return;
     }
 
-    if (id === 'pedido') {
-      // 1. Remove tudo que não for número ou hífen
-      // A regex [^0-9-] significa: "Tudo que NÃO for número de 0-9 ou o sinal de -"
-      let v = value.replace(/[^0-9-]/g, '');
 
-      // 2. Opcional: Impedir hífens duplicados (ex: --) para manter o dado limpo
-      v = v.replace(/-{2,}/g, '-');
-
-      // 3. Limitar o tamanho máximo se necessário (ex: 12 caracteres)
-      v = v.slice(0, 12);
-
-      setFormData(prev => ({ ...prev, [id]: v }));
-      return;
-    }
 
     if (id === 'numero') {
       // 1. Remove qualquer caractere que não seja número (0-9)
@@ -119,9 +106,6 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
     }
 
     if (id === 'notaFiscal') {
-      // 1. Remove qualquer caractere que não seja número (0-9)
-      // O uso do regex /\D/g é perfeito para isso
-      const apenasNumeros = value.replace(/\D/g, '');
 
       // 2. Aplica o limite de caracteres e atualiza o estado
       setFormData(prev => ({

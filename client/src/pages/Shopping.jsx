@@ -72,8 +72,8 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
       const d = new Date(dateStr);
       return d.toISOString().split('T')[0]; // YYYY-MM-DD
     };
-    setFormData({ 
-      ...t, 
+    setFormData({
+      ...t,
       valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '',
       prazoEntrega: formatDateForInput(t.prazoEntrega),
       prazoPagto: formatDateForInput(t.prazoPagto)
@@ -90,8 +90,8 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
       if (!dateStr) return null;
       return new Date(dateStr + 'T00:00:00.000Z').toISOString();
     };
-    const payload = { 
-      ...formData, 
+    const payload = {
+      ...formData,
       valor: isNaN(parsedValor) ? 0 : parsedValor,
       prazoEntrega: convertDate(formData.prazoEntrega),
       prazoPagto: convertDate(formData.prazoPagto)
@@ -128,7 +128,10 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
             style={{ width: 200, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: 8 }}>
             <option value="">Todos</option>
             <option value="Aberto">Aberto</option>
-            <option value="Processando">Processando</option>
+            <option value="3Orçamento">Falta 3 Orçamento</option>
+            <option value="2Orçamento">Falta 2 Orçamento</option>
+            <option value="1Orçamento">Falta 1 Orçamento</option>
+            <option value="ParaEntrega">Esperando Entrega</option>
             <option value="Solucionado">Solucionado</option>
             <option value="Cancelado">Cancelado</option>
           </select>
@@ -191,8 +194,10 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
               <select id="situacao" value={formData.situacao} onChange={handleChange} required>
                 <option value="" disabled>Selecione o status</option>
                 <option value="Aberto">Aberto</option>
-                <option value="Processando">Processando</option>
-                <option value="Escriturar">Escriturar</option>
+                <option value="3Orçamento">Falta 3 Orçamento</option>
+                <option value="2Orçamento">Falta 2 Orçamento</option>
+                <option value="1Orçamento">Falta 1 Orçamento</option>
+                <option value="ParaEntrega">Esperando Entrega</option>
                 <option value="Solucionado">Solucionado</option>
                 <option value="Cancelado">Cancelado</option>
               </select>
@@ -214,12 +219,12 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
               <input type="date" id="prazoEntrega" value={formData.prazoEntrega} onChange={handleChange} />
             </div>
             <div className="form-group">
-              <label htmlFor="valor">Valor (R$) *</label>
-              <input id="valor" value={formData.valor} onChange={handleChange} placeholder="0,00" required />
-            </div>
-            <div className="form-group">
               <label htmlFor="prazoPagto">Prazo Pagamento</label>
               <input type="date" id="prazoPagto" value={formData.prazoPagto} onChange={handleChange} />
+            </div>
+            <div className="form-group">
+              <label htmlFor="valor">Valor (R$) *</label>
+              <input id="valor" value={formData.valor} onChange={handleChange} placeholder="0,00" required />
             </div>
             <div className="form-group">
               <label htmlFor="razao">Razão Social *</label>

@@ -9,16 +9,16 @@ const EMPTY_FORM = {
 
 export default function Freight({ tickets, addTicket, updateTicket, softDeleteTicket, restoreTicket, permanentDeleteTicket }) {
   const [statusFilter, setStatusFilter] = useState('');
-  const [showForm, setShowForm]   = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showTrash, setShowTrash] = useState(false);
-  const [formData, setFormData]   = useState(EMPTY_FORM);
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   // Restore draft
   useEffect(() => {
     if (!editingId) {
       const saved = localStorage.getItem('sgc_freight_draft');
-      if (saved) { try { setFormData(JSON.parse(saved)); } catch(e){} }
+      if (saved) { try { setFormData(JSON.parse(saved)); } catch (e) { } }
     }
   }, [editingId]);
 
@@ -29,12 +29,12 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
     }
   }, [formData, editingId]);
 
-  const active   = tickets.filter(t => !t.deleted);
-  const trash    = tickets.filter(t =>  t.deleted);
+  const active = tickets.filter(t => !t.deleted);
+  const trash = tickets.filter(t => t.deleted);
   const filtered = active.filter(t => !statusFilter || t.situacao === statusFilter);
 
   const formatCurrency = (v) => isNaN(v) ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const formatDate     = (d) => {
+  const formatDate = (d) => {
     if (!d) return '';
     try {
       const date = new Date(d);
@@ -76,7 +76,7 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
     const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(',', '.'));
     const payload = { ...formData, valor: isNaN(parsedValor) ? 0 : parsedValor };
     if (editingId) { updateTicket(editingId, payload); }
-    else           { addTicket(payload); }
+    else { addTicket(payload); }
     setShowForm(false); setEditingId(null); setFormData(EMPTY_FORM);
     if (!editingId) localStorage.removeItem('sgc_freight_draft');
   };
@@ -106,7 +106,10 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
             style={{ width: 200, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: 8 }}>
             <option value="">Todos</option>
             <option value="Aberto">Aberto</option>
-            <option value="Processando">Processando</option>
+            <option value="3Orçamento">Falta 3 Orçamento</option>
+            <option value="2Orçamento">Falta 2 Orçamento</option>
+            <option value="1Orçamento">Falta 1 Orçamento</option>
+            <option value="Contratado">Contratado</option>
             <option value="Solucionado">Solucionado</option>
             <option value="Cancelado">Cancelado</option>
           </select>
@@ -127,19 +130,19 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
                 ? <tr><td colSpan="12" className="empty-state">{showTrash ? 'Lixeira vazia.' : 'Nenhum frete cadastrado. Clique em "Novo Frete" para começar.'}</td></tr>
                 : (showTrash ? trash : filtered).map(t => (
                   <tr key={t.id}>
-                    <td><span className={`status-badge status-${(t.situacao||'').toLowerCase().replace(/\s+/g,'-')}`}>{t.situacao}</span></td>
+                    <td><span className={`status-badge status-${(t.situacao || '').toLowerCase().replace(/\s+/g, '-')}`}>{t.situacao}</span></td>
                     <td>{t.numero}</td><td>{t.solicitacao}</td><td>{t.pedido}</td>
                     <td>{t.notaFiscal}</td><td>{t.dacte}</td>
                     <td>{formatCurrency(t.valor)}</td>
                     <td>{t.razao}</td><td>{t.cnpj}</td><td>{t.requisitante}</td>
-                    <td className="small" title={t.obs}>{(t.obs||'').length > 60 ? t.obs.slice(0,60)+'…' : t.obs}</td>
+                    <td className="small" title={t.obs}>{(t.obs || '').length > 60 ? t.obs.slice(0, 60) + '…' : t.obs}</td>
                     <td className="actions-cell"><div className="action-buttons">
                       {showTrash ? <>
-                        <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16}/></button>
-                        <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16}/></button>
+                        <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16} /></button>
+                        <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16} /></button>
                       </> : <>
-                        <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16}/></button>
-                        <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16}/></button>
+                        <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16} /></button>
+                        <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16} /></button>
                       </>}
                     </div></td>
                   </tr>
@@ -168,8 +171,10 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
               <select id="situacao" value={formData.situacao} onChange={handleChange} required>
                 <option value="" disabled>Selecione o status</option>
                 <option value="Aberto">Aberto</option>
-                <option value="Processando">Processando</option>
-                <option value="Escriturar">Escriturar</option>
+                <option value="3Orçamento">Falta 3 Orçamento</option>
+                <option value="2Orçamento">Falta 2 Orçamento</option>
+                <option value="1Orçamento">Falta 1 Orçamento</option>
+                <option value="Contratado">Contratado</option>
                 <option value="Solucionado">Solucionado</option>
                 <option value="Cancelado">Cancelado</option>
               </select>
