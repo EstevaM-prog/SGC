@@ -3,10 +3,18 @@ import '../styles/pages/TicketForm.css';
 
 export default function TicketForm({ ticket, onSave, onCancel }) {
   const getInitialState = (t) => {
+    const formatDateForInput = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0]; // YYYY-MM-DD
+    };
+
     if (t) {
       return {
         ...t,
-        valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : ''
+        valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '',
+        vencimento: formatDateForInput(t.vencimento),
+        dataEmissao: formatDateForInput(t.dataEmissao)
       };
     }
     return {
@@ -133,7 +141,7 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
     if (formData.requisitante.length < 3) newErrors.requisitante = 'Mínimo 3 caracteres';
     if (formData.setor && formData.setor.length < 2) newErrors.setor = 'Mínimo 2 caracteres';
     if (formData.numero.length < 1) newErrors.numero = 'Obrigatório';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,9 +153,17 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
     // Parse value string to number
     const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(/,/g, '.'));
 
+    // Convert date strings to ISO strings (assuming UTC midnight)
+    const convertDate = (dateStr) => {
+      if (!dateStr) return null;
+      return new Date(dateStr + 'T00:00:00.000Z').toISOString();
+    };
+
     onSave({
       ...formData,
-      valor: isNaN(parsedValor) ? 0 : parsedValor
+      valor: isNaN(parsedValor) ? 0 : parsedValor,
+      vencimento: convertDate(formData.vencimento),
+      dataEmissao: convertDate(formData.dataEmissao)
     });
 
     // Clear draft after successful save
@@ -191,7 +207,7 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
                 maxLength="12"
                 placeholder="Ex: 2025001"
                 required />
-              {errors.numero && <span className="error-msg" style={{color: '#ef4444', fontSize: '0.75rem', marginTop: '4px'}}>{errors.numero}</span>}
+              {errors.numero && <span className="error-msg" style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px' }}>{errors.numero}</span>}
             </div>
 
             <div className="form-group">
@@ -252,18 +268,18 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
 
             <div className="form-group">
               <label htmlFor="razao">Razão Social *</label>
-              <input 
-                type="text" id="razao" value={formData.razao} onChange={handleChange} 
-                placeholder="Empresa" minLength="3" maxLength="100" required 
+              <input
+                type="text" id="razao" value={formData.razao} onChange={handleChange}
+                placeholder="Empresa" minLength="3" maxLength="100" required
               />
-              {errors.razao && <span className="error-msg" style={{color: '#ef4444', fontSize: '0.75rem', marginTop: '4px'}}>{errors.razao}</span>}
+              {errors.razao && <span className="error-msg" style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px' }}>{errors.razao}</span>}
             </div>
 
             <div className="form-group">
               <label htmlFor="cnpj">CNPJ / CPF *</label>
-              <input 
-                type="text" id="cnpj" value={formData.cnpj} onChange={handleChange} 
-                placeholder="00.000.000/0000-00" minLength="11" maxLength="18" required 
+              <input
+                type="text" id="cnpj" value={formData.cnpj} onChange={handleChange}
+                placeholder="00.000.000/0000-00" minLength="11" maxLength="18" required
               />
             </div>
 
@@ -294,17 +310,17 @@ export default function TicketForm({ ticket, onSave, onCancel }) {
 
             <div className="form-group full-width">
               <label htmlFor="requisitante">Nome do Requisitante *</label>
-              <input 
-                type="text" id="requisitante" value={formData.requisitante} onChange={handleChange} 
-                minLength="3" maxLength="50" placeholder="Nome completo" required 
+              <input
+                type="text" id="requisitante" value={formData.requisitante} onChange={handleChange}
+                minLength="3" maxLength="50" placeholder="Nome completo" required
               />
-              {errors.requisitante && <span className="error-msg" style={{color: '#ef4444', fontSize: '0.75rem', marginTop: '4px'}}>{errors.requisitante}</span>}
+              {errors.requisitante && <span className="error-msg" style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '4px' }}>{errors.requisitante}</span>}
             </div>
 
             <div className="form-group full-width">
               <label htmlFor="obs">Observação</label>
-              <textarea 
-                id="obs" value={formData.obs} onChange={handleChange} 
+              <textarea
+                id="obs" value={formData.obs} onChange={handleChange}
                 maxLength="500" placeholder="Anotações adicionais..." rows="4"
               ></textarea>
             </div>

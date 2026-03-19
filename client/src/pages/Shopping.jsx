@@ -35,7 +35,16 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   const filtered = active.filter(t => !statusFilter || t.situacao === statusFilter);
 
   const formatCurrency = (v) => isNaN(v) ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const formatDate = (d) => { try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return d; } };
+  const formatDate = (d) => {
+    if (!d) return '';
+    try {
+      const date = new Date(d);
+      const day = date.getUTCDate().toString().padStart(2, '0');
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+      const year = date.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    } catch { return d; }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -58,7 +67,17 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   };
 
   const handleEdit = (t) => {
-    setFormData({ ...t, valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '' });
+    const formatDateForInput = (dateStr) => {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0]; // YYYY-MM-DD
+    };
+    setFormData({ 
+      ...t, 
+      valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '',
+      prazoEntrega: formatDateForInput(t.prazoEntrega),
+      prazoPagto: formatDateForInput(t.prazoPagto)
+    });
     setEditingId(t.id);
     setShowForm(true);
   };
@@ -66,7 +85,17 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   const handleSubmit = (e) => {
     e.preventDefault();
     const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(',', '.'));
-    const payload = { ...formData, valor: isNaN(parsedValor) ? 0 : parsedValor };
+    // Convert date strings to ISO strings
+    const convertDate = (dateStr) => {
+      if (!dateStr) return null;
+      return new Date(dateStr + 'T00:00:00.000Z').toISOString();
+    };
+    const payload = { 
+      ...formData, 
+      valor: isNaN(parsedValor) ? 0 : parsedValor,
+      prazoEntrega: convertDate(formData.prazoEntrega),
+      prazoPagto: convertDate(formData.prazoPagto)
+    };
     if (editingId) { updateTicket(editingId, payload); }
     else { addTicket(payload); }
     setShowForm(false); setEditingId(null); setFormData(EMPTY_FORM);

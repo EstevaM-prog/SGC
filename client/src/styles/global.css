@@ -330,22 +330,17 @@ body:not(.dark) .card {
 /* Container que mantém os botões lado a lado */
 .button-group {
   display: flex;
-  gap: 1rem;
-  /* Espaço entre os botões */
-  justify-content: center;
-  /* Centraliza no Desktop */
+  gap: 1rem;              /* Espaço entre os botões */
+  justify-content: center; /* Centraliza no Desktop */
   align-items: center;
   width: 100%;
   margin-top: 2rem;
 }
 
 /* Seus estilos de botão (com pequenos ajustes) */
-.btn-primary,
-.btn-secondary {
-  padding: 10px 24px;
-  /* Aumentei um pouco o padding para toque no celular */
-  min-height: 44px;
-  /* Altura mínima recomendada para acessibilidade mobile */
+.btn-primary, .btn-secondary {
+  padding: 10px 24px;     /* Aumentei um pouco o padding para toque no celular */
+  min-height: 44px;       /* Altura mínima recomendada para acessibilidade mobile */
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.875rem;
@@ -356,23 +351,18 @@ body:not(.dark) .card {
   justify-content: center;
   gap: 0.5rem;
   border: none;
-  white-space: nowrap;
-  /* Impede que o texto quebre em duas linhas */
+  white-space: nowrap;    /* Impede que o texto quebre em duas linhas */
 }
 
 /* --- RESPONSIVIDADE PARA CELULAR --- */
 @media (max-width: 600px) {
   .button-group {
-    flex-direction: column;
-    /* No celular, um fica em cima do outro */
+    flex-direction: column; /* No celular, um fica em cima do outro */
     gap: 0.75rem;
   }
 
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    /* Botões ocupam a largura total da tela */
-    font-size: 1rem;
-    /* Texto levemente maior para facilitar leitura */
+  .btn-primary, .btn-secondary {
+    width: 100%;           /* Botões ocupam a largura total da tela */
+    font-size: 1rem;       /* Texto levemente maior para facilitar leitura */
   }
 }

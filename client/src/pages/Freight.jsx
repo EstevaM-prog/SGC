@@ -34,7 +34,16 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
   const filtered = active.filter(t => !statusFilter || t.situacao === statusFilter);
 
   const formatCurrency = (v) => isNaN(v) ? '' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const formatDate     = (d) => { try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return d; } };
+  const formatDate     = (d) => {
+    if (!d) return '';
+    try {
+      const date = new Date(d);
+      const day = date.getUTCDate().toString().padStart(2, '0');
+      const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+      const year = date.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    } catch { return d; }
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;

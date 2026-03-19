@@ -448,7 +448,13 @@ export default function Dashboard({ tickets = [] }) {
                         <td>{status === 'processando' ? ticketInfo : ''}</td>
                         <td>{status === 'escriturar' ? ticketInfo : ''}</td>
                         <td style={{ fontSize: '0.85rem', fontWeight: 500 }}>
-                          {t.vencimento ? new Date(t.vencimento).toLocaleDateString('pt-BR') : '-'}
+                          {t.vencimento ? (() => {
+                            const d = new Date(t.vencimento);
+                            const day = d.getUTCDate().toString().padStart(2, '0');
+                            const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
+                            const year = d.getUTCFullYear();
+                            return `${day}/${month}/${year}`;
+                          })() : '-'}
                         </td>
                       </tr>
                     );

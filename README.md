@@ -89,6 +89,13 @@ PORT=3001
 -   ✅ **Procedimentos**: Documentação interna do sistema integrada.
 -   ✅ **Lixeira Segura**: Sistema de exclusão suave (soft-delete) com restauração.
 -   ✅ **Notificações**: Sistema de notificações em tempo real.
+-   ✅ **Perfis**: Sistema de perfis com autorização.
+-   ✅ **Autenticação**: Sistema de autenticação com JWT.
+-   ✅ **Segurança**: Sistema de segurança com autenticação e autorização.
+-   ✅ **Testes**: Sistema de testes automatizados com Jest.
+-   ✅ **Documentação**: Documentação interativa da API com Swagger.
+
+
 
 ---
 

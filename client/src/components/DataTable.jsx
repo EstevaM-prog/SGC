@@ -9,16 +9,23 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
 
   const formatDate = (iso) => {
     if (!iso) return '';
-    try { return new Date(iso).toLocaleDateString('pt-BR'); } catch { return iso; }
+    try {
+      const d = new Date(iso);
+      const day = d.getUTCDate().toString().padStart(2, '0');
+      const month = (d.getUTCMonth() + 1).toString().padStart(2, '0');
+      const year = d.getUTCFullYear();
+      return `${day}/${month}/${year}`;
+    } catch { return iso; }
   };
 
   const getDueInfo = (vencimento) => {
     if (!vencimento) return { class: '', label: '' };
-    const v = new Date(vencimento);
-    const today = new Date();
-    const todayZero = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const diffMs = v - todayZero;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const v = new Date(vencimento); // Assume ISO string, so UTC
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())); // Midnight UTC
+    const dueUTC = new Date(Date.UTC(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate())); // Midnight UTC of due date
+    const diffMs = dueUTC - todayUTC;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)); // Use floor to avoid edge cases
     
     if (diffDays < 0) return { class: 'badge-due', label: ' (vencido)' };
     if (diffDays <= 3) return { class: 'badge-warning', label: ` (vence em ${diffDays}d)` };

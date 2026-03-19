@@ -42,10 +42,6 @@ export function usePontoTickets() {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: true, deletedAt: new Date().toISOString() } : t));
   };
 
-  const softEditTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: true, deletedAt: new Date().toISOString() } : t));
-  };
-
   const restoreTicket = (id) => {
     setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false, deletedAt: null } : t));
   };

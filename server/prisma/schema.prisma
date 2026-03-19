@@ -24,10 +24,10 @@ model Chamado {
   id           String    @id @default(cuid())
   situacao     String?
   numero       String?
-  dataEmissao  String?
+  dataEmissao  DateTime?
   pedido       String?
   notaFiscal   String?
-  vencimento   String?
+  vencimento   DateTime?
   valor        Float?    @default(0)
   forma        String?
   razao        String?
@@ -50,9 +50,9 @@ model ShoppingTicket {
   numero        String?
   solicitacao   String?
   pedido        String?
-  prazoEntrega  String?
+  prazoEntrega  DateTime?
   valor         Float?    @default(0)
-  prazoPagto    String?
+  prazoPagto    DateTime?
   razao         String?
   cnpj          String?
   requisitante  String?
@@ -71,9 +71,9 @@ model FreightTicket {
   numero        String?
   solicitacao   String?
   pedido        String?
-  prazoEntrega  String?
+  prazoEntrega  DateTime?
   valor         Float?    @default(0)
-  prazoPagto    String?
+  prazoPagto    DateTime?
   razao         String?
   cnpj          String?
   requisitante  String?
@@ -103,4 +103,41 @@ model Lixeira {
   tipo        String   // 'CNpj', 'Shopping', 'Frete'
   conteudo    String   // Dados em formato JSON
   deletedAt   DateTime @default(now())
+}
+
+//Tabela Auxiliar de Tokens
+model Token {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([userId])
+}
+
+//Tabela de Roles
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([name])
+}
+
+// Tabela de Permissões
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([name])
 }
