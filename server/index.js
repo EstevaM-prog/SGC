@@ -7,6 +7,10 @@ import jwt from 'jsonwebtoken';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 
+// Import routes
+import userRoutes from './src/routes/user.routes.js';
+import ticketRoutes from './src/routes/ticket.routes.js';
+
 dotenv.config();
 
 const app = express();
@@ -31,11 +35,15 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./index.js'], // Path to the API docs
+  apis: ['./index.js', './src/routes/*.js'], // Path to the API docs
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 /**
  * @openapi
@@ -47,32 +55,13 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *         description: OK
  */
 
-// basic test route
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'SGC Backend is running' });
 });
 
-// Example route for user list
-/**
- * @openapi
- * /api/users:
- *   get:
- *     description: Retorna a lista de usuários
- *     responses:
- *       200:
- *         description: Sucesso
- */
-app.get('/api/users', async (req, res) => {
-  try {
-    const users = await prisma.user.findMany();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao buscar usuários' });
-  }
-});
-
 const server = app.listen(PORT, () => {
   console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
+  console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
 });
 
 export { app, server };
