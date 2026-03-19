@@ -36,22 +36,26 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
         </button>
       </div>
 
-      <div className="filter-call list" style={{ marginBottom: '1.5rem' }}>
-        <label htmlFor="situacao" className="filter-label text-xs font-semibold uppercase text-muted-foreground mr-2">Filtrar por status:</label>
-        <select
-          id="situacao"
-          className="custom-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          style={{ width: '200px', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: '8px' }}
-        >
-          <option value="">Todos</option>
-          <option value="Aberto">Aberto</option>
-          <option value="Processando">Processando</option>
-          <option value="Escriturar">Escriturar</option>
-          <option value="Solucionado">Solucionado</option>
-          <option value="Cancelado">Cancelado</option>
-        </select>
+      <div className="filter-section-container" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <label htmlFor="situacao" className="filter-label" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
+            Filtrar por status:
+          </label>
+          <select
+            id="situacao"
+            className="custom-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={{ minWidth: '160px' }}
+          >
+            <option value="">Todos os Status</option>
+            <option value="Aberto">Aberto</option>
+            <option value="Processando">Processando</option>
+            <option value="Escriturar">Escriturar</option>
+            <option value="Solucionado">Solucionado</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
       </div>
 
       <div className="card">

@@ -40,22 +40,22 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
             <tr>
               <th>Status</th>
               <th>Nº Chamado</th>
-              <th>Data Emissão</th>
-              <th>Pedido</th>
+              <th className="hide-mobile">Data Emissão</th>
+              <th className="hide-mobile">Pedido</th>
               <th>Nota Fiscal</th>
               <th>Vencimento</th>
               <th>Valor (R$)</th>
-              <th>Forma Pagto</th>
+              <th className="hide-mobile">Forma Pagto</th>
               <th>Razão Social</th>
-              <th>CNPJ</th>
-              <th>Requisitante</th>
-              <th className="small">Observação</th>
+              <th className="hide-mobile">CNPJ</th>
+              <th className="hide-mobile">Requisitante</th>
+              <th className="small hide-mobile">Observação</th>
               <th className="text-right">Ações</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td colSpan="13" className="empty-state">
+              <td colSpan="14" className="empty-state">
                 {isTrash ? "A lixeira está vazia." : 'Nenhum chamado encontrado.'}
               </td>
             </tr>
@@ -72,16 +72,16 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
           <tr>
             <th>Status</th>
             <th>Nº Chamado</th>
-            <th>Data Emissão</th>
-            <th>Pedido</th>
+            <th className="hide-mobile">Data Emissão</th>
+            <th className="hide-mobile">Pedido</th>
             <th>Nota Fiscal</th>
             <th>Vencimento</th>
             <th>Valor (R$)</th>
-            <th>Forma Pagto</th>
+            <th className="hide-mobile">Forma Pagto</th>
             <th>Razão Social</th>
-            <th>CNPJ</th>
-            <th>Requisitante</th>
-            <th className="small">Observação</th>
+            <th className="hide-mobile">CNPJ</th>
+            <th className="hide-mobile">Requisitante</th>
+            <th className="small hide-mobile">Observação</th>
             <th className="text-right">Ações</th>
           </tr>
         </thead>
@@ -96,20 +96,20 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
                   </span>
                 </td>
                 <td>{t.numero}</td>
-                <td>{formatDate(t.dataEmissao)}</td>
-                <td>{t.pedido}</td>
+                <td className="hide-mobile">{formatDate(t.dataEmissao)}</td>
+                <td className="hide-mobile">{t.pedido}</td>
                 <td>{t.notaFiscal}</td>
                 <td>
                   {formatDate(t.vencimento)}
                   {dueInfo.label && <span className={dueInfo.class}>{dueInfo.label}</span>}
                 </td>
                 <td>{formatCurrency(t.valor)}</td>
-                <td>{t.forma}</td>
-                <td>{t.razao}</td>
-                <td>{t.cnpj}</td>
-                <td>{t.requisitante}</td>
-                <td className="small" title={t.obs}>
-                  {t.obs && t.obs.length > 80 ? t.obs.substring(0, 80) + '...' : t.obs}
+                <td className="hide-mobile">{t.forma}</td>
+                <td className="wrap-text">{t.razao}</td>
+                <td className="hide-mobile">{t.cnpj}</td>
+                <td className="hide-mobile">{t.requisitante}</td>
+                <td className="small hide-mobile" title={t.obs}>
+                  {t.obs && t.obs.length > 50 ? t.obs.substring(0, 50) + '...' : t.obs}
                 </td>
                 <td className="actions-cell">
                   <div className="action-buttons">

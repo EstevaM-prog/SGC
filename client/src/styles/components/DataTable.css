@@ -40,11 +40,30 @@
   background: var(--muted);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .table-wrapper {
-    overflow-x: scroll;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+    width: calc(100% + 2rem);
   }
+  
   .data-table {
-    min-width: 800px;
+    min-width: 700px;
   }
+
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+.data-table thead th,
+.data-table tbody td {
+  white-space: nowrap;
+}
+
+.data-table tbody td.wrap-text {
+  white-space: normal;
+  min-width: 200px;
 }

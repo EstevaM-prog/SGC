@@ -24,9 +24,13 @@ const NAV_ITEMS = [
   { id: 'suporte', label: 'Suporte', Icon: Headphones }
 ];
 
-export default function Sidebar({ currentView, setCurrentView, isCollapsed }) {
+export default function Sidebar({ currentView, setCurrentView, isCollapsed, isMobileOpen, onCloseMobile }) {
   return (
-    <aside className={`sidebar-glass ${isCollapsed ? 'collapsed' : ''}`}>
+    <aside className={`sidebar-glass ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
+      {/* Mobile close button */}
+      <button className="sidebar-close-btn" onClick={onCloseMobile}>
+        &times;
+      </button>
 
       {/* ── Logo ── */}
       <div className="sg-header">

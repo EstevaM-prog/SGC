@@ -152,3 +152,32 @@
 .summary-value { font-weight: 600; }
 
 .text-danger { color: var(--destructive) !important; }
+
+/* Dashboard Footer Grid (Calendar + Table) */
+.dashboard-grid-footer {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ensure recharts containers are truly responsive */
+.recharts-responsive-container {
+  min-width: 0;
+}
+
+/* Custom stats-grid icons responsiveness */
+@media (max-width: 480px) {
+  .stat-card {
+    padding: 1rem 0.75rem;
+  }
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}

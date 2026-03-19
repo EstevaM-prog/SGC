@@ -59,6 +59,8 @@ function App() {
   const freight = useFreightTickets();  // fretes_db_v1    → Fretes
   const ponto = usePontoTickets();    // ponto_db_v1     → Ponto
 
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
   // Theme sync
   useEffect(() => {
     document.body.classList.toggle('dark', isDark);
@@ -66,10 +68,14 @@ function App() {
   }, [isDark]);
 
   const toggleSidebar = () => {
-    const next = !isSidebarCollapsed;
-    setIsSidebarCollapsed(next);
-    const s = getSettings();
-    localStorage.setItem('chamados_settings_v1', JSON.stringify({ ...s, sidebarCollapsed: next }));
+    if (window.innerWidth <= 768) {
+      setIsMobileSidebarOpen(!isMobileSidebarOpen);
+    } else {
+      const next = !isSidebarCollapsed;
+      setIsSidebarCollapsed(next);
+      const s = getSettings();
+      localStorage.setItem('chamados_settings_v1', JSON.stringify({ ...s, sidebarCollapsed: next }));
+    }
   };
 
   const toggleTheme = () => {
@@ -106,6 +112,7 @@ function App() {
   const navigateTo = (v) => {
     if (v === 'form') setEditingTicket(null);
     setCurrentView(v);
+    if (window.innerWidth <= 768) setIsMobileSidebarOpen(false);
   };
 
   // ─── Auth gate ────────────────────────────────────────────────
@@ -232,19 +239,18 @@ function App() {
   };
 
   return (
-    <div
-      className="app-container"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: isSidebarCollapsed ? '0 1fr' : '280px 1fr',
-        transition: 'grid-template-columns 0.35s cubic-bezier(0.4,0,0.2,1)',
-      }}
-    >
+    <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-sidebar-open' : ''}`}>
       <Sidebar
         currentView={currentView}
         setCurrentView={navigateTo}
         isCollapsed={isSidebarCollapsed}
+        isMobileOpen={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
+
+      {isMobileSidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setIsMobileSidebarOpen(false)} />
+      )}
 
       <main className="main-content">
         <Header
@@ -252,6 +258,7 @@ function App() {
           toggleTheme={toggleTheme}
           isDark={isDark}
           isSidebarCollapsed={isSidebarCollapsed}
+          isMobileSidebarOpen={isMobileSidebarOpen}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           userName={currentUser?.name || 'Usuário'}

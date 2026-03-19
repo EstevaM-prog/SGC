@@ -69,7 +69,12 @@ export default function Header({
         title={isSidebarCollapsed ? 'Abrir menu' : 'Fechar menu'}
         aria-label="Toggle sidebar"
       >
-        {isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
+        {window.innerWidth <= 768 ? (
+          /* On mobile, show hamburger-style menu if closed */
+          <PanelLeftOpen size={20} />
+        ) : (
+          isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />
+        )}
       </button>
 
       {/* ── Theme toggle ── */}
@@ -83,7 +88,7 @@ export default function Header({
       </button>
 
       {/* ── Divider ── */}
-      <div className="tb-divider" />
+      <div className="tb-divider desktop-only" />
 
       {/* ── Search ── */}
       <div className="tb-search">
@@ -92,7 +97,7 @@ export default function Header({
           type="search"
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          placeholder="Pesquisar por número, status, CNPJ..."
+          placeholder={window.innerWidth <= 640 ? "Buscar..." : "Pesquisar por número, status, CNPJ..."}
           className="tb-search-input"
         />
       </div>
@@ -100,17 +105,16 @@ export default function Header({
       {/* ── Box notification ── */}
       <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
         <button
-          type="button" /* Importante para não submeter formulários por erro */
+          type="button"
           className="tb-icon-btn"
           onClick={(e) => {
-            e.stopPropagation(); // Impede que o clique "suba" para o documento
+            e.stopPropagation();
             setShowNotifications(!showNotifications);
           }}
         >
           <Bell size={18} />
         </button>
 
-        {/* Mini Tela de Notificações (Popover) */}
         {showNotifications && (
           <div className="tb-notif-popover">
             <div className="tb-notif-header">
@@ -134,7 +138,7 @@ export default function Header({
       <div style={{ flex: 1 }} />
 
       {/* ── Clock ── */}
-      <div className="tb-clock">
+      <div className="tb-clock desktop-only">
         <div className="tb-clock-row">
           <CloudSun size={14} />
           <span className="tb-temp">24°C</span>
@@ -146,11 +150,11 @@ export default function Header({
       </div>
 
       {/* ── Divider ── */}
-      <div className="tb-divider" />
+      <div className="tb-divider desktop-only" />
 
       {/* ── User / Avatar ── */}
       <button className="tb-user" onClick={onProfileClick} title="Ver perfil">
-        <div className="tb-user-info">
+        <div className="tb-user-info desktop-only">
           <span className="tb-user-name">Olá, <strong>{userName}</strong></span>
           <span className="tb-user-role">Administrador</span>
         </div>

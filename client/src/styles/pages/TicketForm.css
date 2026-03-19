@@ -66,3 +66,15 @@
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
 }
+
+@media (max-width: 640px) {
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .form-actions .btn-primary,
+  .form-actions .btn-outline {
+    width: 100%;
+    justify-content: center;
+  }
+}

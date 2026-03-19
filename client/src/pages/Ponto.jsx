@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Clock, Calendar, CheckCircle2, XCircle, Pencil } from 'lucide-react';
+import '../styles/pages/Ponto.css';
 
 export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTicket }) {
   const [showForm, setShowForm] = useState(false);
@@ -98,48 +99,42 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
 
   return (
     <div className="view-section active">
-      <div className="section-header">
-        <div style={{ flex: 1 }}>
+      <div className="section-header ponto-header">
+        <div className="ponto-title-wrap">
           <h2 className="section-title">Registro de Ponto</h2>
           <p className="section-subtitle">Gerencie seu controle de horas trabalhadas</p>
         </div>
 
-        {/* Display do Saldo Acumulado */}
-        <div className={`card`} style={{
-          padding: '0.75rem 1.25rem',
-          margin: 0,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          borderLeft: `4px solid ${isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--border)')}`
-        }}>
-          <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--muted-foreground)', display: 'block', textTransform: 'uppercase' }}>
-              Saldo Acumulado
-            </label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{
-                fontSize: '1.25rem',
-                fontWeight: '800',
-                color: isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--foreground)')
-              }}>
-                {totalFormatado}
-              </span>
-              <span className={`status-badge ${isNegative ? 'status-cancelado' : (isPositive ? 'status-solucionado' : '')}`} style={{ fontSize: '0.65rem' }}>
-                {isNegative ? 'DEVEDOR' : (isPositive ? 'EXTRAS' : 'ZERADO')}
-              </span>
+        <div className="ponto-stats-wrap">
+          {/* Display do Saldo Acumulado */}
+          <div className={`card ponto-balance-card`} style={{
+            borderLeft: `4px solid ${isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--border)')}`
+          }}>
+            <div className="ponto-balance-content">
+              <label className="ponto-balance-label">
+                Saldo Acumulado
+              </label>
+              <div className="ponto-balance-value-row">
+                <span className="ponto-balance-value" style={{
+                  color: isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--foreground)')
+                }}>
+                  {totalFormatado}
+                </span>
+                <span className={`status-badge ${isNegative ? 'status-cancelado' : (isPositive ? 'status-solucionado' : '')}`} style={{ fontSize: '0.65rem' }}>
+                  {isNegative ? 'DEVEDOR' : (isPositive ? 'EXTRAS' : 'ZERADO')}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <button
-          className="btn-primary"
-          onClick={showForm ? handleCancel : () => setShowForm(true)}
-          style={{ marginLeft: '1rem' }}
-        >
-          {showForm ? <XCircle size={18} /> : <Plus size={18} />}
-          {showForm ? 'Cancelar' : 'Bater Ponto'}
-        </button>
+          <button
+            className="btn-primary"
+            onClick={showForm ? handleCancel : () => setShowForm(true)}
+          >
+            {showForm ? <XCircle size={18} /> : <Plus size={18} />}
+            <span>{showForm ? 'Cancelar' : 'Bater Ponto'}</span>
+          </button>
+        </div>
       </div>
 
       {showForm && (

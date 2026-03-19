@@ -285,7 +285,7 @@ export default function Dashboard({ tickets = [] }) {
       {/* Charts Panel */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 450px), 1fr))',
         gap: '1.5rem',
         marginBottom: '2rem'
       }}>
@@ -386,12 +386,7 @@ export default function Dashboard({ tickets = [] }) {
       </div>
 
       {/* Side-by-Side: Calendar and Status Table */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 2fr',
-        gap: '1.5rem',
-        alignItems: 'stretch'
-      }}>
+      <div className="dashboard-grid-footer">
         <div style={{ height: '100%' }}>
           <Calendario
             selectedDate={selectedDate}
