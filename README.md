@@ -1,102 +1,71 @@
 # SGC - Sistema de Gestão de Chamados 🚀
 
-O **SGC** é uma plataforma fullstack moderna projetada para centralizar e otimizar o gerenciamento de chamados, compras, fretes e processos internos. Construído com uma arquitetura de monorepo, o sistema oferece uma experiência fluida, segura e escalável.
+O **SGC** é uma plataforma fullstack moderna, segura e de alta performance, projetada para centralizar a gestão de chamados, compras, fretes e processos operacionais. Com uma arquitetura de monorepo e foco em conformidade de dados (**LGPD**), o sistema oferece uma experiência profissional com estética **Dark Glassmorphism**.
 
 ---
 
-## 🏗️ Arquitetura do Projeto
+## 🏗️ Arquitetura e Tech Stack
 
-O projeto utiliza a estrutura de **Monorepo** com `npm workspaces`, dividindo-se em:
+O projeto utiliza **NPM Workspaces** para gerenciar o monorepo:
 
--   **/client**: Interface do usuário desenvolvida com React e Vite.
--   **/server**: API REST robusta utilizando Node.js, Express e Prisma ORM.
+### **Frontend** (`/client`)
+- **React 19** + **Vite**: Interface ultra-rápida e moderna.
+- **Estética Dark Glassmorphism**: Design premium com transparências, blurs e animações fluidas.
+- **Lucide React**: Biblioteca de ícones vetoriais.
+- **Recharts**: Painéis e dashboards dinâmicos orientados a dados.
+- **React Hot Toast**: Notificações em tempo real com feedback visual imediato.
+
+### **Backend** (`/server`)
+- **Node.js** + **Express**: API REST escalável.
+- **Prisma Client**: ORM com extensões para criptografia transparente.
+- **Neon DB**: PostgreSQL serverless de baixa latência.
+- **Swagger**: Documentação interativa completa (OpenAPI).
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🔒 Segurança e Privacidade (LGPD)
 
-### Frontend (`/client`)
--   **React 19** + **Vite** (HMR ultra-rápido)
--   **Lucide React** (Ícones modernos)
--   **Recharts** (Visualização de dados e dashboards)
--   **XLSX (SheetJS)** (Importação/Exportação de planilhas)
--   **CSS Vanilla** (Design modular e responsivo)
+O SGC foi construído com foco em **Proteção de Dados** e **Segurança em Camadas**:
 
-### Backend (`/server`)
--   **Node.js** + **Express**
--   **Prisma ORM** (Modelagem de dados e Migrations)
--   **Neon DB** (Banco de dados PostgreSQL na nuvem)
--   **JWT & Bcryptjs** (Autenticação e segurança de senhas)
--   **Swagger** (Documentação interativa da API)
--   **Jest & Supertest** (Testes de integração)
+- **Identidade**: Hashing de senhas com `Bcrypt` (cost factor 10).
+- **Sessão**: Autenticação via `JWT` (JSON Web Tokens) com expiração controlada.
+- **Criptografia em Repouso (TDE)**: Extensão Prisma para criptografia `AES-256-GCM` de campos sensíveis (E-mails, CNPJ, Razão Social) diretamente no banco de dados.
+- **Verificação em Duas Etapas (2FA)**: Fluxo de registro e recuperação de senha via códigos de segurança de 6 dígitos enviados por e-mail.
+- **RBAC (Role-Based Access Control)**: Permissões granulares para administradores e membros de equipe.
+
+---
+
+## ⚠️ Sistema de Tratamento de Erros
+
+Interface amigável para todos os estados críticos:
+- **401/403**: Tratamento de sessões expiradas e acessos não autorizados.
+- **404**: Página customizada para rotas inexistentes.
+- **500/Offline**: Detecção inteligente de queda de servidor e perda de conexão local.
+- **503**: Página de manutenção para migrações críticas de banco de dados.
+- **Token Error**: Aviso específico para links de recuperação de senha expirados.
 
 ---
 
 ## 🚀 Como Iniciar
 
-### Pré-requisitos
--   Node.js instalado
--   Conta no Neon DB (ou outro PostgreSQL)
-
-### Instalação
-Clone o repositório e instale todas as dependências (raiz, cliente e servidor) com um único comando:
-
-```bash
-npm install
-```
-
-### Desenvolvimento
-Inicie o Frontend e o Backend simultaneamente:
-
-```bash
-npm run dev
-```
-
--   **Frontend:** [http://localhost:5173](http://localhost:5173)
--   **Backend:** [http://localhost:3001](http://localhost:3001)
--   **API Docs (Swagger):** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
-
----
-
-## 📦 Scripts Disponíveis
-
-Na raiz do projeto, você pode executar:
-
--   `npm run dev`: Inicia cliente e servidor juntos.
--   `npm run client`: Inicia apenas o frontend.
--   `npm run server`: Inicia apenas o backend.
--   `npm run build`: Gera a build de produção do frontend.
--   `npm test --workspace=server`: Executa os testes automatizados da API.
-
----
-
-## 🔒 Variáveis de Ambiente
-
-Crie um arquivo `.env` dentro da pasta `/server` com sua URL de conexão:
-
+### Variáveis de Ambiente (`/server/.env`)
 ```env
-DATABASE_URL="postgresql://usuario:senha@host/banco?sslmode=require"
-PORT=3001
+DATABASE_URL='postgresql://...'
+JWT_SECRET='sua_chave_secreta'
+ENCRYPTION_KEY='chave_hex_de_32_bytes' # Requerido para LGPD
+MAIL_HOST='smtp.seuservidor.com'
+MAIL_USER='seu_usuario'
+MAIL_PASS='sua_senha'
 ```
 
----
+### Comandos Principais
+```bash
+npm install     # Instala dependências em todo o monorepo
+npm run dev     # Inicia Cliente (5173) e Servidor (3001) simultaneamente
+```
 
-## 📄 Funcionalidades Principais
--   ✅ **Dashboard**: Gráficos e indicadores de desempenho.
--   ✅ **Gestão de Chamados**: Fluxo completo de situações (Aberto, Processando, Solucionado).
--   ✅ **Compras e Fretes**: Módulos especializados para logística e suprimentos.
--   ✅ **Gerenciamento de Empresas**: Banco de dados de CNPJs inteligente com Upsert.
--   ✅ **Procedimentos**: Documentação interna do sistema integrada.
--   ✅ **Lixeira Segura**: Sistema de exclusão suave (soft-delete) com restauração.
--   ✅ **Notificações**: Sistema de notificações em tempo real.
--   ✅ **Perfis**: Sistema de perfis com autorização.
--   ✅ **Autenticação**: Sistema de autenticação com JWT.
--   ✅ **Segurança**: Sistema de segurança com autenticação e autorização.
--   ✅ **Testes**: Sistema de testes automatizados com Jest.
--   ✅ **Documentação**: Documentação interativa da API com Swagger.
-
-
+- **Documentação da API:** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
 
 ---
 
-Desenvolvido por [Estevam](https://github.com/EstevaM-prog) 💻
+Desenvolvido com ❤️ por [Estevam](https://github.com/EstevaM-prog)

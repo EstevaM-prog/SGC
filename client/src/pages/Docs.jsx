@@ -6,7 +6,9 @@ import {
   Layout, 
   Settings, 
   BarChart3, 
-  Terminal
+  Terminal,
+  ShieldCheck,
+  AlertTriangle
 } from 'lucide-react';
 import '../styles/pages/Docs.css';
 
@@ -21,7 +23,7 @@ export default function Docs({ onBack }) {
       content: (
         <section className="docs-section">
           <h2>Primeiros Passos</h2>
-          <p>Bem-vindo ao Manual do Sistema SGC. Este guia oferece um detalhamento completo dos módulos do aplicativo, desde o sistema de chamados até a gestão de equipes empresariais.</p>
+          <p>Bem-vindo ao Manual do Sistema SGC. Este guia oferece um detalhamento completo dos módulos do aplicativo, desde o sistema de chamados até a gestão de equipes empresariais e segurança em conformidade com a LGPD.</p>
           <div className="docs-grid">
              <div className="docs-card">
                 <h4>Dashboard</h4>
@@ -32,8 +34,8 @@ export default function Docs({ onBack }) {
                 <p>Visão unificada para chamados de Pagamentos, Compras e Fretes.</p>
              </div>
              <div className="docs-card">
-                <h4>Permissões RBAC</h4>
-                <p>Controle exatamente o que cada membro da equipe pode visualizar e editar.</p>
+                <h4>Segurança 2FA</h4>
+                <p>Fluxo de autenticação em duas etapas para garantir a identidade dos usuários.</p>
              </div>
           </div>
         </section>
@@ -71,16 +73,16 @@ export default function Docs({ onBack }) {
           <h2>Fluxos de Trabalho</h2>
           <p>Processos padronizados para as ações comuns do sistema.</p>
           <div className="docs-section">
+             <h3>🛡️ Verificação em Duas Etapas (2FA)</h3>
+             <p>Ao se registrar ou recuperar a senha, o sistema envia um código de 6 dígitos para o e-mail cadastrado. Este código é válido por 15 minutos e é obrigatório para ativar a conta ou redefinir a credencial.</p>
+          </div>
+          <div className="docs-section">
              <h3>📝 Abrindo Chamados</h3>
-             <p>Navegue até o formulário de "Novo Chamado". Preencha os campos obrigatórios (Número, Data, Valor, CNPJ). Ao enviar, o sistema dispara um Toast de sucesso e registra no log de atividades.</p>
+             <p>Navegue até o formulário de "Novo Chamado". Preencha os campos obrigatórios. Ao enviar, os dados sensíveis (CNPJ/Razão) são criptografados antes de serem salvos no banco de dados.</p>
           </div>
           <div className="docs-section">
              <h3>📅 Prazos no Calendário</h3>
              <p>Use o Calendário no Dashboard para identificar datas críticas. Selecionar uma data filtra a visão de pendências para mostrar apenas os chamados com vencimento naquele dia.</p>
-          </div>
-          <div className="docs-section">
-             <h3>🔔 Notificações</h3>
-             <p>O log de atividades rastreia todos os eventos do sistema (Criação, Edições, Exclusões). Indicadores no Topbar mantém você atualizado sobre ações da equipe.</p>
           </div>
         </section>
       )
@@ -92,7 +94,7 @@ export default function Docs({ onBack }) {
       content: (
         <section className="docs-section">
           <h2>Especificações Técnicas</h2>
-          <p>Uma análise da arquitetura do SGC e protocolos de segurança de dados.</p>
+          <p>Uma análise da arquitetura do SGC e protocolos de segurança de dados em conformidade com a LGPD.</p>
           <div className="docs-code-block">
              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <Terminal size={14} />
@@ -100,14 +102,38 @@ export default function Docs({ onBack }) {
              </div>
              - Frontend: React 19 (Hooks, Context API) <br />
              - Backend: Node.js / Express <br />
-             - Base de Dados: Neon Postgres <br />
-             - ORM: Prisma Client <br />
-             - Analytics: Recharts <br />
-             - Segurança: JWT + Bcrypt
+             - Base de Dados: Neon Postgres (PostgreSQL) <br />
+             - Segurança: AES-256-GCM (Database-at-rest) <br />
+             - Identidade: Bcrypt + JWT (Session management)
           </div>
           <div className="docs-section">
-             <h3>🔒 Segurança de Dados</h3>
-             <p>Usamos JWT (JSON Web Tokens) para sessões persistentes e Bcrypt para hashing de senhas. Todos os endpoints da API são protegidos por middleware de autorização.</p>
+             <h3>🔒 Proteção de Dados (LGPD)</h3>
+             <p>O SGC utiliza criptografia simétrica AES-256-GCM para proteger campos sensíveis no banco de dados. E-mails e códigos de convite usam IVs determinísticos para busca, enquanto dados de chamados usam IVs randômicos para máxima segurança.</p>
+          </div>
+        </section>
+      )
+    },
+    {
+      id: "troubleshooting",
+      title: "Solução de Problemas",
+      icon: <AlertTriangle size={18} />,
+      content: (
+        <section className="docs-section">
+          <h2>Solução de Problemas</h2>
+          <p>Guia rápido para os estados de erro do sistema.</p>
+          <div className="docs-grid">
+             <div className="docs-card">
+                <h4>Erro 403 (Acesso Negado)</h4>
+                <p>Ocorre quando um usuário comum tenta acessar áreas administrativas (ex: Gestão de Equipe).</p>
+             </div>
+             <div className="docs-card">
+                <h4>Erro 500 (Servidor)</h4>
+                <p>Indica uma falha inesperada no processamento. Recomendamos aguardar e tentar recarregar.</p>
+             </div>
+             <div className="docs-card">
+                <h4>Conexão Offline</h4>
+                <p>O sistema detecta automaticamente a perda de conexão e exibe um aviso visual persistente.</p>
+             </div>
           </div>
         </section>
       )
@@ -153,13 +179,13 @@ export default function Docs({ onBack }) {
       <main className="docs-content">
         <div className="docs-header">
            <h1>Documentação</h1>
-           <p>Domine o Sistema SGC com nosso manual técnico completo.</p>
+           <p>Domine o Sistema SGC com nosso manual técnico completo e seguro.</p>
         </div>
 
         {sections.find(s => s.id === activeSection)?.content}
 
         <footer style={{ marginTop: '4rem', padding: '1rem 0', borderTop: '1px solid rgba(255, 255, 255, 0.08)', fontSize: '0.875rem', color: '#94a3b8' }}>
-           Atualizado em Março de 2026. Versão 2.0.1
+           Atualizado em Março de 2026. Versão 2.1.0 (Segurança Ativada)
         </footer>
       </main>
     </div>
