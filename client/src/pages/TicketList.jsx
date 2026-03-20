@@ -58,11 +58,11 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
           </select>
         </div>
 
-        <TableActions 
+        <TableActions
           data={filteredTickets.map(t => {
             const { id, type, deleted, createdAt, updatedAt, ...rest } = t;
             return rest; // Remove internal IDs for export
-          })} 
+          })}
           onImport={(items) => {
             // Mapping for standard tickets – logic could be more complex
             if (window.confirm(`Deseja importar ${items.length} registros?`)) {

@@ -112,18 +112,46 @@
 }
 
 /* Color Status Accents */
-.activity-item.success { border-left: 4px solid #10b981; }
-.activity-item.warning { border-left: 4px solid #f59e0b; }
-.activity-item.error { border-left: 4px solid #ef4444; }
-.activity-item.info { border-left: 4px solid #3b82f6; }
+.activity-item.success {
+  border-left: 4px solid #10b981;
+}
+
+.activity-item.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.activity-item.error {
+  border-left: 4px solid #ef4444;
+}
+
+.activity-item.info {
+  border-left: 4px solid #3b82f6;
+}
 
 /* Icon specific helper colors */
-.icon-blue { color: #3b82f6; }
-.icon-green { color: #10b981; }
-.icon-orange { color: #f59e0b; }
-.icon-red { color: #ef4444; }
-.icon-purple { color: #8b5cf6; }
-.icon-gray { color: #94a3b8; }
+.icon-blue {
+  color: #3b82f6;
+}
+
+.icon-green {
+  color: #10b981;
+}
+
+.icon-orange {
+  color: #f59e0b;
+}
+
+.icon-red {
+  color: #ef4444;
+}
+
+.icon-purple {
+  color: #8b5cf6;
+}
+
+.icon-gray {
+  color: #94a3b8;
+}
 
 /* Empty state styling */
 .activities-empty {

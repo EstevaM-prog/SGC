@@ -9,10 +9,10 @@
   flex-direction: column;
   overflow: hidden;
   transform: translateX(0);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), 
-              width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.25s ease;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
   background: rgba(255, 255, 255, 0.60);
   backdrop-filter: blur(18px) saturate(180%);
   -webkit-backdrop-filter: blur(18px) saturate(180%);
@@ -134,8 +134,14 @@ body.dark .sg-header {
   gap: 2px;
 }
 
-.sg-nav::-webkit-scrollbar { width: 3px; }
-.sg-nav::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.18); border-radius: 4px; }
+.sg-nav::-webkit-scrollbar {
+  width: 3px;
+}
+
+.sg-nav::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.18);
+  border-radius: 4px;
+}
 
 .sg-nav-item {
   width: 100%;
@@ -162,7 +168,9 @@ body.dark .sg-header {
   color: var(--foreground);
 }
 
-body.dark .sg-nav-item:hover { background: rgba(255, 255, 255, 0.08); }
+body.dark .sg-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
 
 .sg-nav-item.active {
   background: rgba(255, 255, 255, 0.55);
@@ -170,7 +178,9 @@ body.dark .sg-nav-item:hover { background: rgba(255, 255, 255, 0.08); }
   font-weight: 600;
 }
 
-body.dark .sg-nav-item.active { background: rgba(255, 255, 255, 0.1); }
+body.dark .sg-nav-item.active {
+  background: rgba(255, 255, 255, 0.1);
+}
 
 /* Active bar indicator */
 .sg-nav-item.active::before {

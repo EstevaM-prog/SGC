@@ -16,11 +16,13 @@ import Suporte from './pages/Suporte';
 import Ponto from './pages/Ponto';
 
 // Pages – auth
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
 import ActivitiesPage from './pages/Activities';
+import Docs from './pages/Docs';
 
 // Hooks
 import { useActivities } from './hooks/useActivities';
@@ -45,7 +47,7 @@ function App() {
   const settings = getSettings();
 
   // Auth state
-  const [authView, setAuthView] = useState('login'); // 'login' | 'register' | 'forgot'
+  const [authView, setAuthView] = useState('landing'); // 'landing' | 'login' | 'register' | 'forgot' | 'docs'
   const [currentUser, setCurrentUser] = useState(getSession);
   const [userAvatar, setUserAvatar] = useState(() => localStorage.getItem('user_avatar') || null);
   const [userTeams, setUserTeams] = useState([]);
@@ -161,6 +163,17 @@ function App() {
 
   // ─── Auth gate ────────────────────────────────────────────────
   if (!currentUser) {
+    if (authView === 'landing') {
+      return (
+        <LandingPage
+          onStart={() => setAuthView('register')}
+          onLogin={() => setAuthView('login')}
+          onDocs={() => setAuthView('docs')}
+          isAuthenticated={false}
+        />
+      );
+    }
+    if (authView === 'docs') return <Docs onBack={() => setAuthView('landing')} />;
     if (authView === 'register') return <Register onNavigate={setAuthView} />;
     if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
     return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
@@ -282,6 +295,9 @@ function App() {
 
       case 'activities':
         return <ActivitiesPage activities={activities} onClear={clearActivities} />;
+
+      case 'docs':
+        return <Docs onBack={() => setCurrentView('dashboard')} />;
 
       default:
         return (

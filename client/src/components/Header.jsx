@@ -83,10 +83,10 @@ export default function Header({
       </div>
 
       {/* ── Box notification ── */}
-      <Notification 
-        onNavigateTo={onNavigateTo} 
-        notifications={notifications} 
-        unreadCount={unreadCount} 
+      <Notification
+        onNavigateTo={onNavigateTo}
+        notifications={notifications}
+        unreadCount={unreadCount}
         onMarkRead={onMarkRead}
       />
 
