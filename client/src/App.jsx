@@ -24,6 +24,14 @@ import Profile from './pages/Profile';
 import ActivitiesPage from './pages/Activities';
 import Docs from './pages/Docs';
 
+// Error Pages
+import NotFound from './pages/Error/NotFound';
+import Forbidden from './pages/Error/Forbidden';
+import Unauthenticated from './pages/Error/Unauthenticated';
+import ServerError from './pages/Error/ServerError';
+import Maintenance from './pages/Error/Maintenance';
+import TokenError from './pages/Error/TokenError';
+
 // Hooks
 import { useActivities } from './hooks/useActivities';
 import { useTickets } from './hooks/useTickets';
@@ -64,7 +72,7 @@ function App() {
 
   const fetchTeams = async (userId) => {
     try {
-      const resp = await fetch(`http://localhost:3001/api/teams?userId=${userId}`);
+      const resp = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/teams?userId=${userId}`);
       if (resp.ok) {
         const teams = await resp.json();
         setUserTeams(teams);
@@ -141,7 +149,10 @@ function App() {
   };
 
   // Auth handlers
-  const handleLogin = (user) => setCurrentUser(user);
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    setAuthView('app'); // Transition to app after login
+  };
   const handleLogout = () => {
     localStorage.removeItem('session_v1');
     setCurrentUser(null);
@@ -154,28 +165,46 @@ function App() {
     if (avatar !== undefined) setUserAvatar(avatar);
   };
 
-  // Navigate to sidebar view
+  // Navigate to sidebar view with permission checks
   const navigateTo = (v) => {
+    // 403 Forbidden check (Example: Admin logic)
+    const adminViews = ['teams'];
+    if (adminViews.includes(v) && currentUser?.role !== 'ADMIN') {
+      setCurrentView('403');
+      if (window.innerWidth <= 768) setIsMobileSidebarOpen(false);
+      return;
+    }
+
     if (v === 'form') setEditingTicket(null);
     setCurrentView(v);
     if (window.innerWidth <= 768) setIsMobileSidebarOpen(false);
   };
 
   // ─── Auth gate ────────────────────────────────────────────────
+  if (authView === 'landing') {
+    return (
+      <LandingPage
+        onStart={() => {
+          if (currentUser) {
+            setCurrentView('dashboard');
+            setAuthView('app'); // Internal state to clear the landing gate
+          } else {
+            setAuthView('register');
+          }
+        }}
+        onLogin={() => setAuthView('login')}
+        onDocs={() => setAuthView('docs')}
+        isAuthenticated={!!currentUser}
+      />
+    );
+  }
+
   if (!currentUser) {
-    if (authView === 'landing') {
-      return (
-        <LandingPage
-          onStart={() => setAuthView('register')}
-          onLogin={() => setAuthView('login')}
-          onDocs={() => setAuthView('docs')}
-          isAuthenticated={false}
-        />
-      );
-    }
     if (authView === 'docs') return <Docs onBack={() => setAuthView('landing')} />;
     if (authView === 'register') return <Register onNavigate={setAuthView} />;
     if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
+    if (authView === '401') return <Unauthenticated onLogin={() => setAuthView('login')} />;
+    if (authView === 'maintenance') return <Maintenance />;
     return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
   }
 

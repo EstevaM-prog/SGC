@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, UserPlus, CheckCircle2, ShieldCheck } from 'lucide-react';
 import '../styles/pages/Auth.css';
 
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function Register({ onNavigate }) {
   const [step, setStep] = useState(1); // 1: Form, 2: Verification
