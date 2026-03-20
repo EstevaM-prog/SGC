@@ -1,94 +1,27 @@
 import express from 'express';
-import { createUser, loginUser, getUsers, updateUsers, deleteUsers } from '../controllers/user.controller.js';
+import { 
+  createUser, 
+  loginUser, 
+  getUsers, 
+  updateUsers, 
+  deleteUsers,
+  verifyCode,
+  forgotPassword,
+  resetPassword 
+} from '../controllers/user.controller.js';
 
 const router = express.Router();
 
-/**
- * @openapi
- * /api/users:
- *   get:
- *     description: Retorna a lista de usuários
- *     responses:
- *       200:
- *         description: Sucesso
- */
-router.get('/', getUsers);
-
-/**
- * @openapi
- * /api/users:
- *   post:
- *     description: Cria um novo usuário
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               confirmPassword:
- *                 type: string
- *               role:
- *                 type: string
- *                 enum: [ADMIN, USER]
- *     responses:
- *       201:
- *         description: Usuário criado
- */
+// Public Routes
 router.post('/', createUser);
 router.post('/login', loginUser);
+router.post('/verify', verifyCode);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
-/**
- * @openapi
- * /api/users/{id}:
- *   put:
- *     description: Atualiza um usuário
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Usuário atualizado
- */
+// Management Routes
+router.get('/', getUsers);
 router.put('/:id', updateUsers);
-
-/**
- * @openapi
- * /api/users/{id}:
- *   delete:
- *     description: Deleta um usuário
- *     parameters:
- *       - name: id
- *         in: path
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Usuário deletado
- */
 router.delete('/:id', deleteUsers);
 
 export default router;

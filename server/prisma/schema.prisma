@@ -11,14 +11,18 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  teams     TeamMember[]
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique
+  password            String
+  avatar              String?
+  role                String   @default("USER")
+  isVerified          Boolean  @default(false)
+  verificationCode    String?
+  verificationExpires DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  teams               TeamMember[]
 }
 
 model Team {

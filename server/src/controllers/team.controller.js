@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../db.js';
 
 export const createTeam = async (req, res) => {
   try {
     const { name, description, userId } = req.body;
-    
+
     // Generate unique code SGC-XXXX
     const inviteCode = 'SGC-' + Math.floor(1000 + Math.random() * 9000);
 
