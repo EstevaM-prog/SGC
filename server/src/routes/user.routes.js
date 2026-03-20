@@ -1,5 +1,5 @@
 import express from 'express';
-import { createUser, getUsers, updateUsers, deleteUsers } from '../controllers/user.controller.js';
+import { createUser, loginUser, getUsers, updateUsers, deleteUsers } from '../controllers/user.controller.js';
 
 const router = express.Router();
 
@@ -42,6 +42,7 @@ router.get('/', getUsers);
  *         description: Usuário criado
  */
 router.post('/', createUser);
+router.post('/login', loginUser);
 
 /**
  * @openapi

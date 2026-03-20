@@ -10,6 +10,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 // Import routes
 import userRoutes from './src/routes/user.routes.js';
 import ticketRoutes from './src/routes/ticket.routes.js';
+import teamRoutes from './src/routes/team.routes.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Routes
 app.use('/api/users', userRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/teams', teamRoutes);
 
 /**
  * @openapi

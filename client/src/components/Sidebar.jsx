@@ -24,7 +24,14 @@ const NAV_ITEMS = [
   { id: 'suporte', label: 'Suporte', Icon: Headphones }
 ];
 
-export default function Sidebar({ currentView, setCurrentView, isCollapsed, isMobileOpen, onCloseMobile }) {
+export default function Sidebar({ currentView, setCurrentView, isCollapsed, isMobileOpen, onCloseMobile, permissions }) {
+  const filteredItems = NAV_ITEMS.filter(item => {
+    if (!permissions) return true;
+    // If permission explicitly set to false, hide it
+    if (permissions[item.id] === false) return false;
+    return true;
+  });
+
   return (
     <aside className={`sidebar-glass ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
       {/* Mobile close button */}
@@ -54,7 +61,7 @@ export default function Sidebar({ currentView, setCurrentView, isCollapsed, isMo
 
       {/* ── Nav ── */}
       <nav className="sg-nav">
-        {NAV_ITEMS.map(({ id, label, Icon }) => (
+        {filteredItems.map(({ id, label, Icon }) => (
           <button
             key={id}
             className={`sg-nav-item ${currentView === id ? 'active' : ''}`}

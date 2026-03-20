@@ -62,6 +62,32 @@ export const createUser = async (req, res) => {
   }
 };
 
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) return res.status(401).json({ error: "E-mail ou senha incorretos" });
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) return res.status(401).json({ error: "E-mail ou senha incorretos" });
+
+    const token = jwt.sign(
+      { userId: user.id },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      message: "Login realizado com sucesso!",
+      token,
+      user: { id: user.id, name: user.name, email: user.email }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
 export const getUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({

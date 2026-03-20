@@ -48,6 +48,39 @@ function App() {
   const [authView, setAuthView] = useState('login'); // 'login' | 'register' | 'forgot'
   const [currentUser, setCurrentUser] = useState(getSession);
   const [userAvatar, setUserAvatar] = useState(() => localStorage.getItem('user_avatar') || null);
+  const [userTeams, setUserTeams] = useState([]);
+  const [activePermissions, setActivePermissions] = useState(null);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      fetchTeams(currentUser.id);
+    } else {
+      setUserTeams([]);
+      setActivePermissions(null);
+    }
+  }, [currentUser]);
+
+  const fetchTeams = async (userId) => {
+    try {
+      const resp = await fetch(`http://localhost:3001/api/teams?userId=${userId}`);
+      if (resp.ok) {
+        const teams = await resp.json();
+        setUserTeams(teams);
+        // Combine permissions from all teams (true if any team grants it)
+        const combined = {};
+        teams.forEach(t => {
+          if (t.permissions) {
+            Object.entries(t.permissions).forEach(([key, val]) => {
+              if (val) combined[key] = true;
+            });
+          }
+        });
+        setActivePermissions(Object.keys(combined).length > 0 ? combined : null);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar permissões:', err);
+    }
+  };
 
   // App navigation
   const [currentView, setCurrentView] = useState('list');
@@ -271,6 +304,7 @@ function App() {
         isCollapsed={isSidebarCollapsed}
         isMobileOpen={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
+        permissions={activePermissions}
       />
 
       {isMobileSidebarOpen && (
