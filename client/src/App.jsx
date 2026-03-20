@@ -148,7 +148,12 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard tickets={chamados.tickets} />;
+        const allTickets = [
+          ...(Array.isArray(chamados.tickets) ? chamados.tickets.map(t => ({ ...t, source: 'chamado' })) : []),
+          ...(Array.isArray(shopping.tickets) ? shopping.tickets.map(t => ({ ...t, source: 'shopping' })) : []),
+          ...(Array.isArray(freight.tickets) ? freight.tickets.map(t => ({ ...t, source: 'freight' })) : [])
+        ];
+        return <Dashboard tickets={allTickets} />;
 
       case 'list':
         return (
