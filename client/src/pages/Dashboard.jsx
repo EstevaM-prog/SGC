@@ -151,7 +151,7 @@ export default function Dashboard({ tickets = [] }) {
 
   // KPIs
   const total = filteredTickets.length;
-  const open = filteredTickets.filter(t => (t.situacao || '').toLowerCase() === 'aberto').length;
+  const open = filteredTickets.filter(t => (t.situacao || '').toLowerCase() !== 'solucionado').length;
   const solucionado = filteredTickets.filter(t => (t.situacao || '').toLowerCase() === 'solucionado').length;
   const escriturar = filteredTickets.filter(t => (t.situacao || '').toLowerCase() === 'escriturar').length;
   const processando = filteredTickets.filter(t => (t.situacao || '').toLowerCase() === 'processando').length;

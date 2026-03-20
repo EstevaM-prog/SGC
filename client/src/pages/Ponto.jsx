@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Clock, Calendar, CheckCircle2, XCircle, Pencil } from 'lucide-react';
+import toast from 'react-hot-toast';
 import '../styles/pages/Ponto.css';
 
-export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTicket }) {
+export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTicket, addActivity }) {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -48,35 +49,54 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
     setShowForm(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const saldoMin = getSaldoMinutos(formData.entrada, formData.saida);
-    const saldoFormatado = formatSaldo(saldoMin);
+    const loadingToast = toast.loading(editingId ? 'Atualizando ponto...' : 'Registrando ponto...');
 
-    const recordData = {
-      ...formData,
-      resultado: saldoFormatado,
-      saldoMinutos: saldoMin, // Guardamos o valor numérico para cálculos
-      type: 'ponto_record',
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      const saldoMin = getSaldoMinutos(formData.entrada, formData.saida);
+      const saldoFormatado = formatSaldo(saldoMin);
 
-    if (editingId) {
-      updateTicket(editingId, recordData);
+      const recordData = {
+        ...formData,
+        resultado: saldoFormatado,
+        saldoMinutos: saldoMin, // Guardamos o valor numérico para cálculos
+        type: 'ponto_record',
+        updatedAt: new Date().toISOString()
+      };
+
+      await new Promise(r => setTimeout(r, 600));
+
+      if (editingId) {
+        updateTicket(editingId, recordData);
+      } else {
+        addTicket({
+          ...recordData,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      if (addActivity) {
+        addActivity({
+          text: editingId ? `Registro de Ponto Alterado` : `Novo Registro de Ponto`,
+          description: `Data: ${new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR')} | Entrada: ${formData.entrada} | Saída: ${formData.saida} | Saldo: ${saldoFormatado}`,
+          type: editingId ? 'warning' : 'info',
+          iconType: 'time'
+        });
+      }
+
+      toast.success("Criado com sucesso!", { id: loadingToast });
       setEditingId(null);
-    } else {
-      addTicket({
-        ...recordData,
-        createdAt: new Date().toISOString()
+      setFormData({
+        data: new Date().toISOString().split('T')[0],
+        entrada: '',
+        saida: ''
       });
+      setShowForm(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro no chamado!", { id: loadingToast });
     }
-
-    setFormData({
-      data: new Date().toISOString().split('T')[0],
-      entrada: '',
-      saida: ''
-    });
-    setShowForm(false);
   };
 
   const handleCancel = () => {
@@ -106,7 +126,6 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
         </div>
 
         <div className="ponto-stats-wrap">
-          {/* Display do Saldo Acumulado */}
           <div className={`card ponto-balance-card`} style={{
             borderLeft: `4px solid ${isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--border)')}`
           }}>

@@ -1,15 +1,15 @@
 import React from 'react';
 import { Headset, Mail, MapPin, CheckCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import '../styles/pages/Support.css';
 
-export default function Suporte() {
+export default function Suporte({ addActivity }) {
   const [formData, setFormData] = React.useState({
     nome: '',
     email: '',
     assunto: '',
     mensagem: ''
   });
-  const [showToast, setShowToast] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const handleChange = (e) => {
@@ -19,10 +19,13 @@ export default function Suporte() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    
     setLoading(true);
+    const loadingToast = toast.loading('Enviando sua mensagem...');
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/estevamm.lab@gmail.com", {
+      const response = await fetch("https://formsubmit.co/ajax/estevam0x0@gmail.com", {
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
@@ -38,15 +41,24 @@ export default function Suporte() {
       });
 
       if (response.ok) {
-        setShowToast(true);
+        if (addActivity) {
+          addActivity({
+            text: `Contato de Suporte Enviado`,
+            description: `Assunto: ${formData.assunto} | Por: ${formData.nome} (${formData.email})`,
+            user: formData.nome,
+            type: 'info',
+            iconType: 'edit'
+          });
+        }
+        
+        toast.success("Criado com sucesso!", { id: loadingToast });
         setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
-        setTimeout(() => setShowToast(false), 5000);
       } else {
-        alert("Erro ao enviar mensagem. Por favor, tente novamente.");
+        toast.error("Erro no chamado!", { id: loadingToast });
       }
     } catch (error) {
       console.error("Erro no FormSubmit:", error);
-      alert("Erro de conexão. Verifique sua internet.");
+      toast.error("Erro no chamado!", { id: loadingToast });
     } finally {
       setLoading(false);
     }
@@ -178,12 +190,6 @@ export default function Suporte() {
         </div>
       </div>
 
-      {/* Toast de Sucesso */}
-      {showToast && (
-        <div id="suporte-toast" className="suporte-toast" style={{ display: 'flex', alignItems: 'center', gap: '8px', opacity: 1, bottom: '20px' }}>
-          <CheckCircle /> Mensagem enviada com sucesso!
-        </div>
-      )}
     </section>
   );
 }

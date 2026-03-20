@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import { Toaster } from 'react-hot-toast';
 
 // Pages – main app
 import Dashboard from './pages/Dashboard';
@@ -19,8 +20,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import Profile from './pages/Profile';
+import ActivitiesPage from './pages/Activities';
 
 // Hooks
+import { useActivities } from './hooks/useActivities';
 import { useTickets } from './hooks/useTickets';
 import { useShoppingTickets } from './hooks/useShoppingTickets';
 import { useFreightTickets } from './hooks/useFreightTickets';
@@ -54,18 +57,26 @@ function App() {
   const [editingTicket, setEditingTicket] = useState(null);
 
   // Data hooks (separate stores!)
+  const { activities, unreadCount, addActivity, markAllAsRead, clearActivities } = useActivities();
   const chamados = useTickets();         // chamados_db_v1  → Lista de Chamados (pagamentos)
   const shopping = useShoppingTickets(); // compras_db_v1   → Compras
   const freight = useFreightTickets();  // fretes_db_v1    → Fretes
   const ponto = usePontoTickets();    // ponto_db_v1     → Ponto
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // Theme sync
   useEffect(() => {
     document.body.classList.toggle('dark', isDark);
     document.body.classList.toggle('light', !isDark);
   }, [isDark]);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const toggleSidebar = () => {
     if (window.innerWidth <= 768) {
@@ -129,6 +140,7 @@ function App() {
       onLogout={handleLogout}
       onNavigate={navigateTo}
       onUpdateUser={handleUpdateUser}
+      addActivity={addActivity}
     />
   );
 
@@ -155,6 +167,7 @@ function App() {
             ticket={editingTicket}
             onSave={handleSaveTicket}
             onCancel={() => setCurrentView('list')}
+            addActivity={addActivity}
           />
         );
 
@@ -165,6 +178,7 @@ function App() {
             onEdit={handleEdit}
             onAddTicket={chamados.addTicket}
             onUpdateTicket={chamados.updateTicket}
+            addActivity={addActivity}
           />
         );
 
@@ -192,6 +206,7 @@ function App() {
             softDeleteTicket={shopping.softDeleteTicket}
             restoreTicket={shopping.restoreTicket}
             permanentDeleteTicket={shopping.permanentDeleteTicket}
+            addActivity={addActivity}
           />
         );
 
@@ -204,14 +219,15 @@ function App() {
             softDeleteTicket={freight.softDeleteTicket}
             restoreTicket={freight.restoreTicket}
             permanentDeleteTicket={freight.permanentDeleteTicket}
+            addActivity={addActivity}
           />
         );
 
       case 'procedures':
-        return <Procedimentos />;
+        return <Procedimentos addActivity={addActivity} />;
 
       case 'suporte':
-        return <Suporte />;
+        return <Suporte addActivity={addActivity} />;
 
       case 'ponto':
         return (
@@ -222,8 +238,12 @@ function App() {
             softDeleteTicket={ponto.softDeleteTicket}
             restoreTicket={ponto.restoreTicket}
             permanentDeleteTicket={ponto.permanentDeleteTicket}
+            addActivity={addActivity}
           />
         );
+
+      case 'activities':
+        return <ActivitiesPage activities={activities} onClear={clearActivities} />;
 
       default:
         return (
@@ -264,11 +284,32 @@ function App() {
           userName={currentUser?.name || 'Usuário'}
           userAvatar={userAvatar}
           onProfileClick={() => setCurrentView('profile')}
+          onNavigateTo={navigateTo}
+          notifications={activities}
+          unreadCount={unreadCount}
+          onMarkRead={markAllAsRead}
         />
         <div className="content-area">
           {renderView()}
         </div>
       </main>
+      
+      <Toaster 
+        position={windowWidth <= 768 ? "bottom-center" : "bottom-right"} 
+        reverseOrder={true}
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            background: 'var(--card)',
+            color: 'var(--foreground)',
+            border: '1px solid var(--border)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+          },
+          duration: 4000,
+          // Custom animation via CSS classes if needed, but react-hot-toast 
+          // has built-in smooth entry/exit.
+        }}
+      />
     </div>
   );
 }

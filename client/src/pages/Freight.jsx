@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Edit, Trash, RotateCcw, XCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
+import TableActions from '../components/TableActions';
 
 const EMPTY_FORM = {
   situacao: '', numero: '', solicitacao: '', pedido: '',
@@ -7,12 +9,13 @@ const EMPTY_FORM = {
   razao: '', cnpj: '', requisitante: '', obs: ''
 };
 
-export default function Freight({ tickets, addTicket, updateTicket, softDeleteTicket, restoreTicket, permanentDeleteTicket }) {
+export default function Freight({ tickets, addTicket, updateTicket, softDeleteTicket, restoreTicket, permanentDeleteTicket, addActivity }) {
   const [statusFilter, setStatusFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [showTrash, setShowTrash] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Restore draft
   useEffect(() => {
@@ -71,14 +74,46 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
     setShowForm(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(',', '.'));
-    const payload = { ...formData, valor: isNaN(parsedValor) ? 0 : parsedValor };
-    if (editingId) { updateTicket(editingId, payload); }
-    else { addTicket(payload); }
-    setShowForm(false); setEditingId(null); setFormData(EMPTY_FORM);
-    if (!editingId) localStorage.removeItem('sgc_freight_draft');
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    const loadingToast = toast.loading(editingId ? 'Atualizando frete...' : 'Salvando novo frete...');
+
+    try {
+      const parsedValor = parseFloat(formData.valor.replace(/\./g, '').replace(',', '.'));
+      const payload = { ...formData, valor: isNaN(parsedValor) ? 0 : parsedValor };
+
+      await new Promise(r => setTimeout(r, 800)); // Simulando delay
+
+      if (editingId) {
+        await updateTicket(editingId, payload);
+      } else {
+        await addTicket(payload);
+      }
+
+      if (addActivity) {
+        addActivity({
+          text: editingId ? `Frete #${payload.numero} Atualizado` : `Novo Frete #${payload.numero} Criado`,
+          description: `Frete para ${payload.razao} no valor de R$ ${formData.valor}. Status: ${payload.situacao}. Solicitante: ${payload.requisitante}`,
+          user: payload.requisitante,
+          type: editingId ? 'warning' : 'success',
+          iconType: 'resolved'
+        });
+      }
+
+      toast.success("Criado com sucesso!", { id: loadingToast });
+      setShowForm(false);
+      setEditingId(null);
+      setFormData(EMPTY_FORM);
+      if (!editingId) localStorage.removeItem('sgc_freight_draft');
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro no chamado!", { id: loadingToast });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const cancelForm = () => { setShowForm(false); setEditingId(null); setFormData(EMPTY_FORM); };
@@ -100,19 +135,34 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
       </div>
 
       {!showTrash && (
-        <div className="filter-call list" style={{ marginBottom: '1.5rem' }}>
-          <label className="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por status:</label>
-          <select className="custom-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
-            style={{ width: 200, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: 8 }}>
-            <option value="">Todos</option>
-            <option value="Aberto">Aberto</option>
-            <option value="3Orçamento">Falta 3 Orçamento</option>
-            <option value="2Orçamento">Falta 2 Orçamento</option>
-            <option value="1Orçamento">Falta 1 Orçamento</option>
-            <option value="Contratado">Contratado</option>
-            <option value="Solucionado">Solucionado</option>
-            <option value="Cancelado">Cancelado</option>
-          </select>
+        <div className="filter-section-container" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <label className="filter-label text-xs font-semibold uppercase text-muted-foreground">Filtrar por status:</label>
+            <select className="custom-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+              style={{ minWidth: 200, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)', marginLeft: 8 }}>
+              <option value="">Todos os Status</option>
+              <option value="Aberto">Aberto</option>
+              <option value="3Orçamento">Falta 3 Orçamento</option>
+              <option value="2Orçamento">Falta 2 Orçamento</option>
+              <option value="1Orçamento">Falta 1 Orçamento</option>
+              <option value="Contratado">Contratado</option>
+              <option value="Solucionado">Solucionado</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
+          </div>
+
+          <TableActions 
+            data={filtered.map(t => {
+              const { id, type, deleted, createdAt, updatedAt, ...rest } = t;
+              return rest;
+            })}
+            onImport={(items) => {
+              if (window.confirm(`Importar ${items.length} registros para Fretes?`)) {
+                items.forEach(item => addTicket({ ...item }));
+              }
+            }}
+            filename="relatorio-fretes"
+          />
         </div>
       )}
 
@@ -168,7 +218,7 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
           <div className="form-grid">
             <div className="form-group">
               <label htmlFor="situacao">Status *</label>
-              <select id="situacao" value={formData.situacao} onChange={handleChange} required>
+              <select id="situacao" value={formData.situacao} onChange={handleChange} required disabled={isSubmitting}>
                 <option value="" disabled>Selecione o status</option>
                 <option value="Aberto">Aberto</option>
                 <option value="3Orçamento">Falta 3 Orçamento</option>
@@ -181,48 +231,50 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
             </div>
             <div className="form-group">
               <label htmlFor="numero">Nº Chamado *</label>
-              <input id="numero" value={formData.numero} onChange={handleChange} placeholder="Ex: FRT-2025-001" required />
+              <input id="numero" value={formData.numero} onChange={handleChange} placeholder="Ex: FRT-2025-001" required disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="solicitacao">Nº Solicitação</label>
-              <input id="solicitacao" value={formData.solicitacao} onChange={handleChange} placeholder="Nº da solicitação" />
+              <input id="solicitacao" value={formData.solicitacao} onChange={handleChange} placeholder="Nº da solicitação" disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="pedido">Pedido</label>
-              <input id="pedido" value={formData.pedido} onChange={handleChange} placeholder="Número do pedido" />
+              <input id="pedido" value={formData.pedido} onChange={handleChange} placeholder="Número do pedido" disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="notaFiscal">Nota Fiscal</label>
-              <input id="notaFiscal" value={formData.notaFiscal} onChange={handleChange} placeholder="Número da NF" />
+              <input id="notaFiscal" value={formData.notaFiscal} onChange={handleChange} placeholder="Número da NF" disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="dacte">Dacte</label>
-              <input id="dacte" value={formData.dacte} onChange={handleChange} placeholder="Número do CT-e" />
+              <input id="dacte" value={formData.dacte} onChange={handleChange} placeholder="Número do CT-e" disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="valor">Valor (R$) *</label>
-              <input id="valor" value={formData.valor} onChange={handleChange} placeholder="0,00" required />
+              <input id="valor" value={formData.valor} onChange={handleChange} placeholder="0,00" required disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="razao">Razão Social *</label>
-              <input id="razao" value={formData.razao} onChange={handleChange} placeholder="Transportadora" required />
+              <input id="razao" value={formData.razao} onChange={handleChange} placeholder="Transportadora" required disabled={isSubmitting} />
             </div>
             <div className="form-group">
               <label htmlFor="cnpj">CNPJ *</label>
-              <input id="cnpj" value={formData.cnpj} onChange={handleChange} placeholder="00.000.000/0000-00" maxLength="18" required />
+              <input id="cnpj" value={formData.cnpj} onChange={handleChange} placeholder="00.000.000/0000-00" maxLength="18" required disabled={isSubmitting} />
             </div>
             <div className="form-group full-width">
               <label htmlFor="requisitante">Requisitante</label>
-              <input id="requisitante" value={formData.requisitante} onChange={handleChange} placeholder="Nome completo" />
+              <input id="requisitante" value={formData.requisitante} onChange={handleChange} placeholder="Nome completo" disabled={isSubmitting} />
             </div>
             <div className="form-group full-width">
               <label htmlFor="obs">Observação</label>
-              <textarea id="obs" value={formData.obs} onChange={handleChange} rows="3" placeholder="Notas adicionais..." />
+              <textarea id="obs" value={formData.obs} onChange={handleChange} rows="3" placeholder="Notas adicionais..." disabled={isSubmitting} />
             </div>
           </div>
           <div className="form-actions">
-            <button type="button" className="btn-outline" onClick={cancelForm}>Cancelar</button>
-            <button type="submit" className="btn-primary">Salvar Frete</button>
+            <button type="button" className="btn-outline" onClick={cancelForm} disabled={isSubmitting}>Cancelar</button>
+            <button type="submit" className="btn-primary" disabled={isSubmitting}>
+               {isSubmitting ? 'Salvando...' : 'Salvar Frete'}
+            </button>
           </div>
         </form>
       </div>

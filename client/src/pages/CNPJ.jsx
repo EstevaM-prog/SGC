@@ -1,9 +1,11 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Edit, Download, Upload, FileCheck, FileDown, AlertTriangle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import '../styles/pages/CNPJ.css';
 
-export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
+export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket, addActivity }) {
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef(null);
 
   // Helper: Mask CNPJ (handle letters/symbols like in TicketForm)
@@ -35,6 +37,7 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
 
   // Export to Excel (.xlsx)
   const handleExport = () => {
+    toast.success('Exportando lista...');
     const data = uniqueList.map(item => ({
       'Razão Social': item.razao,
       'CNPJ': item.cnpj,
@@ -47,6 +50,15 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Empresas");
     XLSX.writeFile(wb, `Lista_CNPJ_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+    if (addActivity) {
+      addActivity({
+        text: `Exportação de CNPJs`,
+        description: `Exportado arquivo Excel com ${data.length} empresas registradas.`,
+        type: 'info',
+        iconType: 'resolved'
+      });
+    }
   };
 
   // Import from Excel/CSV
@@ -54,10 +66,13 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || isImporting) return;
+
+    setIsImporting(true);
+    const loadingToast = toast.loading('Processando arquivo...');
 
     const reader = new FileReader();
-    reader.onload = (evt) => {
+    reader.onload = async (evt) => {
       try {
         const bstr = evt.target.result;
         const wb = XLSX.read(bstr, { type: 'binary' });
@@ -66,50 +81,62 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
         const data = XLSX.utils.sheet_to_json(ws);
 
         if (data.length === 0) {
-          alert('O arquivo está vazio!');
+          toast.error('O arquivo está vazio!', { id: loadingToast });
+          setIsImporting(false);
           return;
         }
 
-        let imported = 0;
-        let updated = 0;
-        let errors = 0;
+        let importedCount = 0;
+        let updatedCount = 0;
+        let errorsCount = 0;
+
+        // Process in small batches or simulate delay
+        await new Promise(r => setTimeout(r, 1000));
 
         data.forEach(row => {
-          const rawCnpj = row['CNPJ'] || row['cnpj'] || '';
-          const cleanCnpj = row['CNPJ']?.toString().replace(/\D/g, '') || row['cnpj']?.toString().replace(/\D/g, '') || '';
+          const rawCnpj = (row['CNPJ'] || row['cnpj'] || '').toString();
+          const cleanCnpj = rawCnpj.replace(/\D/g, '');
           const razao = row['Razão Social'] || row['razao'] || '';
-          const req = row['Requisitante'] || row['requisitante'] || '';
-          const setor = row['Setor'] || row['setor'] || '';
           
           if (!cleanCnpj || !razao) {
-            errors++;
+            errorsCount++;
             return;
           }
 
-          // Check if exists in Current View (which de-duplicates from tickets)
           const existing = uniqueList.find(t => t.cnpj.replace(/\D/g, '') === cleanCnpj);
 
           const payload = {
             razao,
             cnpj: formatCNPJ(cleanCnpj),
-            requisitante: req,
-            setor: setor,
+            requisitante: row['Requisitante'] || row['requisitante'] || '',
+            setor: row['Setor'] || row['setor'] || '',
             updatedAt: new Date().toISOString()
           };
 
           if (existing) {
             onUpdateTicket(existing.id, payload);
-            updated++;
+            updatedCount++;
           } else {
             onAddTicket(payload);
-            imported++;
+            importedCount++;
           }
         });
 
-        alert(`Processamento Concluído:\n✅ Novas Empresas: ${imported}\n🔄 Atualizadas (Upsert): ${updated}\n❌ Erros: ${errors}`);
+        if (addActivity) {
+          addActivity({
+            text: `Importação de Arquivo Realizada`,
+            description: `Importado arquivo com ${data.length} registros (${importedCount} novos, ${updatedCount} atualizados).`,
+            type: 'success',
+            iconType: 'resolved'
+          });
+        }
+
+        toast.success("Criado com sucesso!", { id: loadingToast });
       } catch (err) {
         console.error(err);
-        alert('Erro ao processar o arquivo. Verifique o formato!');
+        toast.error("Erro no chamado!", { id: loadingToast });
+      } finally {
+        setIsImporting(false);
       }
       e.target.value = ''; // Reset input
     };
@@ -136,10 +163,13 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket }) {
             className="tb-icon-btn" 
             onClick={handleImportClick} 
             title="Importar Excel/CSV"
+            disabled={isImporting}
             style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: 'auto', padding: '0 1rem', display: 'flex', gap: '8px' }}
           >
             <Upload size={18} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Importar</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+              {isImporting ? 'Processando...' : 'Importar'}
+            </span>
           </button>
           
           <button 

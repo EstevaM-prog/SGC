@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import DataTable from '../components/DataTable';
+import TableActions from '../components/TableActions';
 
 export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, onDelete }) {
   const [statusFilter, setStatusFilter] = useState('');
@@ -36,7 +37,7 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
         </button>
       </div>
 
-      <div className="filter-section-container" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="filter-section-container" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           <label htmlFor="situacao" className="filter-label" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
             Filtrar por status:
@@ -56,6 +57,23 @@ export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, o
             <option value="Cancelado">Cancelado</option>
           </select>
         </div>
+
+        <TableActions 
+          data={filteredTickets.map(t => {
+            const { id, type, deleted, createdAt, updatedAt, ...rest } = t;
+            return rest; // Remove internal IDs for export
+          })} 
+          onImport={(items) => {
+            // Mapping for standard tickets – logic could be more complex
+            if (window.confirm(`Deseja importar ${items.length} registros?`)) {
+              items.forEach(item => {
+                // Ensure correct structure if keys are different
+                onNewTicket({ ...item, type: 'ticket' }); // This depends on how onNewTicket handles saving
+              });
+            }
+          }}
+          filename="lista-chamados"
+        />
       </div>
 
       <div className="card">

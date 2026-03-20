@@ -35,14 +35,6 @@ h6 {
   position: relative;
 }
 
-.sidebar-collapsed {
-  --sidebar-width: 0px;
-}
-
-.app-container:not(.sidebar-collapsed) {
-  --sidebar-width: 280px;
-}
-
 .mobile-only {
   display: none !important;
 }
@@ -67,8 +59,7 @@ h6 {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: calc(100% - var(--sidebar-width, 280px));
-  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
 }
 
 @media (max-width: 768px) {

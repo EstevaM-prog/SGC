@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PanelLeftOpen,
   PanelLeftClose,
@@ -6,9 +6,9 @@ import {
   Moon,
   Search,
   Clock,
-  CloudSun,
-  Bell
+  CloudSun
 } from 'lucide-react';
+import Notification from './Notification';
 import '../styles/components/Notification.css';
 
 export default function Header({
@@ -20,20 +20,14 @@ export default function Header({
   setSearchTerm,
   userName = "Usuário",
   userAvatar = null,
-  onProfileClick
+  onProfileClick,
+  onNavigateTo,
+  notifications = [],
+  unreadCount = 0,
+  onMarkRead
 }) {
   const [time, setTime] = useState('');
   const [date, setDate] = useState('');
-
-  // --- Lógica de Notificações ---
-  const [showNotifications, setShowNotifications] = useState(false);
-  const notificationRef = useRef(null);
-
-  // Exemplo de dados de notificações (poderiam vir via props)
-  const notifications = [
-    { id: 1, text: "Saldo positivo de 1h 20m hoje!", type: "success", time: "2 min atrás" },
-    { id: 2, text: "Revisão de descarte de dados pendente", type: "alert", time: "1h atrás" }
-  ];
 
   useEffect(() => {
     const tick = () => {
@@ -43,19 +37,7 @@ export default function Header({
     };
     tick();
     const id = setInterval(tick, 1000);
-
-    // Fechar ao clicar fora
-    const handleClickOutside = (event) => {
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      clearInterval(id);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => clearInterval(id);
   }, []);
 
   const initials = (userName || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
@@ -70,7 +52,6 @@ export default function Header({
         aria-label="Toggle sidebar"
       >
         {window.innerWidth <= 768 ? (
-          /* On mobile, show hamburger-style menu if closed */
           <PanelLeftOpen size={20} />
         ) : (
           isSidebarCollapsed ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />
@@ -87,7 +68,6 @@ export default function Header({
         {isDark ? <Sun size={18} /> : <Moon size={18} />}
       </button>
 
-      {/* ── Divider ── */}
       <div className="tb-divider desktop-only" />
 
       {/* ── Search ── */}
@@ -103,38 +83,13 @@ export default function Header({
       </div>
 
       {/* ── Box notification ── */}
-      <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
-        <button
-          type="button"
-          className="tb-icon-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowNotifications(!showNotifications);
-          }}
-        >
-          <Bell size={18} />
-        </button>
+      <Notification 
+        onNavigateTo={onNavigateTo} 
+        notifications={notifications} 
+        unreadCount={unreadCount} 
+        onMarkRead={onMarkRead}
+      />
 
-        {showNotifications && (
-          <div className="tb-notif-popover">
-            <div className="tb-notif-header">
-              <span>Notificações</span>
-              <span className="tb-notif-count">{notifications.length} novas</span>
-            </div>
-            <div className="tb-notif-list">
-              {notifications.map(n => (
-                <div key={n.id} className={`tb-notif-item ${n.type}`}>
-                  <p>{n.text}</p>
-                  <small>{n.time}</small>
-                </div>
-              ))}
-            </div>
-            <button className="tb-notif-all">Ver todas as atividades</button>
-          </div>
-        )}
-      </div>
-
-      {/* ── Spacer ── */}
       <div style={{ flex: 1 }} />
 
       {/* ── Clock ── */}
@@ -149,7 +104,6 @@ export default function Header({
         <span className="tb-date">{date}</span>
       </div>
 
-      {/* ── Divider ── */}
       <div className="tb-divider desktop-only" />
 
       {/* ── User / Avatar ── */}

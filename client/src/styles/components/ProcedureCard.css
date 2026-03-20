@@ -1,0 +1,317 @@
+/* ═══════════════════════════════════════════════════════════════
+   PROCEDURE CARD (MINIMIZED & MAXIMIZED)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Minimized Grid State */
+.proc-card-mini {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.proc-card-mini:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-muted);
+  background: hsla(199, 89%, 48%, 0.03);
+}
+
+.proc-card-icon-wrap {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px hsla(199, 89%, 48%, 0.2);
+}
+
+.proc-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.proc-card-category {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+  padding: 2px 8px;
+  background: hsla(199, 89%, 48%, 0.1);
+  border-radius: 4px;
+}
+
+.proc-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--foreground);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.proc-card-actions-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.proc-card-edit-btn,
+.proc-card-read-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  transition: var(--transition);
+  opacity: 1; /* Explicitly visible as requested for Edit button */
+}
+
+.proc-card-edit-btn:hover {
+  background: var(--primary-muted);
+  color: var(--primary);
+}
+
+.proc-card-read-btn {
+  opacity: 0.4;
+}
+
+.proc-card-mini:hover .proc-card-read-btn {
+  opacity: 1;
+  background: var(--secondary);
+  color: var(--primary);
+}
+
+/* Maximized Overlay (Modal) */
+.proc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.proc-modal-content {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+  animation: modalScaleUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalScaleUp {
+  from { transform: scale(0.9) translateY(20px); }
+  to { transform: scale(1) translateY(0); }
+}
+
+.proc-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proc-modal-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.proc-modal-icon {
+  width: 36px;
+  height: 36px;
+  background: hsla(199, 89%, 48%, 0.1);
+  color: var(--primary);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proc-modal-category {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  letter-spacing: 0.05em;
+}
+
+.proc-modal-close {
+  background: var(--secondary);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.proc-modal-close:hover {
+  background: var(--destructive-muted);
+  color: var(--destructive);
+  transform: rotate(90deg);
+}
+
+.proc-modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.proc-modal-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.75rem;
+  line-height: 1.1;
+  color: var(--foreground);
+}
+
+.proc-modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  margin-bottom: 1.5rem;
+}
+
+.proc-modal-description {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--foreground);
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.proc-modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  background: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proc-modal-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-edit-proc, .btn-delete-proc, .btn-close-proc {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+.btn-edit-proc {
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.btn-edit-proc:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-delete-proc {
+  background: var(--card);
+  color: var(--destructive);
+}
+
+.btn-delete-proc:hover {
+  background: var(--destructive);
+  color: white;
+  border-color: var(--destructive);
+}
+
+.btn-close-proc {
+  background: var(--foreground);
+  color: var(--background);
+  border: none;
+}
+
+.btn-close-proc:hover {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+@media (max-width: 640px) {
+  .proc-modal-overlay {
+    padding: 0;
+  }
+  
+  .proc-modal-content {
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  
+  .proc-modal-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .proc-modal-actions {
+    width: 100%;
+  }
+  
+  .proc-modal-actions button {
+    flex: 1;
+  }
+  
+  .btn-close-proc {
+    width: 100%;
+  }
+}

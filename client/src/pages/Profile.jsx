@@ -1,14 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, User, Mail, Lock, Camera, LogOut, Edit, Save, X, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUser }) {
+export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUser, addActivity }) {
   const storedUser = JSON.parse(localStorage.getItem('user_db') || 'null') || {};
 
   const [avatar, setAvatar] = useState(localStorage.getItem('user_avatar') || null);
   const [editing, setEditing] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   const [form, setForm] = useState({
     name: storedUser.name || currentUser?.name || '',
@@ -27,7 +27,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
 
     // Limit to 1MB to prevent QuotaExceededError in localStorage
     if (file.size > 1024 * 1024) {
-      alert('A imagem é muito grande! Por favor, escolha uma foto menor que 1MB.');
+      toast.error('A imagem é muito grande! Máximo 1MB.');
       return;
     }
 
@@ -37,11 +37,11 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
       try {
         setAvatar(data);
         localStorage.setItem('user_avatar', data);
-        // propagate to Header immediately
         onUpdateUser?.({ name: form.name, email: form.email, avatar: data });
+        toast.success('Foto de perfil atualizada!');
       } catch (err) {
         console.error('Erro ao salvar avatar:', err);
-        alert('Não foi possível salvar a imagem. O armazenamento local está cheio.');
+        toast.error('Não foi possível salvar a imagem.');
       }
     };
     reader.readAsDataURL(file);
@@ -50,17 +50,23 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   /* ── Form handlers ─────────────────────────────────────────── */
   const handleChange = (e) => setForm(p => ({ ...p, [e.target.id]: e.target.value }));
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    setError('');
-    if (!form.name.trim()) { setError('O nome não pode estar vazio.'); return; }
-    if (!form.email.trim()) { setError('O e-mail não pode estar vazio.'); return; }
+    if (isSaving) return;
+
+    if (!form.name.trim()) { toast.error('O nome não pode estar vazio.'); return; }
+    if (!form.email.trim()) { toast.error('O e-mail não pode estar vazio.'); return; }
     if (form.password && form.password.length < 6) {
-      setError('A senha deve ter ao menos 6 caracteres.'); return;
+      toast.error('A senha deve ter ao menos 6 caracteres.'); return;
     }
+
+    setIsSaving(true);
+    const loadingToast = toast.loading('Salvando alterações...');
 
     // Persist to localStorage
     try {
+      await new Promise(r => setTimeout(r, 600)); // Simulando delay
+
       const updated = { ...storedUser, name: form.name, email: form.email };
       if (form.password) updated.password = form.password;
       localStorage.setItem('user_db', JSON.stringify(updated));
@@ -71,15 +77,25 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
 
       // ← Sync React state in App so Header re-renders immediately
       onUpdateUser?.({ name: form.name, email: form.email });
+
+      if (addActivity) {
+        addActivity({
+          text: `Perfil de ${form.name} Atualizado`,
+          description: `Alteração de dados cadastrais (E-mail: ${form.email})`,
+          user: form.name,
+          type: 'info',
+          iconType: 'user'
+        });
+      }
+      
+      toast.success("Criado com sucesso!", { id: loadingToast });
+      setEditing(false);
     } catch (err) {
       console.error('Erro ao salvar perfil:', err);
-      setError('Não foi possível salvar as alterações (armazenamento cheio).');
-      return;
+      toast.error("Erro no chamado!", { id: loadingToast });
+    } finally {
+      setIsSaving(false);
     }
-
-    setEditing(false);
-    setSuccess('Perfil atualizado com sucesso!');
-    setTimeout(() => setSuccess(''), 3000);
   };
 
   const handleCancel = () => {
@@ -88,7 +104,6 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
       email: storedUser.email || currentUser?.email || '',
       password: storedUser.password || '',
     });
-    setError('');
     setEditing(false);
   };
 
@@ -134,9 +149,6 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
             <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={handlePhoto} />
           </label>
         </div>
-
-        {error && <p className="auth-error">{error}</p>}
-        {success && <p className="auth-success">{success}</p>}
 
         {/* ── VIEW mode ── */}
         {!editing ? (
@@ -194,7 +206,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
               <label htmlFor="name">Nome</label>
               <div className="auth-input-wrap">
                 <User size={16} className="auth-input-icon" />
-                <input id="name" type="text" value={form.name} onChange={handleChange} placeholder="Seu nome" required />
+                <input id="name" type="text" value={form.name} onChange={handleChange} placeholder="Seu nome" required disabled={isSaving} />
               </div>
             </div>
 
@@ -202,7 +214,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
               <label htmlFor="email">E-mail</label>
               <div className="auth-input-wrap">
                 <Mail size={16} className="auth-input-icon" />
-                <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="voce@exemplo.com" required />
+                <input id="email" type="email" value={form.email} onChange={handleChange} placeholder="voce@exemplo.com" required disabled={isSaving} />
               </div>
             </div>
 
@@ -216,27 +228,27 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
               <div className="auth-input-wrap">
                 <Lock size={16} className="auth-input-icon" />
                 <input id="password" type={showPass ? 'text' : 'password'} value={form.password}
-                  onChange={handleChange} placeholder="••••••••" />
-                <button type="button" className="auth-eye-btn" onClick={() => setShowPass(v => !v)}>
+                  onChange={handleChange} placeholder="••••••••" disabled={isSaving} />
+                <button type="button" className="auth-eye-btn" onClick={() => setShowPass(v => !v)} disabled={isSaving}>
                   {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.25rem' }}>
-              <button type="button" onClick={handleCancel} style={{
+              <button type="button" onClick={handleCancel} disabled={isSaving} style={{
                 flex: 1, height: 44, background: 'transparent', border: '1px solid var(--border)',
                 color: 'var(--foreground)', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}>
                 <X size={16} /> Cancelar
               </button>
-              <button type="submit" style={{
+              <button type="submit" disabled={isSaving} style={{
                 flex: 2, height: 44, background: 'linear-gradient(135deg,#7c3aed,#5b21b6)',
                 color: '#fff', border: 'none', borderRadius: 8, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
               }}>
-                <Save size={16} /> Salvar Alterações
+                <Save size={16} /> {isSaving ? 'Salvando...' : 'Salvar Alterações'}
               </button>
             </div>
           </form>
