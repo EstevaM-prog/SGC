@@ -1,0 +1,54 @@
+/* ═══════════════════════════════════════════════════════════════
+   LANDING PAGE STYLES (HERO, FEATURES, STATS)
+═══════════════════════════════════════════════════════════════ */
+/* Hero Section */
+.hero {
+  position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  overflow: hidden; background: var(--gradient-hero, linear-gradient(180deg, #0a0c14, #16191e));
+}
+
+.hero-bg { position: absolute; inset: 0; overflow: hidden; }
+
+.gradient-blob {
+  position: absolute; width: 24rem; height: 24rem; border-radius: 50%;
+  filter: blur(80px); animation: float 8s ease-in-out infinite;
+}
+
+.blob-1 { top: 25%; left: 25%; background: hsl(189, 95%, 52%, 0.2); }
+.blob-2 { bottom: 25%; right: 25%; background: hsl(195, 85%, 45%, 0.2); animation-delay: -4s; }
+
+@keyframes float {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 0.3; }
+  50% { transform: scale(1.2) translateY(-20px); opacity: 0.5; }
+}
+
+.hero-content { position: relative; z-index: 10; text-align: center; max-width: 56rem; }
+
+/* Badge icon sparkle styles */
+.badge {
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.5rem;
+  margin-bottom: 1.5rem; border-radius: 9999px; background: rgba(10, 12, 18, 0.5);
+  backdrop-filter: blur(8px); border: 1px solid rgba(189, 95, 52, 0.2);
+  font-size: 0.875rem; color: #64748b;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #1898d9, #1793a3);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.hero-description {
+  font-size: clamp(1.125rem, 2vw, 1.5rem); color: #64748b;
+  margin-bottom: 3rem; max-width: 42rem; margin-left: auto; margin-right: auto;
+}
+
+/* Features grid on landing page */
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.feature-card {
+  position: relative; background: linear-gradient(145deg, #1c202a, #13171f);
+  border: 1px solid rgba(189, 95, 52, 0.1); border-radius: 1rem; padding: 2rem;
+  overflow: hidden; transition: all 0.3s ease;
+}
+
+.feature-card:hover { border-color: rgba(189, 95, 52, 0.3); transform: translateY(-4px); }

@@ -1,0 +1,22 @@
+{
+  "name": "sgc-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=client\" \"npm run dev --workspace=server\"",
+    "client": "npm run dev --workspace=client",
+    "server": "npm run dev --workspace=server",
+    "build": "npm run build --workspace=client",
+    "install-all": "npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "nodemailer": "^8.0.3"
+  }
+}

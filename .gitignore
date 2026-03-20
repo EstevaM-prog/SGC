@@ -1,0 +1,73 @@
+# ─────────────────────────────────────────────────────────────────
+#  SGC MANAGEMENT SYSTEM - GITIGNORE CONFIGURATION
+# ─────────────────────────────────────────────────────────────────
+
+# Dependencies
+node_modules/
+**/node_modules/
+.npm
+.pnpm-store/
+
+# Environment Variables (CRITICAL: NEVER COMMIT THESE)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.local
+*.env
+
+# Build Outputs
+dist/
+**/dist/
+build/
+**/build/
+.next/
+out/
+.vercel
+.cache/
+.tmp/
+
+# Logs & Debugging
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.eslintcache
+
+# Database & Storage
+server/dev.db
+server/dev.db-journal
+prisma/dev.db
+*.db
+*.db-journal
+*.sqlite
+uploads/
+**/uploads/
+docker/volumes
+
+# Editor & System Files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+Thumbs.db
+
+# Prisma Generated Files
+**/src/generated/prisma
+/src/generated/prisma
+.prisma/
+
+# Testing
+coverage/
+**/coverage/
+.nyc_output/

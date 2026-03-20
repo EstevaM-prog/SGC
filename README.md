@@ -1,74 +1,71 @@
-# SGC - Sistema de Gerenciamento de Chamados
+# SGC - Sistema de Gestão de Chamados 🚀
 
-Aplicação web para controle, acompanhamento e gestão de chamados administrativos.
-
-## 📌 Funcionalidades
-
-- Cadastro de chamados
-- Listagem e gerenciamento de chamados
-- Dashboard com indicadores
-- Consulta de CNPJ
-- Procedimentos internos
-- Lixeira de chamados
-- Área de suporte
-
-## 🛠 Tecnologias Utilizadas
-
-- HTML5
-- CSS3
-- JavaScript (ES6+)
-- Arquitetura MVC
-- SPA (Single Page Application)
-- Git e GitHub
-
-## 🧱 Arquitetura MVC
-
-O projeto segue o padrão MVC:
-
-- **Model**: Responsável pelas regras de negócio e manipulação de dados
-- **View**: Interface do usuário (HTML)
-- **Controller**: Controla eventos, fluxo da aplicação e comunicação entre Model e View
-
-## 📁 Estrutura do Projeto
-
-```text
-SGC
-├── index.html
-├── main.js
-├── assets
-│   ├── css
-│   └── js
-└── app
-    ├── controllers
-    ├── models
-    └── views
+O **SGC** é uma plataforma fullstack moderna, segura e de alta performance, projetada para centralizar a gestão de chamados, compras, fretes e processos operacionais. Com uma arquitetura de monorepo e foco em conformidade de dados (**LGPD**), o sistema oferece uma experiência profissional com estética **Dark Glassmorphism**.
 
 ---
 
-### 6️⃣ Como executar o projeto
-```md
-## 🚀 Como Executar o Projeto
+## 🏗️ Arquitetura e Tech Stack
 
-1. Clone o repositório:
-```bash
-git clone https://github.com/seu-usuario/sgc.git
+O projeto utiliza **NPM Workspaces** para gerenciar o monorepo:
 
-2. Acesse a pasta do projeto:
-```bash
-cd sgc
+### **Frontend** (`/client`)
+- **React 19** + **Vite**: Interface ultra-rápida e moderna.
+- **Estética Dark Glassmorphism**: Design premium com transparências, blurs e animações fluidas.
+- **Lucide React**: Biblioteca de ícones vetoriais.
+- **Recharts**: Painéis e dashboards dinâmicos orientados a dados.
+- **React Hot Toast**: Notificações em tempo real com feedback visual imediato.
 
-3. Abra o arquivo index.html no navegador
-    ou utilize uma extensão como Live Server no VS Code.
+### **Backend** (`/server`)
+- **Node.js** + **Express**: API REST escalável.
+- **Prisma Client**: ORM com extensões para criptografia transparente.
+- **Neon DB**: PostgreSQL serverless de baixa latência.
+- **Swagger**: Documentação interativa completa (OpenAPI).
 
 ---
 
-### 7️⃣ Branches (importante, você usa develop)
-```md
-## 🌱 Branches
+## 🔒 Segurança e Privacidade (LGPD)
 
-- `main` → versão estável do sistema
-- `develop` → desenvolvimento e novas funcionalidades
+O SGC foi construído com foco em **Proteção de Dados** e **Segurança em Camadas**:
 
-## 👤 Autor
+- **Identidade**: Hashing de senhas com `Bcrypt` (cost factor 10).
+- **Sessão**: Autenticação via `JWT` (JSON Web Tokens) com expiração controlada.
+- **Criptografia em Repouso (TDE)**: Extensão Prisma para criptografia `AES-256-GCM` de campos sensíveis (E-mails, CNPJ, Razão Social) diretamente no banco de dados.
+- **Verificação em Duas Etapas (2FA)**: Fluxo de registro e recuperação de senha via códigos de segurança de 6 dígitos enviados por e-mail.
+- **RBAC (Role-Based Access Control)**: Permissões granulares para administradores e membros de equipe.
 
-Desenvolvido por **Felipe Estevam**
+---
+
+## ⚠️ Sistema de Tratamento de Erros
+
+Interface amigável para todos os estados críticos:
+- **401/403**: Tratamento de sessões expiradas e acessos não autorizados.
+- **404**: Página customizada para rotas inexistentes.
+- **500/Offline**: Detecção inteligente de queda de servidor e perda de conexão local.
+- **503**: Página de manutenção para migrações críticas de banco de dados.
+- **Token Error**: Aviso específico para links de recuperação de senha expirados.
+
+---
+
+## 🚀 Como Iniciar
+
+### Variáveis de Ambiente (`/server/.env`)
+```env
+DATABASE_URL='postgresql://...'
+JWT_SECRET='sua_chave_secreta'
+ENCRYPTION_KEY='chave_hex_de_32_bytes' # Requerido para LGPD
+MAIL_HOST='smtp.seuservidor.com'
+MAIL_USER='seu_usuario'
+MAIL_PASS='sua_senha'
+```
+
+### Comandos Principais
+```bash
+npm install     # Instala dependências em todo o monorepo
+npm run dev     # Inicia Cliente (5173) e Servidor (3001) simultaneamente
+```
+
+- **Documentação da API:** [http://localhost:3001/api-docs](http://localhost:3001/api-docs)
+
+---
+
+Desenvolvido com ❤️ por [Estevam](https://github.com/EstevaM-prog)

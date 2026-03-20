@@ -1,0 +1,77 @@
+/* ═══════════════════════════════════════════════════════════════
+   PONTO PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+.ponto-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ponto-title-wrap {
+  flex: 1;
+  min-width: 250px;
+}
+
+.ponto-stats-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ponto-balance-card {
+  padding: 0.75rem 1.25rem;
+  margin: 0 !important;
+  display: flex;
+  align-items: center;
+}
+
+.ponto-balance-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.ponto-balance-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  display: block;
+}
+
+.ponto-balance-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ponto-balance-value {
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-family: 'Outfit', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .ponto-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .ponto-stats-wrap {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ponto-balance-card {
+    width: 100%;
+  }
+  
+  .ponto-stats-wrap .btn-primary {
+    width: 100%;
+  }
+}

@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String   @id @default(cuid())
+  name                String
+  email               String   @unique
+  password            String
+  avatar              String?
+  role                String   @default("USER")
+  isVerified          Boolean  @default(false)
+  verificationCode    String?
+  verificationExpires DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  teams               TeamMember[]
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?
+  inviteCode  String   @unique
+  permissions Json?    // { "dashboard": true, "activities": true, ... }
+  members     TeamMember[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id      String   @id @default(cuid())
+  userId  String
+  teamId  String
+  role    String   @default("MEMBER") // ADMIN, MEMBER
+  user    User     @relation(fields: [userId], references: [id])
+  team    Team     @relation(fields: [teamId], references: [id])
+  @@unique([userId, teamId])
+}
+
+model Chamado {
+  id           String    @id @default(cuid())
+  situacao     String?
+  numero       String?
+  dataEmissao  DateTime?
+  pedido       String?
+  notaFiscal   String?
+  vencimento   DateTime?
+  valor        Float?    @default(0)
+  forma        String?
+  razao        String?
+  cnpj         String?
+  setor        String?
+  codEtica     String?   @default("nao")
+  requisitante String?
+  obs          String?
+  deleted      Boolean   @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model ShoppingTicket {
+  id            String    @id @default(cuid())
+  situacao      String?
+  numero        String?
+  solicitacao   String?
+  pedido        String?
+  prazoEntrega  DateTime?
+  valor         Float?    @default(0)
+  prazoPagto    DateTime?
+  razao         String?
+  cnpj          String?
+  requisitante  String?
+  obs           String?
+  deleted       Boolean   @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model FreightTicket {
+  id            String    @id @default(cuid())
+  situacao      String?
+  numero        String?
+  solicitacao   String?
+  pedido        String?
+  prazoEntrega  DateTime?
+  valor         Float?    @default(0)
+  prazoPagto    DateTime?
+  razao         String?
+  cnpj          String?
+  requisitante  String?
+  obs           String?
+  deleted       Boolean   @default(false)
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([cnpj])
+}
+
+model Procedimento {
+  id          String   @id @default(cuid())
+  titulo      String
+  descricao   String?
+  categoria   String?
+  icon        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Tabela de Lixeiras para log ou registros específicos deletados
+model Lixeira {
+  id          String   @id @default(cuid())
+  originalId  String   // ID do item original
+  tipo        String   // 'CNpj', 'Shopping', 'Frete'
+  conteudo    String   // Dados em formato JSON
+  deletedAt   DateTime @default(now())
+}
+
+//Tabela Auxiliar de Tokens
+model Token {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([userId])
+}
+
+//Tabela de Roles
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([name])
+}
+
+// Tabela de Permissões
+model Permission {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+  deleted     Boolean  @default(false)
+
+  @@index([name])
+}
