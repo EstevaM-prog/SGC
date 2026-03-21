@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Mail, Eye, EyeOff, LogIn, AlertCircle } from 'lucide-react';
 import '../styles/pages/Auth.css';
+import api from '../Axios/conect.js';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function Login({ onLogin, onNavigate }) {
@@ -27,15 +28,11 @@ export default function Login({ onLogin, onNavigate }) {
     setError('');
 
     try {
-      const resp = await fetch(`${API_BASE}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      const resp = await api.post('/users/login', { email, password });
+      
+      const data = resp.data;
 
-      const data = await resp.json();
-
-      if (resp.ok) {
+      if (resp.status === 200) {
         // Persist Remember Me
         if (remember) {
           localStorage.setItem('remember_me', JSON.stringify({ email, password }));
@@ -57,7 +54,7 @@ export default function Login({ onLogin, onNavigate }) {
       }
     } catch (err) {
       console.error('Erro no login:', err);
-      setError('Servidor indisponível. Verifique sua conexão.');
+      setError(err.response?.data?.error || 'Servidor indisponível. Verifique sua conexão.');
     }
   };
 
