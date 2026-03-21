@@ -1,6 +1,7 @@
 import React from 'react';
 import { Headset, Mail, MapPin, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 import '../styles/pages/Support.css';
 
 export default function Suporte({ addActivity }) {
@@ -25,22 +26,20 @@ export default function Suporte({ addActivity }) {
     const loadingToast = toast.loading('Enviando sua mensagem...');
 
     try {
-      const response = await fetch("https://formsubmit.co/ajax/estevam0x0@gmail.com", {
-        method: "POST",
+      const response = await axios.post("https://formsubmit.co/ajax/estevam0x0@gmail.com", {
+        Nome: formData.nome,
+        Email: formData.email,
+        Assunto: formData.assunto,
+        Mensagem: formData.mensagem,
+        _subject: `Novo contato SGC: ${formData.assunto}`
+      }, {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          Nome: formData.nome,
-          Email: formData.email,
-          Assunto: formData.assunto,
-          Mensagem: formData.mensagem,
-          _subject: `Novo contato SGC: ${formData.assunto}`
-        })
+        }
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         if (addActivity) {
           addActivity({
             text: `Contato de Suporte Enviado`,

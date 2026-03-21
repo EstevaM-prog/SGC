@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { Toaster } from 'react-hot-toast';
+import api from './Axios/conect.js';
 
 // Pages – main app
 import Dashboard from './pages/Dashboard';
@@ -72,9 +73,9 @@ function App() {
 
   const fetchTeams = async (userId) => {
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/teams?userId=${userId}`);
-      if (resp.ok) {
-        const teams = await resp.json();
+      const resp = await api.get(`/teams?userId=${userId}`);
+      if (resp.status === 200) {
+        const teams = resp.data;
         setUserTeams(teams);
         // Combine permissions from all teams (true if any team grants it)
         const combined = {};
