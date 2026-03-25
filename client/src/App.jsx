@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import { Toaster } from 'react-hot-toast';
+import api from './Axios/conect.js';
 
 // Pages – main app
 import Dashboard from './pages/Dashboard';
@@ -41,13 +42,20 @@ import { usePontoTickets } from './hooks/usePontoTickets';
 
 // ─── helpers ─────────────────────────────────────────────────────
 const getSettings = () => {
-  try { return JSON.parse(localStorage.getItem('chamados_settings_v1') || '{}'); }
-  catch { return {}; }
+  try { 
+    const s = localStorage.getItem('chamados_settings_v1');
+    return s ? JSON.parse(s) : {}; 
+  } catch { return {}; }
 };
 
 const getSession = () => {
-  try { return JSON.parse(localStorage.getItem('session_v1') || 'null'); }
-  catch { return null; }
+  try { 
+    const s = localStorage.getItem('session_v1');
+    return s ? JSON.parse(s) : null; 
+  } catch { 
+    localStorage.removeItem('session_v1'); // Limpa se estiver corrompido
+    return null; 
+  }
 };
 // ─────────────────────────────────────────────────────────────────
 
@@ -72,16 +80,16 @@ function App() {
 
   const fetchTeams = async (userId) => {
     try {
-      const resp = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3001/api"}/teams?userId=${userId}`);
-      if (resp.ok) {
-        const teams = await resp.json();
+      const resp = await api.get(`/teams?userId=${userId}`);
+      if (resp.status === 200) {
+        const teams = resp.data;
         setUserTeams(teams);
-        // Combine permissions from all teams (true if any team grants it)
+        // Combine permissions safely
         const combined = {};
         teams.forEach(t => {
-          if (t.permissions) {
-            Object.entries(t.permissions).forEach(([key, val]) => {
-              if (val) combined[key] = true;
+          if (t && t.permissions && Array.isArray(t.permissions)) {
+            t.permissions.forEach(p => {
+              if (p && p.name) combined[p.name] = true;
             });
           }
         });

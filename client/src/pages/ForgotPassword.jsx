@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import '../styles/pages/Auth.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import api from '../Axios/conect.js';
 
 export default function ForgotPassword({ onNavigate }) {
   const [step, setStep] = useState(1); // 1: Email, 2: Code, 3: New Password
@@ -24,20 +24,15 @@ export default function ForgotPassword({ onNavigate }) {
     setLoading(true);
 
     try {
-      const resp = await fetch(`${API_BASE}/users/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
+      const resp = await api.post('/users/forgot-password', { email });
 
-      const data = await resp.json();
-      if (resp.ok) {
+      if (resp.status === 200) {
         setStep(2);
       } else {
-        setError(data.error || 'Erro ao enviar e-mail.');
+        setError(resp.data.error || 'Erro ao enviar e-mail.');
       }
     } catch (err) {
-      setError('Erro de conexão ao servidor.');
+      setError(err.response?.data?.error || 'Erro de conexão ao servidor.');
     } finally {
       setLoading(false);
     }
@@ -66,21 +61,16 @@ export default function ForgotPassword({ onNavigate }) {
     setLoading(true);
 
     try {
-      const resp = await fetch(`${API_BASE}/users/reset-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code, newPassword })
-      });
+      const resp = await api.post('/users/reset-password', { email, code, newPassword });
 
-      const data = await resp.json();
-      if (resp.ok) {
+      if (resp.status === 200) {
         setSuccess(true);
         setTimeout(() => onNavigate('login'), 2000);
       } else {
-        setError(data.error || 'Falha ao redefinir.');
+        setError(resp.data.error || 'Falha ao redefinir.');
       }
     } catch (err) {
-      setError('Erro de conexão.');
+      setError(err.response?.data?.error || 'Erro de conexão.');
     } finally {
       setLoading(false);
     }

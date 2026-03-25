@@ -27,6 +27,7 @@ export const createUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationCode = generateSecurityCode();
+    const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     const user = await prisma.user.create({
@@ -35,9 +36,17 @@ export const createUser = async (req, res) => {
         email,
         password: hashedPassword,
         role: role || "USER",
-        isVerified: false,
-        verificationCode,
-        verificationExpires: expiresAt
+        isVerified: false
+      }
+    });
+
+    // Gerenciar token na tabela específica
+    await prisma.token.create({
+      data: {
+        token: hashedVerificationCode,
+        type: "REGISTRATION",
+        userId: user.id,
+        expiresAt: expiresAt
       }
     });
 
@@ -65,26 +74,40 @@ export const verifyCode = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
-    if (user.verificationCode !== code) {
+    // Busca o token mais recente do tipo REGISTRATION para este usuário
+    const tokenRecord = await prisma.token.findFirst({
+      where: { 
+        userId: user.id, 
+        type: "REGISTRATION" 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!tokenRecord) {
+      return res.status(400).json({ error: "Nenhum código gerado para este usuário" });
+    }
+
+    const isCodeValid = await bcrypt.compare(code, tokenRecord.token);
+    if (!isCodeValid) {
       return res.status(400).json({ error: "Código de segurança incorreto" });
     }
 
-    if (new Date() > user.verificationExpires) {
+    if (new Date() > tokenRecord.expiresAt) {
       return res.status(400).json({ error: "Código expirado. Solicite um novo." });
     }
 
     // Ativa o usuário
     await prisma.user.update({
       where: { email },
-      data: {
-        isVerified: true,
-        verificationCode: null,
-        verificationExpires: null
-      }
+      data: { isVerified: true }
     });
+
+    // Remove o token utilizado
+    await prisma.token.delete({ where: { id: tokenRecord.id } });
 
     res.status(200).json({ message: "Código validado com sucesso!" });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Erro ao validar código" });
   }
 };
@@ -133,13 +156,20 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
     const code = generateSecurityCode();
+    const hashedCode = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    await prisma.user.update({
-      where: { email },
-      data: { 
-        verificationCode: code, 
-        verificationExpires: expiresAt 
+    // Limpa tokens antigos de recuperação antes de criar um novo
+    await prisma.token.deleteMany({
+      where: { userId: user.id, type: "PASSWORD_RESET" }
+    });
+
+    await prisma.token.create({
+      data: {
+        token: hashedCode,
+        type: "PASSWORD_RESET",
+        userId: user.id,
+        expiresAt: expiresAt
       }
     });
 
@@ -159,11 +189,26 @@ export const resetPassword = async (req, res) => {
     const { email, code, newPassword } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || user.verificationCode !== code) {
-      return res.status(400).json({ error: "Código inválido ou usuário inexistente" });
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+
+    const tokenRecord = await prisma.token.findFirst({
+      where: { 
+        userId: user.id, 
+        type: "PASSWORD_RESET" 
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (!tokenRecord) {
+      return res.status(400).json({ error: "Código inválido ou não solicitado" });
     }
 
-    if (new Date() > user.verificationExpires) {
+    const isCodeValid = await bcrypt.compare(code, tokenRecord.token);
+    if (!isCodeValid) {
+      return res.status(400).json({ error: "Código inválido" });
+    }
+
+    if (new Date() > tokenRecord.expiresAt) {
       return res.status(400).json({ error: "Código expirado" });
     }
 
@@ -173,11 +218,12 @@ export const resetPassword = async (req, res) => {
       where: { email },
       data: {
         password: hashedPassword,
-        verificationCode: null,
-        verificationExpires: null,
-        isVerified: true // Garante que o user fique ativo se recuperou a senha
+        isVerified: true 
       }
     });
+
+    // Limpa o token após o uso
+    await prisma.token.delete({ where: { id: tokenRecord.id } });
 
     res.status(200).json({ message: "Senha redefinida com sucesso!" });
   } catch (error) {

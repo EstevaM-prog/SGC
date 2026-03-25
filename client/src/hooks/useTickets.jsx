@@ -1,66 +1,92 @@
 import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'chamados_db_v1';
-
-const initializer = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Erro ao ler localStorage', e);
-  }
-  return [];
-};
+import api from '../Axios/conect.js';
+import toast from 'react-hot-toast';
 
 export function useTickets() {
-  const [tickets, setTickets] = useState(initializer);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Sync to localStorage
-  useEffect(() => {
+  const fetchTickets = async () => {
+    setLoading(true);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
-    } catch (e) {
-      console.error('Erro ao salvar no localStorage:', e);
+      const resp = await api.get('/tickets');
+      if (resp.status === 200) {
+        setTickets(resp.data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar tickets:', err);
+    } finally {
+      setLoading(false);
     }
-  }, [tickets]);
-
-  const addTicket = (ticketData) => {
-    const newTicket = {
-      ...ticketData,
-      id: ticketData.id || 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
-      deleted: false,
-      deletedAt: null,
-      updatedAt: new Date().toISOString()
-    };
-    setTickets(prev => [newTicket, ...prev]);
   };
 
-  const updateTicket = (id, updatedData) => {
-    setTickets(prev => prev.map(t => 
-      t.id === id ? { ...t, ...updatedData, updatedAt: new Date().toISOString() } : t
-    ));
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const addTicket = async (data) => {
+    try {
+      const resp = await api.post('/tickets', data);
+      if (resp.status === 201) {
+        setTickets(prev => [resp.data, ...prev]);
+        toast.success('Chamado salvo no banco!');
+      }
+    } catch (err) {
+      toast.error('Erro ao salvar chamado.');
+    }
   };
 
-  const softDeleteTicket = (id) => {
-    setTickets(prev => prev.map(t => 
-      t.id === id ? { ...t, deleted: true, deletedAt: new Date().toISOString() } : t
-    ));
+  const updateTicket = async (id, updatedData) => {
+    try {
+      const resp = await api.put(`/tickets/${id}`, updatedData);
+      if (resp.status === 200) {
+        setTickets(prev => prev.map(t => t.id === id ? resp.data : t));
+        toast.success('Chamado atualizado!');
+      }
+    } catch (err) {
+      toast.error('Erro ao atualizar chamado.');
+    }
   };
 
-  const restoreTicket = (id) => {
-    setTickets(prev => prev.map(t => 
-      t.id === id ? { ...t, deleted: false, deletedAt: null } : t
-    ));
+  const softDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/tickets/${id}`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Movido para a lixeira');
+    } catch (err) {
+      toast.error('Erro ao deletar chamado.');
+    }
   };
 
-  const permanentDeleteTicket = (id) => {
-    setTickets(prev => prev.filter(t => t.id !== id));
+  // Funções para a Lixeira (Trash)
+  const restoreTicket = async (id) => {
+    try {
+      const resp = await api.post(`/tickets/${id}/restore`);
+      if (resp.status === 200) {
+        setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false } : t));
+        toast.success('Chamado restaurado!');
+      }
+    } catch (err) {
+      toast.error('Erro ao restaurar chamado.');
+    }
   };
 
-  return {
-    tickets,
-    addTicket,
-    updateTicket,
+  const permanentDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/tickets/${id}/permanent`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Excluído definitivamente!');
+    } catch (err) {
+      toast.error('Erro ao excluir definitivamente.');
+    }
+  };
+
+  return { 
+    tickets, 
+    loading, 
+    fetchTickets, 
+    addTicket, 
+    updateTicket, 
     softDeleteTicket,
     restoreTicket,
     permanentDeleteTicket

@@ -1,54 +1,91 @@
 import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'fretes_db_v1';
-
-const initializer = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Erro ao ler fretes localStorage', e);
-  }
-  return [];
-};
+import api from '../Axios/conect.js';
+import toast from 'react-hot-toast';
 
 export function useFreightTickets() {
-  const [tickets, setTickets] = useState(initializer);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const resp = await api.get('/freights');
+      if (resp.status === 200) {
+        setTickets(resp.data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar fretes:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const addTicket = async (data) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
-    } catch (e) {
-      console.error('Erro ao salvar fretes:', e);
+      const resp = await api.post('/freights', data);
+      if (resp.status === 201) {
+        setTickets(prev => [resp.data, ...prev]);
+        toast.success('Frete salvo na API!');
+      }
+    } catch (err) {
+      toast.error('Erro ao salvar frete.');
     }
-  }, [tickets]);
-
-  const addTicket = (data) => {
-    const item = {
-      ...data,
-      id: 'frt-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
-      deleted: false,
-      deletedAt: null,
-      updatedAt: new Date().toISOString(),
-    };
-    setTickets(prev => [item, ...prev]);
   };
 
-  const updateTicket = (id, updatedData) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...updatedData, updatedAt: new Date().toISOString() } : t));
+  const updateTicket = async (id, updatedData) => {
+    try {
+      const resp = await api.put(`/freights/${id}`, updatedData);
+      if (resp.status === 200) {
+        setTickets(prev => prev.map(t => t.id === id ? resp.data : t));
+        toast.success('Alteração sincronizada!');
+      }
+    } catch (err) {
+      toast.error('Erro ao atualizar no servidor.');
+    }
   };
 
-  const softDeleteTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: true, deletedAt: new Date().toISOString() } : t));
+  const softDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/freights/${id}`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Frete movido para lixeira');
+    } catch (err) {
+      toast.error('Erro ao remover frete.');
+    }
   };
 
-  const restoreTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false, deletedAt: null } : t));
+  const restoreTicket = async (id) => {
+    try {
+      await api.post(`/freights/${id}/restore`);
+      setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false } : t));
+      toast.success('Frete restaurado!');
+    } catch (err) {
+      toast.error('Erro ao restaurar frete.');
+    }
   };
 
-  const permanentDeleteTicket = (id) => {
-    setTickets(prev => prev.filter(t => t.id !== id));
+  const permanentDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/freights/${id}/permanent`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Frete excluído para sempre!');
+    } catch (err) {
+      toast.error('Erro ao excluir frete.');
+    }
   };
 
-  return { tickets, addTicket, updateTicket, softDeleteTicket, restoreTicket, permanentDeleteTicket };
+  return { 
+    tickets, 
+    loading, 
+    fetchTickets, 
+    addTicket, 
+    updateTicket, 
+    softDeleteTicket,
+    restoreTicket,
+    permanentDeleteTicket
+  };
 }

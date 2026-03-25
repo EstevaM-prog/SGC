@@ -17,6 +17,8 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "nodemailer": "^7.0.11"
+    "axios": "^1.13.6",
+    "nodemailer": "^8.0.3",
+    "resend": "^6.9.4"
   }
 }

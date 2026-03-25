@@ -18,11 +18,10 @@ model User {
   avatar              String?
   role                String   @default("USER")
   isVerified          Boolean  @default(false)
-  verificationCode    String?
-  verificationExpires DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   teams               TeamMember[]
+  tokens              Token[]
 }
 
 model Team {
@@ -30,9 +29,10 @@ model Team {
   name        String
   description String?
   icon        String?
-  inviteCode  String   @unique
-  permissions Json?    // { "dashboard": true, "activities": true, ... }
-  members     TeamMember[]
+  inviteCode          String   @unique
+  inviteCodeExpires   DateTime?
+  permissions         Permission[]
+  members             TeamMember[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -136,9 +136,12 @@ model Lixeira {
 model Token {
   id          String   @id @default(cuid())
   token       String   @unique
+  type        String   // "REGISTRATION" ou "PASSWORD_RESET"
   userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  expiresAt   DateTime
   deletedAt   DateTime?
   deleted     Boolean  @default(false)
 
@@ -160,7 +163,8 @@ model Role {
 // Tabela de Permissões
 model Permission {
   id          String   @id @default(cuid())
-  name        String   @unique
+  name        String   @unique // ex: "dashboard", "activities"
+  teams       Team[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   deletedAt   DateTime?

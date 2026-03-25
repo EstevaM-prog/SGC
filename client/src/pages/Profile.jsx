@@ -7,7 +7,7 @@ import {
 import toast from 'react-hot-toast';
 import '../styles/pages/Auth.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+import api from '../Axios/conect.js';
 
 // Page options for permissions
 const PAGE_OPTIONS = [
@@ -28,6 +28,8 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   const [editing, setEditing] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+  const [isJoiningTeam, setIsJoiningTeam] = useState(false);
   
   // Tab/Section state
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' | 'team'
@@ -65,10 +67,9 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
     }
     setLoadingTeams(true);
     try {
-      const resp = await fetch(`${API_BASE}/teams?userId=${currentSession.id || ''}`);
-      if (resp.ok) {
-        const data = await resp.json();
-        setTeams(data);
+      const resp = await api.get(`/teams?userId=${currentSession.id || ''}`);
+      if (resp.status === 200) {
+        setTeams(resp.data);
       }
     } catch (err) {
       console.error('Erro ao buscar equipes:', err);
@@ -131,15 +132,14 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   /* ── Team Logic ────────────────────────────────────────────── */
   const handleCreateTeam = async (e) => {
     e.preventDefault();
+    if (isCreatingTeam) return;
     if (!teamForm.name.trim()) return toast.error('Dê um nome à equipe!');
+
+    setIsCreatingTeam(true);
     const loading = toast.loading('Criando equipe...');
     try {
-      const resp = await fetch(`${API_BASE}/teams`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...teamForm, userId: currentSession.id })
-      });
-      if (resp.ok) {
+      const resp = await api.post('/teams', { ...teamForm, userId: currentSession.id });
+      if (resp.status === 201) {
         toast.success('Equipe criada com sucesso!', { id: loading });
         setShowCreateTeam(false);
         setTeamForm({ name: '', description: '' });
@@ -147,19 +147,19 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
       } else {
         toast.error('Erro ao criar equipe.', { id: loading });
       }
-    } catch (err) { toast.error('Falha de conexão com o servidor.', { id: loading }); }
+    } catch (err) { 
+      toast.error(err.response?.data?.error || 'Falha de conexão com o servidor.', { id: loading }); 
+    } finally {
+      setIsCreatingTeam(false);
+    }
   };
 
   const handleJoinTeam = async (e) => {
     e.preventDefault();
     const loading = toast.loading('Entrando em equipe...');
     try {
-      const resp = await fetch(`${API_BASE}/teams/join`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ inviteCode: inviteCodeInput, userId: currentSession.id })
-      });
-      if (resp.ok) {
+      const resp = await api.post('/teams/join', { inviteCode: inviteCodeInput, userId: currentSession.id });
+      if (resp.status === 200) {
         toast.success('Você agora faz parte da equipe!', { id: loading });
         setShowJoinTeam(false);
         setInviteCodeInput('');
@@ -167,13 +167,15 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
       } else {
         toast.error('Código inválido ou você já é membro.', { id: loading });
       }
-    } catch (err) { toast.error('Falha de conexão.', { id: loading }); }
+    } catch (err) { 
+      toast.error(err.response?.data?.error || 'Falha de conexão.', { id: loading }); 
+    }
   };
 
   const handleResetTeamCode = async (teamId) => {
     try {
-      const resp = await fetch(`${API_BASE}/teams/${teamId}/reset-code`, { method: 'PUT' });
-      if (resp.ok) {
+      const resp = await api.put(`/teams/${teamId}/reset-code`);
+      if (resp.status === 200) {
         toast.success('Código de convite resetado!');
         fetchTeams();
       }
@@ -181,20 +183,19 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   };
 
   const togglePermission = async (team, pageId) => {
-    const currentPerms = team.permissions || {};
-    const updatedPerms = { ...currentPerms, [pageId]: !currentPerms[pageId] };
+    // Agora permissões são um array de objetos. Verificamos se existe o registro lá.
+    const hasAccess = team.permissions?.some(p => p.name === pageId);
     
     try {
-      const resp = await fetch(`${API_BASE}/teams/${team.id}/permissions`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ permissions: updatedPerms })
+      const resp = await api.put(`/teams/${team.id}/permissions`, { 
+        permissionName: pageId, 
+        enabled: !hasAccess 
       });
-      if (resp.ok) {
-        toast.success(`Acesso ${updatedPerms[pageId] ? 'concedido' : 'revogado'} para ${pageId}.`);
+      if (resp.status === 200) {
+        toast.success(`Acesso ${!hasAccess ? 'concedido' : 'revogado'} para ${pageId}.`);
         fetchTeams();
       }
-    } catch (err) { toast.error('Erro ao atualizar permissões.'); }
+    } catch (err) { toast.error('Erro ao atualizar permissões na tabela.'); }
   };
 
   const copyToClipboard = (text) => {
@@ -290,8 +291,10 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                   <div className="auth-field"><label>Nome da Equipe</label><input type="text" placeholder="Ex: Time de Suporte" value={teamForm.name} onChange={e => setTeamForm(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
                   <div className="auth-field"><label>Descrição (opcional)</label><input type="text" placeholder="Setor ou objetivo" value={teamForm.description} onChange={e => setTeamForm(p => ({ ...p, description: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="button" onClick={() => setShowCreateTeam(false)} style={{ flex: 1, height: 40, borderRadius: '8px', border: '1px solid #333', background: 'transparent', color: '#fff', cursor: 'pointer' }}>Cancelar</button>
-                    <button type="submit" className="auth-btn-primary" style={{ flex: 1, margin: 0 }}>Criar Agora</button>
+                    <button type="button" onClick={() => setShowCreateTeam(false)} disabled={isCreatingTeam} style={{ flex: 1, height: 40, borderRadius: '8px', border: '1px solid #333', background: 'transparent', color: '#fff', cursor: 'pointer' }}>Cancelar</button>
+                    <button type="submit" className="auth-btn-primary" disabled={isCreatingTeam} style={{ flex: 1, margin: 0 }}>
+                      {isCreatingTeam ? 'Criando...' : 'Criar Agora'}
+                    </button>
                   </div>
                 </form>
               </div>

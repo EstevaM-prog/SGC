@@ -1,22 +1,26 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import prisma from './src/db.js';
 
 // Import routes
 import userRoutes from './src/routes/user.routes.js';
-import ticketRoutes from './src/routes/ticket.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
+import ticketRoutes from './src/routes/ticket.routes.js';
+import shoppingRoutes from './src/routes/ticketShopping.js';
+import freightRoutes from './src/routes/ticketFreight.js';
+import procedureRoutes from './src/routes/ticketProdureceres.js';
+import pontoRoutes from './src/routes/ticketPonto.js';
+
+import { sendSupportEmail } from './src/utils/mailer.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
@@ -35,34 +39,39 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./index.js', './src/routes/*.js'], // Path to the API docs
+  apis: ['./index.js', './src/routes/*.js'],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
+// API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/tickets', ticketRoutes);
 app.use('/api/teams', teamRoutes);
-
-/**
- * @openapi
- * /api/health:
- *   get:
- *     description: Retorna o status da API
- *     responses:
- *       200:
- *         description: OK
- */
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/shopping', shoppingRoutes);
+app.use('/api/freights', freightRoutes);
+app.use('/api/procedures', procedureRoutes);
+app.use('/api/ponto', pontoRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'SGC Backend is running' });
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
-  console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
+app.post('/api/support', async (req, res) => {
+  const success = await sendSupportEmail(req.body);
+  if (success) {
+    res.json({ message: 'E-mail enviado com sucesso!' });
+  } else {
+    res.status(500).json({ error: 'Falha ao enviar e-mail.' });
+  }
 });
 
-export { app, server };
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => {
+    console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
+    console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
+  });
+}
+
+export { app };

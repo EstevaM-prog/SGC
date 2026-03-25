@@ -1,6 +1,6 @@
 import prisma from '../db.js';
 
-export const getTickets = async (req, res) => {
+export const getPonto = async (req, res) => {
   try {
     const tickets = await prisma.chamado.findMany({
       where: { deleted: false },
@@ -13,7 +13,7 @@ export const getTickets = async (req, res) => {
   }
 };
 
-export const createTicket = async (req, res) => {
+export const createPonto = async (req, res) => {
   try {
     const ticketData = req.body;
     const ticket = await prisma.chamado.create({
@@ -26,7 +26,7 @@ export const createTicket = async (req, res) => {
   }
 };
 
-export const updateTicket = async (req, res) => {
+export const updatePonto = async (req, res) => {
   try {
     const { id } = req.params;
     const ticketData = req.body;
@@ -41,7 +41,7 @@ export const updateTicket = async (req, res) => {
   }
 };
 
-export const deleteTicket = async (req, res) => {
+export const deletePonto = async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.chamado.update({
@@ -54,3 +54,10 @@ export const deleteTicket = async (req, res) => {
     res.status(500).json({ error: 'Erro ao deletar chamado' });
   }
 };
+
+export default {
+  getPonto,
+  createPonto,
+  updatePonto,
+  deletePonto
+}

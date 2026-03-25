@@ -1,54 +1,91 @@
 import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'compras_db_v1';
-
-const initializer = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {
-    console.error('Erro ao ler compras localStorage', e);
-  }
-  return [];
-};
+import api from '../Axios/conect.js';
+import toast from 'react-hot-toast';
 
 export function useShoppingTickets() {
-  const [tickets, setTickets] = useState(initializer);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const resp = await api.get('/shopping');
+      if (resp.status === 200) {
+        setTickets(resp.data);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar compras:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
+    fetchTickets();
+  }, []);
+
+  const addTicket = async (data) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
-    } catch (e) {
-      console.error('Erro ao salvar compras:', e);
+      const resp = await api.post('/shopping', data);
+      if (resp.status === 201) {
+        setTickets(prev => [resp.data, ...prev]);
+        toast.success('Compra salva!');
+      }
+    } catch (err) {
+      toast.error('Erro ao salvar compra.');
     }
-  }, [tickets]);
-
-  const addTicket = (data) => {
-    const item = {
-      ...data,
-      id: 'comp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
-      deleted: false,
-      deletedAt: null,
-      updatedAt: new Date().toISOString(),
-    };
-    setTickets(prev => [item, ...prev]);
   };
 
-  const updateTicket = (id, updatedData) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...updatedData, updatedAt: new Date().toISOString() } : t));
+  const updateTicket = async (id, updatedData) => {
+    try {
+      const resp = await api.put(`/shopping/${id}`, updatedData);
+      if (resp.status === 200) {
+        setTickets(prev => prev.map(t => t.id === id ? resp.data : t));
+        toast.success('Compra atualizada!');
+      }
+    } catch (err) {
+      toast.error('Erro ao atualizar compra.');
+    }
   };
 
-  const softDeleteTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: true, deletedAt: new Date().toISOString() } : t));
+  const softDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/shopping/${id}`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Compra enviada para lixeira');
+    } catch (err) {
+      toast.error('Erro ao remover compra.');
+    }
   };
 
-  const restoreTicket = (id) => {
-    setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false, deletedAt: null } : t));
+  const restoreTicket = async (id) => {
+    try {
+      await api.post(`/shopping/${id}/restore`);
+      setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false } : t));
+      toast.success('Compra restaurada!');
+    } catch (err) {
+      toast.error('Erro ao restaurar compra.');
+    }
   };
 
-  const permanentDeleteTicket = (id) => {
-    setTickets(prev => prev.filter(t => t.id !== id));
+  const permanentDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/shopping/${id}/permanent`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Compra excluída para sempre!');
+    } catch (err) {
+      toast.error('Erro ao excluir compra.');
+    }
   };
 
-  return { tickets, addTicket, updateTicket, softDeleteTicket, restoreTicket, permanentDeleteTicket };
+  return { 
+    tickets, 
+    loading, 
+    fetchTickets, 
+    addTicket, 
+    updateTicket, 
+    softDeleteTicket,
+    restoreTicket,
+    permanentDeleteTicket
+  };
 }

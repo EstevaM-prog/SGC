@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, UserPlus, CheckCircle2, ShieldCheck } from 'lucide-react';
 import '../styles/pages/Auth.css';
 
+import api from '../Axios/conect.js';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function Register({ onNavigate }) {
@@ -28,26 +29,21 @@ export default function Register({ onNavigate }) {
     if (form.password.length < 6) { setError('A senha deve ter ao menos 6 caracteres.'); setLoading(false); return; }
 
     try {
-      const resp = await fetch(`${API_BASE}/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: form.name, 
-          email: form.email, 
-          password: form.password, 
-          confirmPassword: form.confirm,
-          role: 'USER'
-        })
+      const resp = await api.post('/users', { 
+        name: form.name, 
+        email: form.email, 
+        password: form.password, 
+        confirmPassword: form.confirm,
+        role: 'USER'
       });
 
-      const data = await resp.json();
-      if (resp.ok) {
+      if (resp.status === 201) {
         setStep(2); // Avança para o código
       } else {
-        setError(data.error || 'Erro ao criar conta.');
+        setError(resp.data.error || 'Erro ao criar conta.');
       }
     } catch (err) {
-      setError('Erro de conexão ao servidor.');
+      setError(err.response?.data?.error || 'Erro de conexão ao servidor.');
     } finally {
       setLoading(false);
     }
@@ -62,21 +58,16 @@ export default function Register({ onNavigate }) {
     setLoading(true);
 
     try {
-      const resp = await fetch(`${API_BASE}/users/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: form.email, code })
-      });
+      const resp = await api.post('/users/verify', { email: form.email, code });
 
-      const data = await resp.json();
-      if (resp.ok) {
+      if (resp.status === 200) {
         setSuccess(true);
         setTimeout(() => onNavigate('login'), 2000);
       } else {
-        setError(data.error || 'Código inválido.');
+        setError(resp.data.error || 'Código inválido.');
       }
     } catch (err) {
-      setError('Erro ao validar código.');
+      setError(err.response?.data?.error || 'Erro ao validar código.');
     } finally {
       setLoading(false);
     }
