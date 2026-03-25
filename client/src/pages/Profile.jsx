@@ -28,6 +28,8 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   const [editing, setEditing] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
+  const [isJoiningTeam, setIsJoiningTeam] = useState(false);
   
   // Tab/Section state
   const [activeTab, setActiveTab] = useState('personal'); // 'personal' | 'team'
@@ -130,7 +132,10 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   /* ── Team Logic ────────────────────────────────────────────── */
   const handleCreateTeam = async (e) => {
     e.preventDefault();
+    if (isCreatingTeam) return;
     if (!teamForm.name.trim()) return toast.error('Dê um nome à equipe!');
+
+    setIsCreatingTeam(true);
     const loading = toast.loading('Criando equipe...');
     try {
       const resp = await api.post('/teams', { ...teamForm, userId: currentSession.id });
@@ -144,6 +149,8 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
       }
     } catch (err) { 
       toast.error(err.response?.data?.error || 'Falha de conexão com o servidor.', { id: loading }); 
+    } finally {
+      setIsCreatingTeam(false);
     }
   };
 
@@ -176,16 +183,19 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   };
 
   const togglePermission = async (team, pageId) => {
-    const currentPerms = team.permissions || {};
-    const updatedPerms = { ...currentPerms, [pageId]: !currentPerms[pageId] };
+    // Agora permissões são um array de objetos. Verificamos se existe o registro lá.
+    const hasAccess = team.permissions?.some(p => p.name === pageId);
     
     try {
-      const resp = await api.put(`/teams/${team.id}/permissions`, { permissions: updatedPerms });
+      const resp = await api.put(`/teams/${team.id}/permissions`, { 
+        permissionName: pageId, 
+        enabled: !hasAccess 
+      });
       if (resp.status === 200) {
-        toast.success(`Acesso ${updatedPerms[pageId] ? 'concedido' : 'revogado'} para ${pageId}.`);
+        toast.success(`Acesso ${!hasAccess ? 'concedido' : 'revogado'} para ${pageId}.`);
         fetchTeams();
       }
-    } catch (err) { toast.error('Erro ao atualizar permissões.'); }
+    } catch (err) { toast.error('Erro ao atualizar permissões na tabela.'); }
   };
 
   const copyToClipboard = (text) => {
@@ -281,8 +291,10 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                   <div className="auth-field"><label>Nome da Equipe</label><input type="text" placeholder="Ex: Time de Suporte" value={teamForm.name} onChange={e => setTeamForm(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
                   <div className="auth-field"><label>Descrição (opcional)</label><input type="text" placeholder="Setor ou objetivo" value={teamForm.description} onChange={e => setTeamForm(p => ({ ...p, description: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="button" onClick={() => setShowCreateTeam(false)} style={{ flex: 1, height: 40, borderRadius: '8px', border: '1px solid #333', background: 'transparent', color: '#fff', cursor: 'pointer' }}>Cancelar</button>
-                    <button type="submit" className="auth-btn-primary" style={{ flex: 1, margin: 0 }}>Criar Agora</button>
+                    <button type="button" onClick={() => setShowCreateTeam(false)} disabled={isCreatingTeam} style={{ flex: 1, height: 40, borderRadius: '8px', border: '1px solid #333', background: 'transparent', color: '#fff', cursor: 'pointer' }}>Cancelar</button>
+                    <button type="submit" className="auth-btn-primary" disabled={isCreatingTeam} style={{ flex: 1, margin: 0 }}>
+                      {isCreatingTeam ? 'Criando...' : 'Criar Agora'}
+                    </button>
                   </div>
                 </form>
               </div>

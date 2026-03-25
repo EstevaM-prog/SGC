@@ -77,12 +77,12 @@ function App() {
       if (resp.status === 200) {
         const teams = resp.data;
         setUserTeams(teams);
-        // Combine permissions from all teams (true if any team grants it)
+        // Combine permissions from multiple teams: true if the record exists in any team
         const combined = {};
         teams.forEach(t => {
-          if (t.permissions) {
-            Object.entries(t.permissions).forEach(([key, val]) => {
-              if (val) combined[key] = true;
+          if (Array.isArray(t.permissions)) {
+            t.permissions.forEach(p => {
+              combined[p.name] = true;
             });
           }
         });
