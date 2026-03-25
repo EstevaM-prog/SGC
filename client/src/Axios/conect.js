@@ -1,10 +1,11 @@
 import axios from 'axios';
 
 const api = axios.create({
+  // Aqui deve ser a URL do seu servidor, não o ID do serviço
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
 });
 
-// Interceptor para injetar o Token JWT automaticamente
+// Interceptor para injetar o Token JWT e o Service ID automaticamente
 api.interceptors.request.use((config) => {
   try {
     const sessionStr = localStorage.getItem('session_v1');
@@ -14,9 +15,9 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
     }
-    
-    // Insira seu Service ID aqui (vindo do .env ou fixo se necessário)
-    config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'SEU_ID_AQUI';
+
+    // O Service ID enviado nos Headers (Correto!)
+    config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
 
   } catch (err) {
     console.error('Erro ao ler sessão do localStorage:', err);
