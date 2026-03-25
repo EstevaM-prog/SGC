@@ -1,56 +1,45 @@
-import prisma from '../db.js';
+import express from 'express';
+import { 
+  createPonto, getPonto, updatePonto, deletePonto 
+} from '../controllers/ponto.controller.js';
+import { authenticate, checkPermission } from '../middlewares/auth.js';
 
-export const getTickets = async (req, res) => {
-  try {
-    const tickets = await prisma.chamado.findMany({
-      where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
-    });
-    res.json(tickets);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao buscar chamados' });
-  }
-};
+const router = express.Router();
 
-export const createTicket = async (req, res) => {
-  try {
-    const ticketData = req.body;
-    const ticket = await prisma.chamado.create({
-      data: ticketData
-    });
-    res.status(201).json(ticket);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao criar chamado' });
-  }
-};
+/**
+ * @openapi
+ * /api/ponto:
+ *   post:
+ *     summary: Cria registro de ponto
+ *     tags: [Ponto]
+ */
+router.post('/', authenticate, checkPermission('ponto'), createPonto);
 
-export const updateTicket = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const ticketData = req.body;
-    const ticket = await prisma.chamado.update({
-      where: { id },
-      data: ticketData
-    });
-    res.json(ticket);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao atualizar chamado' });
-  }
-};
+/**
+ * @openapi
+ * /api/ponto:
+ *   get:
+ *     summary: Retorna lista de batidas de ponto
+ *     tags: [Ponto]
+ */
+router.get('/', authenticate, checkPermission('ponto'), getPonto);
 
-export const deleteTicket = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await prisma.chamado.update({
-      where: { id },
-      data: { deleted: true, deletedAt: new Date() }
-    });
-    res.json({ message: 'Chamado deletado com sucesso' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao deletar chamado' });
-  }
-};
+/**
+ * @openapi
+ * /api/ponto/{id}:
+ *   put:
+ *     summary: Atualiza registro de ponto
+ *     tags: [Ponto]
+ */
+router.put('/:id', authenticate, checkPermission('ponto'), updatePonto);
+
+/**
+ * @openapi
+ * /api/ponto/{id}:
+ *   delete:
+ *     summary: Exclui (soft delete) registro de ponto
+ *     tags: [Ponto]
+ */
+router.delete('/:id', authenticate, checkPermission('ponto'), deletePonto);
+
+export default router;

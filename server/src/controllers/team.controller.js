@@ -1,5 +1,6 @@
 import prisma from '../db.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export const createTeam = async (req, res) => {
   try {
@@ -32,11 +33,15 @@ export const createTeam = async (req, res) => {
         inviteCodeExpires: expiresAt,
         // Conecta as permissões padrão (dashboard, etc - garante que existam)
         permissions: {
-           connectOrCreate: [
-              { where: { name: 'dashboard' }, create: { name: 'dashboard' } },
-              { where: { name: 'activities' }, create: { name: 'activities' } },
-              { where: { name: 'forms' }, create: { name: 'forms' } }
-           ]
+          connectOrCreate: [
+            { where: { name: 'dashboard' }, create: { name: 'dashboard' } },
+            { where: { name: 'activities' }, create: { name: 'activities' } },
+            { where: { name: 'forms' }, create: { name: 'forms' } },
+            { where: { name: 'shopping' }, create: { name: 'shopping' } },
+            { where: { name: 'freight' }, create: { name: 'freight' } },
+            { where: { name: 'ponto' }, create: { name: 'ponto' } },
+            { where: { name: 'procedures' }, create: { name: 'procedures' } }
+          ]
         },
         members: {
           create: {
@@ -90,9 +95,9 @@ export const resetInviteCode = async (req, res) => {
 
     const team = await prisma.team.update({
       where: { id: teamId },
-      data: { 
+      data: {
         inviteCode: hashedInviteCode,
-        inviteCodeExpires: expiresAt 
+        inviteCodeExpires: expiresAt
       }
     });
 
@@ -107,14 +112,14 @@ export const updatePermissions = async (req, res) => {
     const { teamId } = req.params;
     const { permissionName, enabled } = req.body; // toggle: "dashboard", true/false
 
-    const updateData = enabled 
+    const updateData = enabled
       ? { connectOrCreate: { where: { name: permissionName }, create: { name: permissionName } } }
       : { disconnect: { name: permissionName } };
 
     const team = await prisma.team.update({
       where: { id: teamId },
-      data: { 
-        permissions: updateData 
+      data: {
+        permissions: updateData
       },
       include: { permissions: true }
     });
@@ -128,7 +133,7 @@ export const updatePermissions = async (req, res) => {
 export const joinTeam = async (req, res) => {
   try {
     const { inviteCode, userId } = req.body;
-    
+
     // Como o código é um hash, não podemos usar findUnique diretamente.
     // Vamos buscar por ID do time se tivéssemos, mas como só temos o código, 
     // precisamos buscar equipes com convites ativos e comparar.

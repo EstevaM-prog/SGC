@@ -6,8 +6,13 @@ import swaggerJsdoc from 'swagger-jsdoc';
 
 // Import routes
 import userRoutes from './src/routes/user.routes.js';
-import ticketRoutes from './src/routes/ticket.routes.js';
 import teamRoutes from './src/routes/team.routes.js';
+import ticketRoutes from './src/routes/ticket.routes.js';
+import shoppingRoutes from './src/routes/ticketShopping.js';
+import freightRoutes from './src/routes/ticketFreight.js';
+import procedureRoutes from './src/routes/ticketProdureceres.js';
+import pontoRoutes from './src/routes/ticketPonto.js';
+
 import { sendSupportEmail } from './src/utils/mailer.js';
 
 dotenv.config();
@@ -40,10 +45,14 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Routes
+// API Routes
 app.use('/api/users', userRoutes);
-app.use('/api/tickets', ticketRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/tickets', ticketRoutes);
+app.use('/api/shopping', shoppingRoutes);
+app.use('/api/freights', freightRoutes);
+app.use('/api/procedures', procedureRoutes);
+app.use('/api/ponto', pontoRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'SGC Backend is running' });
