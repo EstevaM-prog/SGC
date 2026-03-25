@@ -14,7 +14,7 @@ export function useShoppingTickets() {
         setTickets(resp.data);
       }
     } catch (err) {
-      console.error('Erro ao buscar compras da API:', err);
+      console.error('Erro ao buscar compras:', err);
     } finally {
       setLoading(false);
     }
@@ -29,10 +29,10 @@ export function useShoppingTickets() {
       const resp = await api.post('/shopping', data);
       if (resp.status === 201) {
         setTickets(prev => [resp.data, ...prev]);
-        toast.success('Compra salva na API!');
+        toast.success('Compra salva!');
       }
     } catch (err) {
-      toast.error('Erro ao salvar compra no servidor.');
+      toast.error('Erro ao salvar compra.');
     }
   };
 
@@ -50,15 +50,42 @@ export function useShoppingTickets() {
 
   const softDeleteTicket = async (id) => {
     try {
-      const resp = await api.delete(`/shopping/${id}`);
-      if (resp.status === 200) {
-        setTickets(prev => prev.filter(t => t.id !== id));
-        toast.success('Compra removida (API)');
-      }
+      await api.delete(`/shopping/${id}`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Compra enviada para lixeira');
     } catch (err) {
-      toast.error('Erro ao excluir no banco de dados.');
+      toast.error('Erro ao remover compra.');
     }
   };
 
-  return { tickets, loading, fetchTickets, addTicket, updateTicket, softDeleteTicket };
+  const restoreTicket = async (id) => {
+    try {
+      await api.post(`/shopping/${id}/restore`);
+      setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false } : t));
+      toast.success('Compra restaurada!');
+    } catch (err) {
+      toast.error('Erro ao restaurar compra.');
+    }
+  };
+
+  const permanentDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/shopping/${id}/permanent`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Compra excluída para sempre!');
+    } catch (err) {
+      toast.error('Erro ao excluir compra.');
+    }
+  };
+
+  return { 
+    tickets, 
+    loading, 
+    fetchTickets, 
+    addTicket, 
+    updateTicket, 
+    softDeleteTicket,
+    restoreTicket,
+    permanentDeleteTicket
+  };
 }

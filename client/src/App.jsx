@@ -42,13 +42,20 @@ import { usePontoTickets } from './hooks/usePontoTickets';
 
 // ─── helpers ─────────────────────────────────────────────────────
 const getSettings = () => {
-  try { return JSON.parse(localStorage.getItem('chamados_settings_v1') || '{}'); }
-  catch { return {}; }
+  try { 
+    const s = localStorage.getItem('chamados_settings_v1');
+    return s ? JSON.parse(s) : {}; 
+  } catch { return {}; }
 };
 
 const getSession = () => {
-  try { return JSON.parse(localStorage.getItem('session_v1') || 'null'); }
-  catch { return null; }
+  try { 
+    const s = localStorage.getItem('session_v1');
+    return s ? JSON.parse(s) : null; 
+  } catch { 
+    localStorage.removeItem('session_v1'); // Limpa se estiver corrompido
+    return null; 
+  }
 };
 // ─────────────────────────────────────────────────────────────────
 
@@ -77,12 +84,12 @@ function App() {
       if (resp.status === 200) {
         const teams = resp.data;
         setUserTeams(teams);
-        // Combine permissions from multiple teams: true if the record exists in any team
+        // Combine permissions safely
         const combined = {};
         teams.forEach(t => {
-          if (Array.isArray(t.permissions)) {
+          if (t && t.permissions && Array.isArray(t.permissions)) {
             t.permissions.forEach(p => {
-              combined[p.name] = true;
+              if (p && p.name) combined[p.name] = true;
             });
           }
         });

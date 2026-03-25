@@ -72,9 +72,36 @@ export const deleteChamados = async (req, res) => {
   }
 };
 
+export const restoreChamados = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const chamado = await prisma.chamado.update({
+      where: { id },
+      data: { deleted: false, deletedAt: null }
+    });
+    res.json(chamado);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao restaurar chamado' });
+  }
+};
+
+export const permanentDeleteChamados = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.chamado.delete({
+      where: { id }
+    });
+    res.json({ message: 'Chamado removido permanentemente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir definitivamente' });
+  }
+};
+
 export default {
     createChamados,
     getChamados,
     updateChamados,
-    deleteChamados
+    deleteChamados,
+    restoreChamados,
+    permanentDeleteChamados
 };

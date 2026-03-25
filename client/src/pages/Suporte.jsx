@@ -1,70 +1,106 @@
-import nodemailer from 'nodemailer';
+import React, { useState } from 'react';
+import { Headphones, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
+import api from '../Axios/conect.js';
+import toast from 'react-hot-toast';
 
-/**
- * Configure standard transporter using environment variables.
- * For production, use a service like SendGrid, Mailtrap, or Gmail SMTP.
- */
-const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_HOST || 'smtp.ethereal.email',
-  port: process.env.MAIL_PORT || 587,
-  auth: {
-    user: process.env.MAIL_USER || 'mock_user',
-    pass: process.env.MAIL_PASS || 'mock_pass',
-  },
-});
+export default function Suporte({ addActivity }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [sending, setSending] = useState(false);
 
-/**
- * Sends a 6-digit security code to the user's email.
- * @param {string} to Receiver's email
- * @param {string} code 6-digit security code
- * @param {string} type 'REGISTRATION' | 'PASSWORD_RESET'
- */
-export async function sendVerificationEmail(to, code, type = 'REGISTRATION') {
-  const subject = type === 'REGISTRATION'
-    ? 'SGC - Verificação de Conta'
-    : 'SGC - Recuperação de Senha';
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSending(true);
 
-  const html = `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #6366f1; text-align: center;">Sistema SGC</h2>
-      <p>Olá,</p>
-      <p>Você solicitou uma ação de segurança no Sistema SGC. Utilize o código de 6 dígitos abaixo para continuar:</p>
-      <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-        <span style="font-size: 32px; font-weight: 800; letter-spacing: 10px; color: #111827;">${code}</span>
-      </div>
-      <p style="font-size: 14px; color: #6b7280; text-align: center;">Este código expira em 15 minutos.</p>
-      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-      <p style="font-size: 12px; color: #9ca3af; text-align: center;">Se você não solicitou este código, ignore este e-mail.</p>
-    </div>
-  `;
-
-  try {
-    // In development mode without real SMTP, we log the code to console too
-    if (!process.env.MAIL_USER) {
-      console.log('--- [MOCK EMAIL] ---');
-      console.log(`Para: ${to}`);
-      console.log(`Assunto: ${subject}`);
-      console.log(`Código: ${code}`);
-      console.log('---------------------');
-      return true;
+    try {
+      const resp = await api.post('/support', formData);
+      if (resp.status === 200) {
+        toast.success('Sua mensagem foi enviada ao suporte!');
+        addActivity({
+          title: 'Suporte Solicitado',
+          description: `Mensagem enviada sobre: ${formData.subject}`,
+          type: 'info'
+        });
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      }
+    } catch (err) {
+      toast.error('Não foi possível enviar a mensagem agora.');
+    } finally {
+      setSending(false);
     }
+  };
 
-    await transporter.sendMail({
-      from: '"Sistema SGC" <noreply@sgc.com>',
-      to,
-      subject,
-      html,
-    });
-    return true;
-  } catch (error) {
-    console.error('Erro ao enviar e-mail:', error);
-    return false;
-  }
-}
+  return (
+    <div className="sg-page-anim" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+      <div className="sg-card" style={{ padding: '2.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ background: 'var(--primary-glow)', padding: '12px', borderRadius: '12px', color: 'var(--primary)' }}>
+            <Headphones size={28} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0 }}>Canal de Suporte</h1>
+            <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginTop: '4px' }}>Estamos aqui para ajudar com suas dúvidas técnicas ou operacionais.</p>
+          </div>
+        </div>
 
-/**
- * Generates a cryptographically strong 6-digit random code.
- */
-export function generateSecurityCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <div className="sg-field">
+              <label>Seu Nome</label>
+              <input 
+                type="text" required 
+                value={formData.name}
+                onChange={e => setFormData({...formData, name: e.target.value})}
+                placeholder="Ex: Estevam"
+              />
+            </div>
+            <div className="sg-field">
+              <label>E-mail para Retorno</label>
+              <input 
+                type="email" required
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+                placeholder="seu-email@exemplo.com"
+              />
+            </div>
+          </div>
+
+          <div className="sg-field">
+            <label>Assunto</label>
+            <input 
+              type="text" required
+              value={formData.subject}
+              onChange={e => setFormData({...formData, subject: e.target.value})}
+              placeholder="Qual o problema?"
+            />
+          </div>
+
+          <div className="sg-field">
+            <label>Mensagem Detalhada</label>
+            <textarea 
+              rows={5} required
+              value={formData.message}
+              onChange={e => setFormData({...formData, message: e.target.value})}
+              placeholder="Descreva o que está acontecendo..."
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--card-alt)', color: 'var(--foreground)' }}
+            />
+          </div>
+
+          <button 
+            type="submit" 
+            className="sg-btn-primary" 
+            disabled={sending}
+            style={{ width: '100%', height: '48px', marginTop: '1rem' }}
+          >
+            {sending ? 'Enviando...' : 'Enviar Mensagem'}
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

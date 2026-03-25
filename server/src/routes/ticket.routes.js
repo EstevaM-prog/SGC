@@ -1,5 +1,5 @@
 import express from 'express';
-import { getChamados, createChamados, updateChamados, deleteChamados } from '../controllers/chamados.controller.js';
+import { getChamados, createChamados, updateChamados, deleteChamados, restoreChamados, permanentDeleteChamados } from '../controllers/chamados.controller.js';
 import { authenticate, checkPermission } from '../middlewares/auth.js';
 
 const router = express.Router();
@@ -35,5 +35,10 @@ router.put('/:id', authenticate, checkPermission('list'), updateChamados);
  *     description: Deleta um chamado (soft delete)
  */
 router.delete('/:id', authenticate, checkPermission('list'), deleteChamados);
+
+// Novas rotas de Lixeira
+router.post('/:id/restore', authenticate, checkPermission('list'), restoreChamados);
+router.delete('/:id/permanent', authenticate, checkPermission('list'), permanentDeleteChamados);
+
 
 export default router;

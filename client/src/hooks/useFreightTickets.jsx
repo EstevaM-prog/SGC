@@ -14,7 +14,7 @@ export function useFreightTickets() {
         setTickets(resp.data);
       }
     } catch (err) {
-      console.error('Erro ao buscar fretes da API:', err);
+      console.error('Erro ao buscar fretes:', err);
     } finally {
       setLoading(false);
     }
@@ -32,7 +32,7 @@ export function useFreightTickets() {
         toast.success('Frete salvo na API!');
       }
     } catch (err) {
-      toast.error('Erro ao salvar frete no servidor.');
+      toast.error('Erro ao salvar frete.');
     }
   };
 
@@ -50,15 +50,42 @@ export function useFreightTickets() {
 
   const softDeleteTicket = async (id) => {
     try {
-      const resp = await api.delete(`/freights/${id}`);
-      if (resp.status === 200) {
-        setTickets(prev => prev.filter(t => t.id !== id));
-        toast.success('Frete removido (DB)');
-      }
+      await api.delete(`/freights/${id}`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Frete movido para lixeira');
     } catch (err) {
-      toast.error('Erro ao deletar no banco de dados.');
+      toast.error('Erro ao remover frete.');
     }
   };
 
-  return { tickets, loading, fetchTickets, addTicket, updateTicket, softDeleteTicket };
+  const restoreTicket = async (id) => {
+    try {
+      await api.post(`/freights/${id}/restore`);
+      setTickets(prev => prev.map(t => t.id === id ? { ...t, deleted: false } : t));
+      toast.success('Frete restaurado!');
+    } catch (err) {
+      toast.error('Erro ao restaurar frete.');
+    }
+  };
+
+  const permanentDeleteTicket = async (id) => {
+    try {
+      await api.delete(`/freights/${id}/permanent`);
+      setTickets(prev => prev.filter(t => t.id !== id));
+      toast.success('Frete excluído para sempre!');
+    } catch (err) {
+      toast.error('Erro ao excluir frete.');
+    }
+  };
+
+  return { 
+    tickets, 
+    loading, 
+    fetchTickets, 
+    addTicket, 
+    updateTicket, 
+    softDeleteTicket,
+    restoreTicket,
+    permanentDeleteTicket
+  };
 }
