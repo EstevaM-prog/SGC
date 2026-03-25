@@ -7,6 +7,10 @@ export function useTickets() {
   const [loading, setLoading] = useState(false);
 
   const fetchTickets = async () => {
+    // Se não houver sessão no localStorage, nem tentamos buscar (évita o loop de 401)
+    const session = localStorage.getItem('session_v1');
+    if (!session) return;
+
     setLoading(true);
     try {
       const resp = await api.get('/tickets');
@@ -21,7 +25,10 @@ export function useTickets() {
   };
 
   useEffect(() => {
-    fetchTickets();
+    // Só buscamos os chamados se houver sessão
+    if (localStorage.getItem('session_v1')) {
+      fetchTickets();
+    }
   }, []);
 
   const addTicket = async (data) => {

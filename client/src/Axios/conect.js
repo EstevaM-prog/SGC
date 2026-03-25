@@ -31,9 +31,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      console.warn('Sessão expirada ou token inválido. Deslogando...');
+      console.warn('Sessão inválida. Redirecionando para o index...');
       localStorage.removeItem('session_v1');
-      window.location.reload(); 
+      window.location.href = '/'; // Força a volta para a página inicial
     }
     return Promise.reject(error);
   }

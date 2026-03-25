@@ -7,6 +7,9 @@ export function usePontoTickets() {
   const [loading, setLoading] = useState(false);
 
   const fetchTickets = async () => {
+    const session = localStorage.getItem('session_v1');
+    if (!session) return;
+
     setLoading(true);
     try {
       const resp = await api.get('/ponto');
@@ -21,7 +24,9 @@ export function usePontoTickets() {
   };
 
   useEffect(() => {
-    fetchTickets();
+    if (localStorage.getItem('session_v1')) {
+      fetchTickets();
+    }
   }, []);
 
   const addTicket = async (data) => {

@@ -79,6 +79,7 @@ function App() {
   }, [currentUser]);
 
   const fetchTeams = async (userId) => {
+    if (!userId) return; // Não busca se não houver usuário logado
     try {
       const resp = await api.get(`/teams?userId=${userId}`);
       if (resp.status === 200) {
@@ -211,9 +212,26 @@ function App() {
     if (authView === 'docs') return <Docs onBack={() => setAuthView('landing')} />;
     if (authView === 'register') return <Register onNavigate={setAuthView} />;
     if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
-    if (authView === '401') return <Unauthenticated onLogin={() => setAuthView('login')} />;
-    if (authView === 'maintenance') return <Maintenance />;
-    return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
+    if (authView === 'login') return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
+    if (authView === 'landing') {
+      return (
+        <LandingPage
+          onStart={() => setAuthView('register')}
+          onLogin={() => setAuthView('login')}
+          onDocs={() => setAuthView('docs')}
+          isAuthenticated={false}
+        />
+      );
+    }
+    // Caso padrão: Redireciona para a Página Inicial (Landing Page)
+    return (
+      <LandingPage
+        onStart={() => setAuthView('register')}
+        onLogin={() => setAuthView('login')}
+        onDocs={() => setAuthView('docs')}
+        isAuthenticated={false}
+      />
+    );
   }
 
   // ─── Profile overlay ─────────────────────────────────────────
