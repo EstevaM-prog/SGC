@@ -136,7 +136,7 @@ model Lixeira {
 model Token {
   id          String   @id @default(cuid())
   token       String   @unique
-  type        String   // "REGISTRATION" ou "PASSWORD_RESET"
+  tokenType   String   // "REGISTRATION" ou "PASSWORD_RESET"
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

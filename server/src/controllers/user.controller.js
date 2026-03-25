@@ -30,11 +30,11 @@ export const createUser = async (req, res) => {
       const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      await prisma.token.deleteMany({ where: { userId: userExists.id, type: "REGISTRATION" } });
+      await prisma.token.deleteMany({ where: { userId: userExists.id, tokenType: "REGISTRATION" } });
       await prisma.token.create({
         data: {
           token: hashedVerificationCode,
-          type: "REGISTRATION",
+          tokenType: "REGISTRATION",
           userId: userExists.id,
           expiresAt: expiresAt
         }
@@ -66,11 +66,10 @@ export const createUser = async (req, res) => {
     });
 
     console.log(`[DEBUG] Criando token de verificação para userId: ${user.id}`);
-    // Gerenciar token na tabela específica
     await prisma.token.create({
       data: {
         token: hashedVerificationCode,
-        type: "REGISTRATION",
+        tokenType: "REGISTRATION",
         userId: user.id,
         expiresAt: expiresAt
       }
@@ -105,7 +104,7 @@ export const verifyCode = async (req, res) => {
     const tokenRecord = await prisma.token.findFirst({
       where: { 
         userId: user.id, 
-        type: "REGISTRATION" 
+        tokenType: "REGISTRATION" 
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -188,13 +187,13 @@ export const forgotPassword = async (req, res) => {
 
     // Limpa tokens antigos de recuperação antes de criar um novo
     await prisma.token.deleteMany({
-      where: { userId: user.id, type: "PASSWORD_RESET" }
+      where: { userId: user.id, tokenType: "PASSWORD_RESET" }
     });
 
     await prisma.token.create({
       data: {
         token: hashedCode,
-        type: "PASSWORD_RESET",
+        tokenType: "PASSWORD_RESET",
         userId: user.id,
         expiresAt: expiresAt
       }
@@ -221,7 +220,7 @@ export const resetPassword = async (req, res) => {
     const tokenRecord = await prisma.token.findFirst({
       where: { 
         userId: user.id, 
-        type: "PASSWORD_RESET" 
+        tokenType: "PASSWORD_RESET" 
       },
       orderBy: { createdAt: 'desc' }
     });
