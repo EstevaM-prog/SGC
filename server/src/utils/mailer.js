@@ -20,8 +20,8 @@ const transporter = nodemailer.createTransport({
  * @param {string} type 'REGISTRATION' | 'PASSWORD_RESET'
  */
 export async function sendVerificationEmail(to, code, type = 'REGISTRATION') {
-  const subject = type === 'REGISTRATION' 
-    ? 'SGC - Verificação de Conta' 
+  const subject = type === 'REGISTRATION'
+    ? 'SGC - Verificação de Conta'
     : 'SGC - Recuperação de Senha';
 
   const html = `
