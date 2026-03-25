@@ -1,10 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'srv-d6vcouc50q8c739im5vg',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
 });
 
-// Interceptor para injetar o Token JWT automaticamente
+// Interceptor de REQUISIÇÃO: Injeta Token e ID
 api.interceptors.request.use((config) => {
   try {
     const sessionStr = localStorage.getItem('session_v1');
@@ -14,7 +14,7 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
     }
-
+    
     // Insira seu Service ID aqui (vindo do .env ou fixo se necessário)
     config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
 
@@ -25,5 +25,18 @@ api.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
+// Interceptor de RESPOSTA: Trata erros globais (Ex: 401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn('Sessão expirada ou token inválido. Deslogando...');
+      localStorage.removeItem('session_v1');
+      window.location.reload(); 
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default api;
