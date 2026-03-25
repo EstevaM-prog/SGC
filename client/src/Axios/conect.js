@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
+  // Se estiver no Netlify, ele usará a VITE_API_URL. Se não, tenta o localhost.
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://sgc-03ln.onrender.com/api'),
 });
 
 // Interceptor de REQUISIÇÃO: Injeta Token e ID
@@ -14,7 +15,7 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
     }
-    
+
     // Insira seu Service ID aqui (vindo do .env ou fixo se necessário)
     config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
 
