@@ -22,14 +22,39 @@ export const createUser = async (req, res) => {
 
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
-      return res.status(400).json({ error: "Este e-mail já está cadastrado" });
-    }
+      if (userExists.isVerified) {
+        return res.status(400).json({ error: "Este e-mail já está cadastrado" });
+      }
+      console.log(`[DEBUG] Usuário pendente detectado (${email}). Reenviando token...`);
+      const verificationCode = generateSecurityCode();
+      const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
+      await prisma.token.deleteMany({ where: { userId: userExists.id, type: "REGISTRATION" } });
+      await prisma.token.create({
+        data: {
+          token: hashedVerificationCode,
+          type: "REGISTRATION",
+          userId: userExists.id,
+          expiresAt: expiresAt
+        }
+      });
+
+      console.log(`[DEBUG] Código reenviado para terminal e e-mail.`);
+      sendVerificationEmail(email, verificationCode, 'REGISTRATION');
+      return res.status(200).json({
+        message: "E-mail pendente detectado! Reenviamos o código de verificação para você.",
+        email: userExists.email
+      });
+    }
+    
+    console.log(`[DEBUG] Gerando código para: ${email}`);
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationCode = generateSecurityCode();
     const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
+    console.log(`[DEBUG] Criando registro de usuário no banco...`);
     const user = await prisma.user.create({
       data: {
         name,
@@ -40,6 +65,7 @@ export const createUser = async (req, res) => {
       }
     });
 
+    console.log(`[DEBUG] Criando token de verificação para userId: ${user.id}`);
     // Gerenciar token na tabela específica
     await prisma.token.create({
       data: {
@@ -50,6 +76,7 @@ export const createUser = async (req, res) => {
       }
     });
 
+    console.log(`[DEBUG] Chamando serviço de e-mail...`);
     // Enviar E-mail em background
     sendVerificationEmail(email, verificationCode, 'REGISTRATION');
 
@@ -59,8 +86,8 @@ export const createUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro interno ao criar usuário" });
+    console.error('[ERRO FATAL - createUser]:', error);
+    res.status(500).json({ error: "Erro interno ao criar usuário. Verifique logs do servidor." });
   }
 };
 

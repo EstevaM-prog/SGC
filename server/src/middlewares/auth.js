@@ -4,14 +4,20 @@ import prisma from '../db.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta';
 
 export const authenticate = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Token não fornecido' });
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(' ')[1];
+  
+  if (!token) {
+    console.warn('Bloqueio 401: Token não fornecido no Header Request');
+    return res.status(401).json({ error: 'Token não fornecido' });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch (err) {
+    console.error('Bloqueio 401: Token inválido ou expirado:', err.message);
     res.status(401).json({ error: 'Token inválido' });
   }
 };
@@ -19,11 +25,8 @@ export const authenticate = (req, res, next) => {
 export const checkPermission = (permissionKey) => {
   return async (req, res, next) => {
     try {
-      // Busca se o usuário pertence a algum time que tenha essa permissão (no novo formato Many-to-Many)
       const userTeams = await prisma.team.findMany({
-        where: {
-          members: { some: { userId: req.userId } }
-        },
+        where: { members: { some: { userId: req.userId } } },
         include: { permissions: true }
       });
 
@@ -32,11 +35,13 @@ export const checkPermission = (permissionKey) => {
       );
 
       if (!hasPermission) {
-        return res.status(403).json({ error: `Sem permissão de acesso para: ${permissionKey}` });
+        console.warn(`Bloqueio 403: Usuário ${req.userId} não possui permissão ${permissionKey}`);
+        return res.status(403).json({ error: `Sem permissão: ${permissionKey}` });
       }
 
       next();
     } catch (err) {
+      console.error('Erro 500 no checkPermission:', err);
       res.status(500).json({ error: 'Erro ao verificar permissões' });
     }
   };

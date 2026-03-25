@@ -35,6 +35,7 @@ export const createTeam = async (req, res) => {
         permissions: {
           connectOrCreate: [
             { where: { name: 'dashboard' }, create: { name: 'dashboard' } },
+            { where: { name: 'list' }, create: { name: 'list' } }, // Essencial para a lista de chamados
             { where: { name: 'activities' }, create: { name: 'activities' } },
             { where: { name: 'forms' }, create: { name: 'forms' } },
             { where: { name: 'shopping' }, create: { name: 'shopping' } },
@@ -67,6 +68,9 @@ export const createTeam = async (req, res) => {
 export const getTeams = async (req, res) => {
   try {
     const { userId } = req.query;
+    if (!userId || userId === 'undefined') {
+       return res.status(200).json([]); // Retorna lista vazia em vez de 500
+    }
     const teams = await prisma.team.findMany({
       where: {
         members: {
@@ -82,6 +86,7 @@ export const getTeams = async (req, res) => {
     });
     res.json(teams);
   } catch (err) {
+    console.error('Falha ao buscar equipes:', err);
     res.status(500).json({ error: 'Erro ao buscar equipes' });
   }
 };
