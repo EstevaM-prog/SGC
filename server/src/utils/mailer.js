@@ -50,7 +50,7 @@ export async function sendVerificationEmail(to, code, type = 'REGISTRATION') {
     }
 
     await transporter.sendMail({
-      from: '"Sistema SGC" <noreply@sgc.com>',
+      from: '"Sistema SGC" <[EMAIL_ADDRESS]>',
       to,
       subject,
       html,
@@ -67,4 +67,22 @@ export async function sendVerificationEmail(to, code, type = 'REGISTRATION') {
  */
 export function generateSecurityCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/**
+ * Sends a support email message from the support form.
+ */
+export async function sendSupportEmail({ name, email, subject, message }) {
+  try {
+    await transporter.sendMail({
+      from: `"${name}" <${email}>`,
+      to: process.env.SUPPORT_EMAIL || 'support@sgc.com',
+      subject: `[SUPORTE SGC] ${subject}`,
+      html: `<p>MENSAGEM DE: ${name} (${email})</p><hr/><p>${message}</p>`,
+    });
+    return true;
+  } catch (err) {
+    console.error('Falha no suporte:', err);
+    return false;
+  }
 }

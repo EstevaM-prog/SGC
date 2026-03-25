@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTickets, createTicket, updateTicket, deleteTicket } from '../controllers/ticketPonto.js';
+import { getChamados, createChamados, updateChamados, deleteChamados } from '../controllers/chamados.controller.js';
 import { authenticate, checkPermission } from '../middlewares/auth.js';
 
 const router = express.Router();
@@ -10,7 +10,7 @@ const router = express.Router();
  *   get:
  *     description: Retorna a lista de chamados
  */
-router.get('/', authenticate, checkPermission('list'), getTickets);
+router.get('/', authenticate, checkPermission('list'), getChamados);
 
 /**
  * @openapi
@@ -18,7 +18,7 @@ router.get('/', authenticate, checkPermission('list'), getTickets);
  *   post:
  *     description: Cria um novo chamado
  */
-router.post('/', authenticate, checkPermission('list'), createTicket);
+router.post('/', authenticate, checkPermission('list'), createChamados);
 
 /**
  * @openapi
@@ -26,7 +26,7 @@ router.post('/', authenticate, checkPermission('list'), createTicket);
  *   put:
  *     description: Atualiza um chamado
  */
-router.put('/:id', authenticate, checkPermission('list'), updateTicket);
+router.put('/:id', authenticate, checkPermission('list'), updateChamados);
 
 /**
  * @openapi
@@ -34,6 +34,6 @@ router.put('/:id', authenticate, checkPermission('list'), updateTicket);
  *   delete:
  *     description: Deleta um chamado (soft delete)
  */
-router.delete('/:id', authenticate, checkPermission('list'), deleteTicket);
+router.delete('/:id', authenticate, checkPermission('list'), deleteChamados);
 
 export default router;
