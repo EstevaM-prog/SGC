@@ -1,14 +1,13 @@
+import { expect, describe, test } from '@jest/globals';
 import request from 'supertest';
-import { app, server } from './index.js';
+import { app } from './index.js';
 
 describe('API Health Check', () => {
-  afterAll(() => {
-    server.close();
-  });
-
-  it('deve retornar status 200 e mensagem de ok', async () => {
-    const res = await request(app).get('/api/health');
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('status', 'ok');
+  test('deve retornar status 200 e mensagem de ok', async () => {
+    // Definimos o NODE_ENV para test para que o index.js não tente iniciar o server
+    process.env.NODE_ENV = 'test';
+    const response = await request(app).get('/api/health');
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('status', 'ok');
   });
 });

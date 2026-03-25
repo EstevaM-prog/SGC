@@ -67,9 +67,11 @@ app.post('/api/support', async (req, res) => {
   }
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
-  console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const server = app.listen(PORT, () => {
+    console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
+    console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
+  });
+}
 
-export { app, server };
+export { app };
