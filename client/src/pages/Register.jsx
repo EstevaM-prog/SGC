@@ -37,7 +37,7 @@ export default function Register({ onNavigate }) {
         role: 'USER'
       });
 
-      if (resp.status === 201) {
+      if (resp.status === 200 || resp.status === 201) {
         setStep(2); // Avança para o código
       } else {
         setError(resp.data.error || 'Erro ao criar conta.');

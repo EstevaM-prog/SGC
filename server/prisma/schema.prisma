@@ -21,7 +21,7 @@ model User {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   teams               TeamMember[]
-  tokens              Token[]
+  authTokens          AuthToken[]
 }
 
 model Team {
@@ -123,19 +123,17 @@ model Procedimento {
   updatedAt   DateTime @updatedAt
 }
 
-// Tabela de Lixeiras para log ou registros específicos deletados
 model Lixeira {
   id          String   @id @default(cuid())
-  originalId  String   // ID do item original
-  tipo        String   // 'CNpj', 'Shopping', 'Frete'
-  conteudo    String   // Dados em formato JSON
+  originalId  String   
+  tipo        String   
+  conteudo    String   
   deletedAt   DateTime @default(now())
 }
 
-//Tabela Auxiliar de Tokens
-model Token {
+model AuthToken {
   id          String   @id @default(cuid())
-  token       String   @unique
+  code        String   @unique
   tokenType   String   // "REGISTRATION" ou "PASSWORD_RESET"
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -148,22 +146,9 @@ model Token {
   @@index([userId])
 }
 
-//Tabela de Roles
-model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
-  deleted     Boolean  @default(false)
-
-  @@index([name])
-}
-
-// Tabela de Permissões
 model Permission {
   id          String   @id @default(cuid())
-  name        String   @unique // ex: "dashboard", "activities"
+  name        String   @unique 
   teams       Team[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // Se estiver no Netlify, ele usará a VITE_API_URL. Se não, tenta o localhost.
-  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://sgc-03ln.onrender.com/api'),
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-03ln.onrender.com/api' : 'https://sgc-03ln.onrender.com/api'),
 });
 
 // Interceptor de REQUISIÇÃO: Injeta Token e ID
