@@ -14,6 +14,10 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${session.token}`;
       }
     }
+    
+    // Insira seu Service ID aqui (vindo do .env ou fixo se necessário)
+    config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'SEU_ID_AQUI';
+
   } catch (err) {
     console.error('Erro ao ler sessão do localStorage:', err);
   }
