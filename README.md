@@ -4,6 +4,18 @@ O **SGC** é uma plataforma fullstack moderna, segura e de alta performance, pro
 
 ---
 
+## ✨ Novidades v2.1
+
+O sistema foi atualizado para uma arquitetura mais robusta e transparente:
+
+- **Auditoria Estruturada**: Implementação de logs de auditoria (Winston) com rotação diária para monitorar login, falhas de segurança e alterações de permissão.
+- **Sistema de Lixeira (Soft Delete)**: Recuperação inteligente de chamados, compras e fretes excluídos, permitindo restauração ou exclusão permanente.
+- **Gestão de Times v2**: Painel administrativo para membros da equipe com controle de *Feature Flags* e permissões dinâmicas via JSON.
+- **Onboarding Premium**: Nova página de boas-vindas (*Welcome Page*) e tela de carregamento (*Loading Screen*) com micro-animações e feedback visual.
+- **Central de Suporte**: Interface redesenhada para abertura de tickets com categorização inteligente e busca em base de conhecimento.
+
+---
+
 ## 🏗️ Arquitetura e Tech Stack
 
 O projeto utiliza **NPM Workspaces** para gerenciar o monorepo:
@@ -19,7 +31,8 @@ O projeto utiliza **NPM Workspaces** para gerenciar o monorepo:
 - **Node.js** + **Express**: API REST escalável.
 - **Prisma Client**: ORM com extensões para criptografia transparente.
 - **Neon DB**: PostgreSQL serverless de baixa latência.
-- **Swagger**: Documentação interativa completa (OpenAPI).
+- **Swagger**: Documentação interativa completa (OpenAPI v3).
+- **Audit Logging**: Winston + Winston Daily Rotate File para rastreabilidade.
 
 ---
 
