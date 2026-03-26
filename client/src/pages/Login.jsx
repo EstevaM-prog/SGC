@@ -44,7 +44,8 @@ export default function Login({ onLogin, onNavigate }) {
           id: data.user.id, 
           name: data.user.name, 
           email: data.user.email,
-          avatar: data.user.avatar,
+          avatarUrl: data.user.avatarUrl,  // API returns avatarUrl, not avatar
+          role: data.user.role,
           teams: data.user.teams,
           accessToken: data.accessToken,
           refreshToken: data.refreshToken

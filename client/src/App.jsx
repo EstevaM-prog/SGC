@@ -172,9 +172,10 @@ function App() {
   // Auth handlers
   const handleLogin = (session) => {
     setCurrentUser(session);
-    if (session.avatar) {
-      setUserAvatar(session.avatar);
-      localStorage.setItem('user_avatar', session.avatar);
+    // avatarUrl is the API field name
+    if (session.avatarUrl) {
+      setUserAvatar(session.avatarUrl);
+      localStorage.setItem('user_avatar', session.avatarUrl);
     }
     if (session.teams) {
       setUserTeams(session.teams);

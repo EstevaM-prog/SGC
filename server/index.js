@@ -24,6 +24,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust reverse proxy (required for Render, Heroku, Nginx, etc.)
+// Allows express-rate-limit to correctly identify IPs via X-Forwarded-For
+app.set('trust proxy', 1);
+
 // Middlewares
 app.use(morgan('dev'));
 app.use(cors());
