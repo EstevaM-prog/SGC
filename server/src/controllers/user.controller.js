@@ -22,14 +22,39 @@ export const createUser = async (req, res) => {
 
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
-      return res.status(400).json({ error: "Este e-mail já está cadastrado" });
-    }
+      if (userExists.isVerified) {
+        return res.status(400).json({ error: "Este e-mail já está cadastrado" });
+      }
+      console.log(`[DEBUG] Usuário pendente detectado (${email}). Reenviando token...`);
+      const verificationCode = generateSecurityCode();
+      const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
+      await prisma.authToken.deleteMany({ where: { userId: userExists.id, tokenType: "REGISTRATION" } });
+      await prisma.authToken.create({
+        data: {
+          code: hashedVerificationCode,
+          tokenType: "REGISTRATION",
+          userId: userExists.id,
+          expiresAt: expiresAt
+        }
+      });
+
+      console.log(`[DEBUG] Código reenviado para terminal e e-mail.`);
+      sendVerificationEmail(email, verificationCode, 'REGISTRATION');
+      return res.status(200).json({
+        message: "E-mail pendente detectado! Reenviamos o código de verificação para você.",
+        email: userExists.email
+      });
+    }
+    
+    console.log(`[DEBUG] Gerando código para: ${email}`);
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationCode = generateSecurityCode();
     const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
+    console.log(`[DEBUG] Criando registro de usuário no banco...`);
     const user = await prisma.user.create({
       data: {
         name,
@@ -40,16 +65,17 @@ export const createUser = async (req, res) => {
       }
     });
 
-    // Gerenciar token na tabela específica
-    await prisma.token.create({
+    console.log(`[DEBUG] Criando token de verificação para userId: ${user.id}`);
+    await prisma.authToken.create({
       data: {
-        token: hashedVerificationCode,
-        type: "REGISTRATION",
+        code: hashedVerificationCode,
+        tokenType: "REGISTRATION",
         userId: user.id,
         expiresAt: expiresAt
       }
     });
 
+    console.log(`[DEBUG] Chamando serviço de e-mail...`);
     // Enviar E-mail em background
     sendVerificationEmail(email, verificationCode, 'REGISTRATION');
 
@@ -59,8 +85,8 @@ export const createUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro interno ao criar usuário" });
+    console.error('[ERRO FATAL - createUser]:', error);
+    res.status(500).json({ error: "Erro interno ao criar usuário. Verifique logs do servidor." });
   }
 };
 
@@ -75,10 +101,10 @@ export const verifyCode = async (req, res) => {
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
     // Busca o token mais recente do tipo REGISTRATION para este usuário
-    const tokenRecord = await prisma.token.findFirst({
+    const tokenRecord = await prisma.authToken.findFirst({
       where: { 
         userId: user.id, 
-        type: "REGISTRATION" 
+        tokenType: "REGISTRATION" 
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -87,7 +113,7 @@ export const verifyCode = async (req, res) => {
       return res.status(400).json({ error: "Nenhum código gerado para este usuário" });
     }
 
-    const isCodeValid = await bcrypt.compare(code, tokenRecord.token);
+    const isCodeValid = await bcrypt.compare(code, tokenRecord.code);
     if (!isCodeValid) {
       return res.status(400).json({ error: "Código de segurança incorreto" });
     }
@@ -103,7 +129,7 @@ export const verifyCode = async (req, res) => {
     });
 
     // Remove o token utilizado
-    await prisma.token.delete({ where: { id: tokenRecord.id } });
+    await prisma.authToken.delete({ where: { id: tokenRecord.id } });
 
     res.status(200).json({ message: "Código validado com sucesso!" });
   } catch (error) {
@@ -160,14 +186,14 @@ export const forgotPassword = async (req, res) => {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     // Limpa tokens antigos de recuperação antes de criar um novo
-    await prisma.token.deleteMany({
-      where: { userId: user.id, type: "PASSWORD_RESET" }
+    await prisma.authToken.deleteMany({
+      where: { userId: user.id, tokenType: "PASSWORD_RESET" }
     });
 
-    await prisma.token.create({
+    await prisma.authToken.create({
       data: {
-        token: hashedCode,
-        type: "PASSWORD_RESET",
+        code: hashedCode,
+        tokenType: "PASSWORD_RESET",
         userId: user.id,
         expiresAt: expiresAt
       }
@@ -191,10 +217,10 @@ export const resetPassword = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
-    const tokenRecord = await prisma.token.findFirst({
+    const tokenRecord = await prisma.authToken.findFirst({
       where: { 
         userId: user.id, 
-        type: "PASSWORD_RESET" 
+        tokenType: "PASSWORD_RESET" 
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -203,7 +229,7 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ error: "Código inválido ou não solicitado" });
     }
 
-    const isCodeValid = await bcrypt.compare(code, tokenRecord.token);
+    const isCodeValid = await bcrypt.compare(code, tokenRecord.code);
     if (!isCodeValid) {
       return res.status(400).json({ error: "Código inválido" });
     }
@@ -223,7 +249,7 @@ export const resetPassword = async (req, res) => {
     });
 
     // Limpa o token após o uso
-    await prisma.token.delete({ where: { id: tokenRecord.id } });
+    await prisma.authToken.delete({ where: { id: tokenRecord.id } });
 
     res.status(200).json({ message: "Senha redefinida com sucesso!" });
   } catch (error) {
