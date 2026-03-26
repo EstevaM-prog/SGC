@@ -44,7 +44,10 @@ export default function Login({ onLogin, onNavigate }) {
           id: data.user.id, 
           name: data.user.name, 
           email: data.user.email,
-          token: data.token 
+          avatar: data.user.avatar,
+          teams: data.user.teams,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken
         };
         
         localStorage.setItem('session_v1', JSON.stringify(sessionData));

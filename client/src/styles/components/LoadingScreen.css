@@ -1,0 +1,104 @@
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #030014;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  overflow: hidden;
+}
+
+.loading-content {
+  position: relative;
+  z-index: 20;
+  text-align: center;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2rem;
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loading-logo {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: white;
+}
+
+.logo-s { color: #818cf8; }
+.logo-gc { color: #a78bfa; }
+.logo-divider { 
+  opacity: 0.2; 
+  font-weight: 100;
+  margin: 0 4px;
+}
+
+.loading-spinner-wrap {
+  margin: 1.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.loading-bar-container {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.loading-bar-progress {
+  height: 100%;
+  width: 50%;
+  background: linear-gradient(90deg, #818cf8, #a78bfa);
+  animation: progressPulse 2s infinite ease-in-out;
+  border-radius: 2px;
+}
+
+.blob {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  filter: blur(80px);
+  z-index: 10;
+  animation: blobFloat 10s infinite linear alternate;
+}
+
+.blob-1 { top: -100px; left: -100px; }
+.blob-2 { bottom: -100px; right: -100px; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes progressPulse {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); width: 30%; }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes blobFloat {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(100px, 50px); }
+}

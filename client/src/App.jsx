@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import TeamMembers from './components/TeamMembers';
+import LoadingScreen from './components/LoadingScreen';
+import Welcome from './pages/Welcome';
 import { Toaster } from 'react-hot-toast';
 import api from './Axios/conect.js';
 
@@ -61,13 +64,22 @@ const getSession = () => {
 
 function App() {
   const settings = getSettings();
+  const [isLoading, setIsLoading] = useState(true);
 
   // Auth state
-  const [authView, setAuthView] = useState('landing'); // 'landing' | 'login' | 'register' | 'forgot' | 'docs'
+  const [authView, setAuthView] = useState('landing'); // 'landing' | 'login' | 'register' | 'forgot' | 'docs' | 'welcome'
   const [currentUser, setCurrentUser] = useState(getSession);
   const [userAvatar, setUserAvatar] = useState(() => localStorage.getItem('user_avatar') || null);
   const [userTeams, setUserTeams] = useState([]);
   const [activePermissions, setActivePermissions] = useState(null);
+
+  useEffect(() => {
+    // Initial pre-processing delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (currentUser?.id) {
@@ -158,9 +170,31 @@ function App() {
   };
 
   // Auth handlers
-  const handleLogin = (user) => {
-    setCurrentUser(user);
-    setAuthView('app'); // Transition to app after login
+  const handleLogin = (session) => {
+    setCurrentUser(session);
+    if (session.avatar) {
+      setUserAvatar(session.avatar);
+      localStorage.setItem('user_avatar', session.avatar);
+    }
+    if (session.teams) {
+      setUserTeams(session.teams);
+      // Combine permissions after login
+      const combined = {};
+      session.teams.forEach(t => {
+        if (t.team && t.team.permissions) {
+          t.team.permissions.forEach(p => {
+            if (p.name) combined[p.name] = true;
+          });
+        }
+      });
+      setActivePermissions(Object.keys(combined).length > 0 ? combined : null);
+    }
+    
+    setIsLoading(true);
+    setTimeout(() => {
+      setAuthView('welcome');
+      setIsLoading(false);
+    }, 1000);
   };
   const handleLogout = () => {
     localStorage.removeItem('session_v1');
@@ -189,63 +223,6 @@ function App() {
     if (window.innerWidth <= 768) setIsMobileSidebarOpen(false);
   };
 
-  // ─── Auth gate ────────────────────────────────────────────────
-  if (authView === 'landing') {
-    return (
-      <LandingPage
-        onStart={() => {
-          if (currentUser) {
-            setCurrentView('dashboard');
-            setAuthView('app'); // Internal state to clear the landing gate
-          } else {
-            setAuthView('register');
-          }
-        }}
-        onLogin={() => setAuthView('login')}
-        onDocs={() => setAuthView('docs')}
-        isAuthenticated={!!currentUser}
-      />
-    );
-  }
-
-  if (!currentUser) {
-    if (authView === 'docs') return <Docs onBack={() => setAuthView('landing')} />;
-    if (authView === 'register') return <Register onNavigate={setAuthView} />;
-    if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
-    if (authView === 'login') return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
-    if (authView === 'landing') {
-      return (
-        <LandingPage
-          onStart={() => setAuthView('register')}
-          onLogin={() => setAuthView('login')}
-          onDocs={() => setAuthView('docs')}
-          isAuthenticated={false}
-        />
-      );
-    }
-    // Caso padrão: Redireciona para a Página Inicial (Landing Page)
-    return (
-      <LandingPage
-        onStart={() => setAuthView('register')}
-        onLogin={() => setAuthView('login')}
-        onDocs={() => setAuthView('docs')}
-        isAuthenticated={false}
-      />
-    );
-  }
-
-  // ─── Profile overlay ─────────────────────────────────────────
-  if (currentView === 'profile') return (
-    <Profile
-      currentUser={currentUser}
-      onLogout={handleLogout}
-      onNavigate={navigateTo}
-      onUpdateUser={handleUpdateUser}
-      addActivity={addActivity}
-    />
-  );
-
-  // ─── Main app view ────────────────────────────────────────────
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -333,7 +310,23 @@ function App() {
         return <Procedimentos addActivity={addActivity} />;
 
       case 'suporte':
-        return <Suporte addActivity={addActivity} />;
+        return <Suporte addActivity={addActivity} currentUser={currentUser} />;
+
+      case 'teams':
+        // Encontra o primeiro time para exibir inicialmente (ou podemos ter um seletor no futuro)
+        const firstTeamId = userTeams?.[0]?.id || userTeams?.[0]?.teamId;
+        return (
+          <div className="p-8">
+            <h1 className="text-3xl font-bold mb-8">Gestão de Equipes</h1>
+            {firstTeamId ? (
+              <TeamMembers teamId={firstTeamId} currentUserRole={currentUser?.role} />
+            ) : (
+              <div className="p-12 text-center bg-card rounded-3xl border border-white/5">
+                <p className="text-muted-foreground">Você não faz parte de nenhuma equipe ainda.</p>
+              </div>
+            )}
+          </div>
+        );
 
       case 'ponto':
         return (
@@ -366,6 +359,67 @@ function App() {
         );
     }
   };
+
+  if (isLoading) return <LoadingScreen />;
+
+  if (authView === 'landing') {
+    return (
+      <LandingPage
+        onStart={() => {
+          if (currentUser) {
+            setCurrentView('dashboard');
+            setAuthView('app'); // Internal state to clear the landing gate
+          } else {
+            setAuthView('register');
+          }
+        }}
+        onLogin={() => setAuthView('login')}
+        onDocs={() => setAuthView('docs')}
+        isAuthenticated={!!currentUser}
+      />
+    );
+  }
+
+  if (authView === 'welcome') {
+    return <Welcome user={currentUser} onStart={() => setAuthView('app')} />;
+  }
+
+  if (!currentUser) {
+    if (authView === 'docs') return <Docs onBack={() => setAuthView('landing')} />;
+    if (authView === 'register') return <Register onNavigate={setAuthView} />;
+    if (authView === 'forgot') return <ForgotPassword onNavigate={setAuthView} />;
+    if (authView === 'login') return <Login onLogin={handleLogin} onNavigate={setAuthView} />;
+    if (authView === 'landing') {
+      return (
+        <LandingPage
+          onStart={() => setAuthView('register')}
+          onLogin={() => setAuthView('login')}
+          onDocs={() => setAuthView('docs')}
+          isAuthenticated={false}
+        />
+      );
+    }
+    // Caso padrão: Redireciona para a Página Inicial (Landing Page)
+    return (
+      <LandingPage
+        onStart={() => setAuthView('register')}
+        onLogin={() => setAuthView('login')}
+        onDocs={() => setAuthView('docs')}
+        isAuthenticated={false}
+      />
+    );
+  }
+
+  // ─── Profile overlay ─────────────────────────────────────────
+  if (currentView === 'profile') return (
+    <Profile
+      currentUser={currentUser}
+      onLogout={handleLogout}
+      onNavigate={navigateTo}
+      onUpdateUser={handleUpdateUser}
+      addActivity={addActivity}
+    />
+  );
 
   return (
     <div className={`app-container ${isSidebarCollapsed ? 'sidebar-collapsed' : ''} ${isMobileSidebarOpen ? 'mobile-sidebar-open' : ''}`}>

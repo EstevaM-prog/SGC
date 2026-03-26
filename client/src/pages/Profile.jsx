@@ -55,10 +55,28 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
 
   /* ── Initial Fetch ─────────────────────────────────────────── */
   useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
     if (activeTab === 'team') {
       fetchTeams();
     }
   }, [activeTab]);
+
+  const fetchProfile = async () => {
+    try {
+      const resp = await api.get('/users/me');
+      if (resp.status === 200) {
+        const u = resp.data;
+        setForm({ name: u.name, email: u.email, password: '' });
+        setAvatar(u.avatarUrl);
+        setTeams(u.teams || []);
+      }
+    } catch (err) {
+      toast.error('Erro ao carregar dados do perfil');
+    }
+  };
 
   const fetchTeams = async () => {
     if (!currentSession.id) {
@@ -79,19 +97,28 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
   };
 
   /* ── Photo upload ──────────────────────────────────────────── */
-  const handlePhoto = (e) => {
+  const handlePhoto = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 1024 * 1024) { toast.error('A imagem é muito grande! Máximo 1MB.'); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const data = ev.target.result;
-      setAvatar(data);
-      localStorage.setItem('user_avatar', data);
-      onUpdateUser?.({ ...currentUser, avatar: data });
-      toast.success('Foto de perfil atualizada!');
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 5 * 1024 * 1024) { toast.error('A imagem é muito grande! Máximo 5MB.'); return; }
+    
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    const loading = toast.loading('Enviando imagem...');
+    try {
+      const resp = await api.post('/users/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      if (resp.status === 200) {
+        setAvatar(resp.data.avatarUrl);
+        localStorage.setItem('user_avatar', resp.data.avatarUrl);
+        onUpdateUser?.({ ...currentUser, avatar: resp.data.avatarUrl });
+        toast.success('Foto de perfil atualizada!', { id: loading });
+      }
+    } catch (err) {
+      toast.error('Erro ao fazer upload da imagem', { id: loading });
+    }
   };
 
   /* ── Form handlers (Personal) ──────────────────────────────── */
@@ -107,25 +134,14 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
     const loadingToast = toast.loading('Salvando alterações...');
 
     try {
-      await new Promise(r => setTimeout(r, 600));
-      const updated = { ...storedUser, name: form.name, email: form.email };
-      if (form.password) updated.password = form.password;
-      localStorage.setItem('user_db', JSON.stringify(updated));
-      const session = JSON.parse(localStorage.getItem('session_v1') || '{}');
-      localStorage.setItem('session_v1', JSON.stringify({ ...session, name: form.name, email: form.email }));
-      onUpdateUser?.({ name: form.name, email: form.email });
-
-      if (addActivity) {
-        addActivity({
-          text: `Perfil atualizado`,
-          description: `${form.name} alterou seus dados cadastrais.`,
-          user: form.name, type: 'info', iconType: 'user'
-        });
+      const resp = await api.put('/users/me', form);
+      if (resp.status === 200) {
+        onUpdateUser?.({ name: form.name, email: form.email });
+        toast.success("Perfil atualizado!", { id: loadingToast });
+        setEditing(false);
       }
-      toast.success("Perfil atualizado!", { id: loadingToast });
-      setEditing(false);
     } catch (err) {
-      toast.error("Erro ao salvar perfil!", { id: loadingToast });
+      toast.error(err.response?.data?.error || "Erro ao salvar perfil!", { id: loadingToast });
     } finally { setIsSaving(false); }
   };
 
