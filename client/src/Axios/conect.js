@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:3001/api' : 'https://sgc-03ln.onrender.com/api'),
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-03ln.onrender.com/api' : 'https://sgc-03ln.onrender.com/api')
 });
 
 let isRefreshing = false;
@@ -24,16 +24,24 @@ api.interceptors.request.use((config) => {
     if (sessionStr) {
       const session = JSON.parse(sessionStr);
       if (session?.accessToken) {
-        config.headers = Object.assign({}, config.headers, {
-          Authorization: `Bearer ${session.accessToken}`,
-          'X-Access-Token': session.accessToken
-        });
+        if (typeof config.headers.set === 'function') {
+          config.headers.set('Authorization', `Bearer ${session.accessToken}`);
+          config.headers.set('X-Access-Token', session.accessToken);
+        } else {
+          config.headers['Authorization'] = `Bearer ${session.accessToken}`;
+          config.headers['X-Access-Token'] = session.accessToken;
+        }
+
+        // ENVIO GARANTIDO VIA QUERY STRING PARA MÓDULOS ONDE PROXIES BLOQUEIAM TUDO REDE
+        config.params = { ...config.params, token: session.accessToken };
       }
     }
-    
-    config.headers = Object.assign({}, config.headers, {
-      'X-Service-ID': import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg'
-    });
+
+    if (typeof config.headers.set === 'function') {
+      config.headers.set('X-Service-ID', import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg');
+    } else {
+      config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
+    }
   } catch (err) {
     console.error('Erro ao ler sessão:', err);
   }
@@ -66,7 +74,7 @@ api.interceptors.response.use(
       try {
         const sessionStr = localStorage.getItem('session_v1');
         if (!sessionStr) throw new Error('No session');
-        
+
         const session = JSON.parse(sessionStr);
         const resp = await axios.post(`${api.defaults.baseURL}/users/refresh`, {
           refreshToken: session.refreshToken
