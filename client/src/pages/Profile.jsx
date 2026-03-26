@@ -71,7 +71,6 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
         const u = resp.data;
         setForm({ name: u.name, email: u.email, password: '' });
         setAvatar(u.avatarUrl);
-        setTeams(u.teams || []);
       }
     } catch (err) {
       toast.error('Erro ao carregar dados do perfil');
@@ -367,7 +366,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                             <h5 style={{ margin: '0 0 1rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Permissões de Acesso (RBAC)</h5>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
                               {PAGE_OPTIONS.map(page => {
-                                const hasAccess = team.permissions?.[page.id] ?? true;
+                                const hasAccess = team.permissions?.some(p => p.name === page.id) ?? true;
                                 return (
                                   <div key={page.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

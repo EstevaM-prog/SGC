@@ -25,7 +25,8 @@ api.interceptors.request.use((config) => {
       const session = JSON.parse(sessionStr);
       if (session?.accessToken) {
         config.headers = Object.assign({}, config.headers, {
-          Authorization: `Bearer ${session.accessToken}`
+          Authorization: `Bearer ${session.accessToken}`,
+          'X-Access-Token': session.accessToken
         });
       }
     }
@@ -51,7 +52,8 @@ api.interceptors.response.use(
         })
           .then((token) => {
             originalRequest.headers = Object.assign({}, originalRequest.headers, {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
+              'X-Access-Token': token
             });
             return api(originalRequest);
           })
@@ -76,7 +78,8 @@ api.interceptors.response.use(
 
         processQueue(null, accessToken);
         originalRequest.headers = Object.assign({}, originalRequest.headers, {
-          Authorization: `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
+          'X-Access-Token': accessToken
         });
         return api(originalRequest);
       } catch (refreshError) {

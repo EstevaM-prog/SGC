@@ -3,12 +3,12 @@ import prisma from '../db.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta';
 
-export const authenticate = (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
-  const token = authHeader?.split(' ')[1];
+  const token = authHeader?.split(' ')[1] || req.headers['x-access-token'] || req.query.token;
   
   if (!token) {
-    console.warn('Bloqueio 401: Token não fornecido no Header Request', {
+    console.warn('Bloqueio 401: Token não fornecido via Header/Query', {
       method: req.method,
       url: req.originalUrl,
       headers: req.headers
@@ -18,6 +18,20 @@ export const authenticate = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Consulta no Banco de Dados se há uma sessão ativa para este usuário
+    const activeSession = await prisma.refreshToken.findFirst({
+      where: {
+        userId: decoded.userId,
+        revoked: false
+      }
+    });
+
+    if (!activeSession) {
+      console.warn(`Bloqueio 401 DB: Sessão revogada ou inexistente para o usuário ${decoded.userId}.`);
+      return res.status(401).json({ error: 'Sessão revogada no banco de dados' });
+    }
+
     req.userId = decoded.userId;
     next();
   } catch (err) {

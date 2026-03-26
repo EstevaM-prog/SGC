@@ -177,7 +177,7 @@ export const loginUser = async (req, res) => {
     const accessToken = jwt.sign(
       { userId: user.id },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '60m' }
     );
 
     const refreshTokenString = crypto.randomBytes(40).toString('hex');
@@ -291,7 +291,7 @@ export const refreshToken = async (req, res) => {
     const accessToken = jwt.sign(
       { userId: tokenRecord.userId },
       JWT_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: '60m' }
     );
 
     res.json({ accessToken });
