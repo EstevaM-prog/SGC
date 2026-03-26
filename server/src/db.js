@@ -1,9 +1,36 @@
 import { PrismaClient } from '@prisma/client';
 import { encrypt, decrypt } from './utils/encryption.js';
 
+// Neon DB closes idle connections after ~5 minutes.
+// connection_limit=1 + pool_timeout prevent ERR_KIND_CLOSED errors.
+const DATABASE_URL = process.env.DATABASE_URL?.includes('?')
+  ? `${process.env.DATABASE_URL}&connection_limit=10&pool_timeout=20&connect_timeout=30`
+  : `${process.env.DATABASE_URL}?connection_limit=10&pool_timeout=20&connect_timeout=30`;
+
 const prisma = new PrismaClient({
-  log: ['query', 'error'],
+  log: ['error'],
+  datasources: {
+    db: { url: DATABASE_URL }
+  }
 });
+
+// Reconnect helper: if Neon drops the connection, gracefully reconnect
+const withReconnect = async (fn) => {
+  try {
+    return await fn();
+  } catch (err) {
+    if (err.message?.includes('Closed') || err.code === 'P1001' || err.code === 'P1002') {
+      console.warn('[DB] Conexão perdida com Neon DB. Reconectando...');
+      await prisma.$disconnect();
+      await prisma.$connect();
+      return await fn();
+    }
+    throw err;
+  }
+};
+
+// Warm up connection on startup
+prisma.$connect().catch((e) => console.error('[DB] Falha ao conectar:', e));
 
 // List of fields to be transparently encrypted/decrypted for LGPD/Security
 const CONFIG = {

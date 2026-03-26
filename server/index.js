@@ -96,11 +96,26 @@ app.post('/api/support', async (req, res) => {
   }
 });
 
+import prisma from './src/db.js';
+
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
     logger.info(`🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
     logger.info(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
   });
+
+  // Graceful shutdown: disconnect Prisma to avoid connection leaks on Render restarts
+  const shutdown = async () => {
+    logger.info('🛑 Encerrando servidor...');
+    server.close(async () => {
+      await prisma.$disconnect();
+      logger.info('✅ Conexão com banco encerrada.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 export { app };
