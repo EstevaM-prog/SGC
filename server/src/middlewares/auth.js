@@ -4,11 +4,15 @@ import prisma from '../db.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta';
 
 export const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization || req.headers.Authorization;
   const token = authHeader?.split(' ')[1];
   
   if (!token) {
-    console.warn('Bloqueio 401: Token não fornecido no Header Request');
+    console.warn('Bloqueio 401: Token não fornecido no Header Request', {
+      method: req.method,
+      url: req.originalUrl,
+      headers: req.headers
+    });
     return res.status(401).json({ error: 'Token não fornecido' });
   }
 
