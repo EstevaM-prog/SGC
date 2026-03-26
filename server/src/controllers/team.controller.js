@@ -1,4 +1,5 @@
 import prisma from '../db.js';
+import auditLogger from '../utils/audit.logger.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -80,7 +81,7 @@ export const getTeams = async (req, res) => {
       include: {
         permissions: true,
         members: {
-          include: { user: { select: { id: true, name: true, avatar: true } } }
+          include: { user: { select: { id: true, name: true, avatarUrl: true, email: true } } }
         }
       }
     });
@@ -159,16 +160,67 @@ export const joinTeam = async (req, res) => {
 
     if (!foundTeam) return res.status(404).json({ error: 'Código inválido ou expirado' });
 
-    const member = await prisma.teamMember.create({
+    const team = await prisma.team.update({
+      where: { id: foundTeam.id },
       data: {
-        teamId: foundTeam.id,
-        userId,
-        role: 'MEMBER'
+        members: {
+          create: {
+            userId,
+            role: 'MEMBER',
+            permissions: {}
+          }
+        }
+      },
+      include: {
+        members: {
+          where: { userId }
+        }
       }
     });
 
-    res.status(201).json({ team: foundTeam, member });
+    res.status(201).json({ team: foundTeam, member: team.members[0] });
   } catch (err) {
     res.status(500).json({ error: 'Erro ao entrar na equipe. Talvez você já seja membro?' });
+  }
+};
+
+export const updateMemberPermissions = async (req, res) => {
+  try {
+    const { teamId, userId } = req.params;
+    const { permissions } = req.body;
+
+    const updatedMember = await prisma.teamMember.update({
+      where: {
+        userId_teamId: { userId, teamId }
+      },
+      data: { permissions }
+    });
+
+    auditLogger.info(`Alteração de Feature Flag no usuário ${userId} pelo Admin ${req.userId}`, { 
+      teamId, 
+      permissions 
+    });
+
+    res.json(updatedMember);
+  } catch (err) {
+    console.error('Erro ao atualizar permissões do membro:', err);
+    res.status(500).json({ error: 'Erro ao atualizar permissões do membro' });
+  }
+};
+
+export const getTeamMembers = async (req, res) => {
+  try {
+    const { teamId } = req.params;
+    const members = await prisma.teamMember.findMany({
+      where: { teamId },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatarUrl: true }
+        }
+      }
+    });
+    res.json(members);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar membros da equipe' });
   }
 };

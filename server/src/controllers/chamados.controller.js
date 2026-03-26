@@ -97,6 +97,18 @@ export const permanentDeleteChamados = async (req, res) => {
   }
 };
 
+export const getTrashChamados = async (req, res) => {
+  try {
+    const items = await prisma.chamado.findMany({
+      where: { deleted: true },
+      orderBy: { deletedAt: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lixeira de chamados' });
+  }
+};
+
 export default {
     createChamados,
     getChamados,

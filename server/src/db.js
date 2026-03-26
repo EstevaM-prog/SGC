@@ -1,7 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { encrypt, decrypt } from './utils/encryption.js';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query', 'error'],
+});
 
 // List of fields to be transparently encrypted/decrypted for LGPD/Security
 const CONFIG = {

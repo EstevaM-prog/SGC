@@ -69,9 +69,49 @@ export const deleteFreight = async (req, res) => {
   }
 };
 
+export const restoreFreight = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const freight = await prisma.freightTicket.update({
+      where: { id },
+      data: { deleted: false, deletedAt: null }
+    });
+    res.json(freight);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao restaurar frete' });
+  }
+};
+
+export const permanentDeleteFreight = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.freightTicket.delete({
+      where: { id }
+    });
+    res.json({ message: 'Frete removido permanentemente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir definitivamente' });
+  }
+};
+
+export const getTrashFreight = async (req, res) => {
+  try {
+    const items = await prisma.freightTicket.findMany({
+      where: { deleted: true },
+      orderBy: { deletedAt: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lixeira de fretes' });
+  }
+};
+
 export default {
     createFreight,
     getFreight,
     updateFreight,
-    deleteFreight
+    deleteFreight,
+    restoreFreight,
+    permanentDeleteFreight,
+    getTrashFreight
 };

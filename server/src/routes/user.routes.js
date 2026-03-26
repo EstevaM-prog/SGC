@@ -1,16 +1,29 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { 
   createUser, 
   loginUser, 
+  refreshToken, 
   getUsers, 
   updateUsers, 
   deleteUsers,
   verifyCode,
   forgotPassword,
-  resetPassword 
+  resetPassword,
+  uploadAvatar
 } from '../controllers/user.controller.js';
+import { authenticate } from '../middlewares/auth.js';
+import upload from '../middlewares/upload.js';
 
 const router = express.Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5, // 5 tentativas
+  message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 /**
  * @openapi
@@ -26,7 +39,9 @@ router.post('/', createUser);
  *   post:
  *     description: Autentica usuário e retorna token JWT
  */
-router.post('/login', loginUser);
+router.post('/login', loginLimiter, loginUser);
+router.post('/refresh', refreshToken);
+router.post('/avatar', authenticate, upload.single('avatar'), uploadAvatar);
 
 /**
  * @openapi

@@ -1,7 +1,9 @@
 import prisma from '../db.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { sendVerificationEmail, generateSecurityCode } from '../utils/mailer.js';
+import auditLogger from '../utils/audit.logger.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'sua_chave_secreta';
 
@@ -144,30 +146,97 @@ export const verifyCode = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      include: {
+        teams: {
+          include: {
+            team: {
+              include: { permissions: true }
+            }
+          }
+        }
+      }
+    });
 
-    if (!user) return res.status(401).json({ error: "E-mail ou senha incorretos" });
+    if (!user) {
+      auditLogger.warn(`Falha de login: Usuário não encontrado para e-mail ${email}`);
+      return res.status(401).json({ error: "E-mail ou senha incorretos" });
+    }
 
     if (!user.isVerified) {
       return res.status(403).json({ error: "Sua conta ainda não foi verificada. Verifique seu e-mail." });
     }
 
     const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) return res.status(401).json({ error: "E-mail ou senha incorretos" });
+    if (!isValid) {
+      auditLogger.warn(`Falha de login: Senha incorreta para e-mail ${email}`);
+      return res.status(401).json({ error: "E-mail ou senha incorretos" });
+    }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { userId: user.id },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '15m' }
     );
+
+    const refreshTokenString = crypto.randomBytes(40).toString('hex');
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshTokenString,
+        userId: user.id,
+        expiresAt: expiresAt
+      }
+    });
 
     res.json({
       message: "Login realizado com sucesso!",
-      token,
-      user: { id: user.id, name: user.name, email: user.email }
+      accessToken,
+      refreshToken: refreshTokenString,
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        email: user.email, 
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        teams: user.teams
+      }
     });
   } catch (error) {
+    console.error('Erro no login:', error);
     res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
+export const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken: token } = req.body;
+
+    if (!token) {
+      return res.status(401).json({ error: "Refresh token não fornecido" });
+    }
+
+    const tokenRecord = await prisma.refreshToken.findUnique({
+      where: { token },
+      include: { user: true }
+    });
+
+    if (!tokenRecord || tokenRecord.revoked || new Date() > tokenRecord.expiresAt) {
+      return res.status(401).json({ error: "Refresh token inválido ou expirado" });
+    }
+
+    const accessToken = jwt.sign(
+      { userId: tokenRecord.userId },
+      JWT_SECRET,
+      { expiresIn: '15m' }
+    );
+
+    res.json({ accessToken });
+  } catch (error) {
+    console.error('Erro ao renovar token:', error);
+    res.status(500).json({ error: "Erro interno ao processar refresh" });
   }
 };
 
@@ -257,10 +326,30 @@ export const resetPassword = async (req, res) => {
   }
 };
 
+export const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    await prisma.user.update({
+      where: { id: req.userId },
+      data: { avatarUrl }
+    });
+
+    res.json({ message: 'Avatar atualizado com sucesso!', avatarUrl });
+  } catch (error) {
+    console.error('Erro no uploadAvatar:', error);
+    res.status(500).json({ error: 'Erro ao processar upload do avatar' });
+  }
+};
+
 export const getUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({
-      select: { id: true, name: true, email: true, role: true, isVerified: true }
+      select: { id: true, name: true, email: true, role: true, isVerified: true, avatarUrl: true }
     });
     res.status(200).json(users);
   } catch (error) {
@@ -275,6 +364,7 @@ export const updateUsers = async (req, res) => {
 
     let dataToUpdate = { name, email };
     if (password) dataToUpdate.password = await bcrypt.hash(password, 10);
+    if (avatarUrl) dataToUpdate.avatarUrl = avatarUrl;
 
     const user = await prisma.user.update({
       where: { id },

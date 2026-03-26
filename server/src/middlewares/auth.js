@@ -46,3 +46,21 @@ export const checkPermission = (permissionKey) => {
     }
   };
 };
+
+export const checkRole = (allowedRoles) => {
+  return async (req, res, next) => {
+    try {
+      const user = await prisma.user.findUnique({ where: { id: req.userId } });
+      
+      if (!user || !allowedRoles.includes(user.role)) {
+        console.warn(`Bloqueio 403: Usuário ${req.userId} (Role: ${user?.role}) tentou acessar área restrita.`);
+        return res.status(403).json({ error: 'Acesso negado: Nível de permissão insuficiente.' });
+      }
+
+      next();
+    } catch (err) {
+      console.error('Erro no checkRole:', err);
+      res.status(500).json({ error: 'Erro ao verificar cargos' });
+    }
+  };
+};

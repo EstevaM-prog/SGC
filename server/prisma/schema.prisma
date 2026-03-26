@@ -15,13 +15,14 @@ model User {
   name                String
   email               String   @unique
   password            String
-  avatar              String?
+  avatarUrl           String?
   role                String   @default("USER")
   isVerified          Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   teams               TeamMember[]
   authTokens          AuthToken[]
+  refreshTokens       RefreshToken[]
 }
 
 model Team {
@@ -42,6 +43,7 @@ model TeamMember {
   userId  String
   teamId  String
   role    String   @default("MEMBER") // ADMIN, MEMBER
+  permissions Json?    @default("{}") // RBAC custom permissions for this user in this team
   user    User     @relation(fields: [userId], references: [id])
   team    Team     @relation(fields: [teamId], references: [id])
   @@unique([userId, teamId])
@@ -156,4 +158,16 @@ model Permission {
   deleted     Boolean  @default(false)
 
   @@index([name])
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
 }

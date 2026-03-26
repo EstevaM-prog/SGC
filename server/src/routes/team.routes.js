@@ -1,5 +1,13 @@
 import express from 'express';
-import { createTeam, getTeams, joinTeam, resetInviteCode, updatePermissions } from '../controllers/team.controller.js';
+import { 
+  createTeam, 
+  getTeams, 
+  joinTeam, 
+  resetInviteCode, 
+  updatePermissions,
+  updateMemberPermissions,
+  getTeamMembers
+} from '../controllers/team.controller.js';
 
 const router = express.Router();
 
@@ -49,7 +57,7 @@ router.post('/join', joinTeam);
  *       200:
  *         description: OK
  */
-router.put('/:teamId/reset-code', resetInviteCode);
+router.put('/:id/reset-code', resetInviteCode);
 
 /**
  * @openapi
@@ -60,6 +68,9 @@ router.put('/:teamId/reset-code', resetInviteCode);
  *       200:
  *         description: OK
  */
-router.put('/:teamId/permissions', updatePermissions);
+router.put('/:id/permissions', updatePermissions);
+
+router.get('/:teamId/members', getTeamMembers);
+router.patch('/:teamId/members/:userId/permissions', updateMemberPermissions);
 
 export default router;
