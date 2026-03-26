@@ -30,7 +30,12 @@ app.set('trust proxy', 1);
 
 // Middlewares
 app.use(morgan('dev'));
-app.use(cors());
+app.use(cors({
+  origin: '*', // Permite qualquer origem (ideal para dev e deploy inicial)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-ID'],
+  exposedHeaders: ['Authorization']
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
