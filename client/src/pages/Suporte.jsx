@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Headphones, Send, Search, CheckCircle2, Loader2, MessageSquare, lifeBuoy, Zap } from 'lucide-react';
+import { Headphones, Send, Search, CheckCircle2, Loader2, MessageSquare, Zap } from 'lucide-react';
 import api from '../Axios/conect.js';
 import toast from 'react-hot-toast';
 import Modal from '../components/Modal';
