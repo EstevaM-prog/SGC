@@ -43,6 +43,12 @@ export const authenticate = async (req, res, next) => {
 export const checkPermission = (permissionKey) => {
   return async (req, res, next) => {
     try {
+      // Bypass automático se for super admin
+      const user = await prisma.user.findUnique({ where: { id: req.userId }, select: { role: true } });
+      if (user?.role === 'ADMIN') {
+        return next();
+      }
+
       const userTeams = await prisma.team.findMany({
         where: { members: { some: { userId: req.userId } } },
         include: { permissions: true }

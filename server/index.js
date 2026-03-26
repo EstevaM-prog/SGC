@@ -33,8 +33,8 @@ app.use(morgan('dev'));
 app.use(cors({
   origin: '*', // Permite qualquer origem (ideal para dev e deploy inicial)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-ID'],
-  exposedHeaders: ['Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-ID', 'X-Access-Token'],
+  exposedHeaders: ['Authorization', 'X-Access-Token']
 }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
