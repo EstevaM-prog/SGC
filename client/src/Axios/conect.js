@@ -24,10 +24,19 @@ api.interceptors.request.use((config) => {
     if (sessionStr) {
       const session = JSON.parse(sessionStr);
       if (session?.accessToken) {
-        config.headers.Authorization = `Bearer ${session.accessToken}`;
+        if (config.headers && typeof config.headers.set === 'function') {
+          config.headers.set('Authorization', `Bearer ${session.accessToken}`);
+        } else {
+          config.headers.Authorization = `Bearer ${session.accessToken}`;
+        }
       }
     }
-    config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
+    
+    if (config.headers && typeof config.headers.set === 'function') {
+      config.headers.set('X-Service-ID', import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg');
+    } else {
+      config.headers['X-Service-ID'] = import.meta.env.VITE_SERVICE_ID || 'srv-d6vcouc50q8c739im5vg';
+    }
   } catch (err) {
     console.error('Erro ao ler sessão:', err);
   }
@@ -45,7 +54,11 @@ api.interceptors.response.use(
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            if (originalRequest.headers && typeof originalRequest.headers.set === 'function') {
+              originalRequest.headers.set('Authorization', `Bearer ${token}`);
+            } else {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
             return api(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -68,7 +81,11 @@ api.interceptors.response.use(
         localStorage.setItem('session_v1', JSON.stringify(session));
 
         processQueue(null, accessToken);
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        if (originalRequest.headers && typeof originalRequest.headers.set === 'function') {
+          originalRequest.headers.set('Authorization', `Bearer ${accessToken}`);
+        } else {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
