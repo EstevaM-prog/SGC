@@ -210,6 +210,67 @@ export const loginUser = async (req, res) => {
   }
 };
 
+export const getMyProfile = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        avatarUrl: true,
+        role: true,
+        isVerified: true,
+        teams: {
+          include: {
+            team: {
+              include: {
+                members: {
+                  include: {
+                    user: {
+                      select: { id: true, name: true, avatarUrl: true, role: true }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Erro ao buscar perfil:', error);
+    res.status(500).json({ error: "Erro interno ao buscar perfil" });
+  }
+};
+
+export const updateMyProfile = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    let dataToUpdate = { name, email };
+
+    if (password) {
+      dataToUpdate.password = await bcrypt.hash(password, 10);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.userId },
+      data: dataToUpdate
+    });
+
+    res.json({ message: "Perfil atualizado com sucesso!", user: { id: user.id, name: user.name, email: user.email } });
+  } catch (error) {
+    console.error('Erro ao atualizar seu perfil:', error);
+    res.status(500).json({ error: "Erro interno ao atualizar perfil" });
+  }
+};
+
 export const refreshToken = async (req, res) => {
   try {
     const { refreshToken: token } = req.body;
@@ -360,7 +421,12 @@ export const getUsers = async (req, res) => {
 export const updateUsers = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, password } = req.body;
+    const { name, email, password, avatarUrl } = req.body;
+
+    // Check permissions: User can only update themselves OR must be ADMIN
+    if (req.userId !== id && req.userRole !== 'ADMIN') {
+      return res.status(403).json({ error: "Você não tem permissão para atualizar este usuário" });
+    }
 
     let dataToUpdate = { name, email };
     if (password) dataToUpdate.password = await bcrypt.hash(password, 10);

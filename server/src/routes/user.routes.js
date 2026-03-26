@@ -10,7 +10,9 @@ import {
   verifyCode,
   forgotPassword,
   resetPassword,
-  uploadAvatar
+  uploadAvatar,
+  getMyProfile,
+  updateMyProfile
 } from '../controllers/user.controller.js';
 import { authenticate } from '../middlewares/auth.js';
 import upload from '../middlewares/upload.js';
@@ -41,6 +43,8 @@ router.post('/', createUser);
  */
 router.post('/login', loginLimiter, loginUser);
 router.post('/refresh', refreshToken);
+router.get('/me', authenticate, getMyProfile);
+router.put('/me', authenticate, updateMyProfile);
 router.post('/avatar', authenticate, upload.single('avatar'), uploadAvatar);
 
 /**
@@ -100,9 +104,9 @@ router.post('/reset-password', resetPassword);
  *   get:
  *     description: Retorna a lista de usuários com dados LGPD-ready
  */
-router.get('/', getUsers);
+router.get('/', authenticate, getUsers);
 
-router.put('/:id', updateUsers);
-router.delete('/:id', deleteUsers);
+router.put('/:id', authenticate, updateUsers);
+router.delete('/:id', authenticate, deleteUsers);
 
 export default router;
