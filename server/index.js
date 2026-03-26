@@ -44,6 +44,24 @@ const swaggerOptions = {
         url: `http://localhost:${PORT}`,
       },
     ],
+    tags: [
+      { name: 'Auth', description: 'Autenticação e sessão (JWT)' },
+      { name: 'Users', description: 'Gestão de usuários e perfis' },
+      { name: 'Teams', description: 'Gestão de equipes e permissões' },
+      { name: 'Tickets', description: 'Operações de chamados (Geral)' },
+      { name: 'Shopping', description: 'Chamados de Compras corporativas' },
+      { name: 'Freight', description: 'Chamados de Fretes de carga' },
+      { name: 'Trash', description: 'Recuperação de itens excluídos' },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
   apis: ['./index.js', './src/routes/*.js'],
 };
