@@ -2,7 +2,7 @@ import prisma from '../db.js';
 
 export const getPonto = async (req, res) => {
   try {
-    const tickets = await prisma.chamado.findMany({
+    const tickets = await prisma.ponto.findMany({
       where: { deleted: false },
       orderBy: { createdAt: 'desc' }
     });
@@ -16,7 +16,7 @@ export const getPonto = async (req, res) => {
 export const createPonto = async (req, res) => {
   try {
     const ticketData = req.body;
-    const ticket = await prisma.chamado.create({
+    const ticket = await prisma.ponto.create({
       data: ticketData
     });
     res.status(201).json(ticket);
@@ -30,7 +30,7 @@ export const updatePonto = async (req, res) => {
   try {
     const { id } = req.params;
     const ticketData = req.body;
-    const ticket = await prisma.chamado.update({
+    const ticket = await prisma.ponto.update({
       where: { id },
       data: ticketData
     });
@@ -44,7 +44,7 @@ export const updatePonto = async (req, res) => {
 export const deletePonto = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.chamado.update({
+    await prisma.ponto.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
     });
