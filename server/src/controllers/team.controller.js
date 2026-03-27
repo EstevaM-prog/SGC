@@ -183,6 +183,32 @@ export const joinTeam = async (req, res) => {
       return res.status(404).json({ error: 'Código inválido ou expirado' });
     }
 
+    // 1. Verifica se já existe o membro para evitar erro de constraint única
+    const existingMember = await prisma.teamMember.findUnique({
+      where: {
+        userId_teamId: { userId, teamId: foundTeam.id }
+      }
+    });
+
+    if (existingMember) {
+      console.log(`[joinTeam] Usuário ${userId} já está na equipe ${foundTeam.id}`);
+      return res.status(200).json({ 
+        message: 'Você já faz parte desta equipe!', 
+        team: foundTeam, 
+        member: existingMember 
+      });
+    }
+
+    // 2. Inicializa as Feature Flags vazias (todas em false por padrão)
+    // Isso garante que o Admin veja os botões na tela de membros
+    const defaultPermissions = {
+      can_edit_freight: false,
+      can_view_billing: false,
+      can_manage_tickets: false,
+      can_access_trash: false
+    };
+
+    // 3. Cria o novo membro na equipe
     const team = await prisma.team.update({
       where: { id: foundTeam.id },
       data: {
@@ -190,20 +216,28 @@ export const joinTeam = async (req, res) => {
           create: {
             userId,
             role: 'MEMBER',
-            permissions: {}
+            permissions: defaultPermissions
           }
         }
       },
       include: {
         members: {
-          where: { userId }
+          where: { userId },
+          include: {
+            user: { select: { id: true, name: true, avatarUrl: true } }
+          }
         }
       }
     });
 
-    res.status(201).json({ team: foundTeam, member: team.members[0] });
+    res.status(201).json({ 
+      message: 'Bem-vindo à equipe!', 
+      team: foundTeam, 
+      member: team.members[0] 
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Erro ao entrar na equipe. Talvez você já seja membro?' });
+    console.error('[joinTeam Error]:', err);
+    res.status(500).json({ error: 'Erro interno ao entrar na equipe.' });
   }
 };
 
