@@ -1,412 +1,468 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  ArrowLeft, User, Mail, Lock, Camera, LogOut, Edit, Save, X, Eye, EyeOff, 
-  ShieldCheck, UserCircle2, Users, Settings, RefreshCw, Key, Share2, Plus, 
-  Check, ChevronRight, Layout
+import {
+  ArrowLeft, User, Mail, Lock, Camera, LogOut, Edit, Save, X, Eye, EyeOff,
+  ShieldCheck, UserCircle2, Users, Settings, RefreshCw, Key, Share2, Plus, Check,
+  CheckCircle2, Layout, Building2, Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import '../styles/pages/Auth.css';
-
 import api from '../Axios/conect.js';
 
-// Page options for permissions
+/* ── Page options for permissions ── */
 const PAGE_OPTIONS = [
-  { id: 'dashboard', label: 'Dashboard', Icon: Layout },
-  { id: 'list', label: 'Lista de Chamados', Icon: Users },
-  { id: 'activities', label: 'Atividades', Icon: ShieldCheck },
-  { id: 'shopping', label: 'Compras', Icon: Settings },
-  { id: 'freight', label: 'Fretes', Icon: Settings },
-  { id: 'ponto', label: 'Ponto', Icon: Settings },
-  { id: 'procedures', label: 'Procedimentos', Icon: Settings },
+  { id:'dashboard',   label:'Dashboard',        Icon:Layout },
+  { id:'list',        label:'Lista de Chamados', Icon:Users },
+  { id:'activities',  label:'Atividades',        Icon:Zap },
+  { id:'shopping',    label:'Compras',           Icon:Building2 },
+  { id:'freight',     label:'Fretes',            Icon:Settings },
+  { id:'ponto',       label:'Ponto',             Icon:Settings },
+  { id:'procedures',  label:'Procedimentos',     Icon:Settings },
 ];
 
 export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUser, addActivity }) {
-  const storedUser = JSON.parse(localStorage.getItem('user_db') || 'null') || {};
-  const currentSession = JSON.parse(localStorage.getItem('session_v1') || 'null') || {};
+  const storedUser     = JSON.parse(localStorage.getItem('user_db')   || 'null') || {};
+  const currentSession = JSON.parse(localStorage.getItem('session_v1')|| 'null') || {};
 
-  const [avatar, setAvatar] = useState(localStorage.getItem('user_avatar') || null);
-  const [editing, setEditing] = useState(false);
-  const [showPass, setShowPass] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
-  const [isJoiningTeam, setIsJoiningTeam] = useState(false);
-  
-  // Tab/Section state
-  const [activeTab, setActiveTab] = useState('personal'); // 'personal' | 'team'
-  
-  // Team state
-  const [teams, setTeams] = useState([]);
+  const [avatar, setAvatar]           = useState(localStorage.getItem('user_avatar') || null);
+  const [editing, setEditing]         = useState(false);
+  const [showPass, setShowPass]       = useState(false);
+  const [isSaving, setIsSaving]       = useState(false);
+  const [activeTab, setActiveTab]     = useState('personal');
+  const [teams, setTeams]             = useState([]);
   const [loadingTeams, setLoadingTeams] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
-  const [showJoinTeam, setShowJoinTeam] = useState(false);
-  const [teamForm, setTeamForm] = useState({ name: '', description: '' });
+  const [showJoinTeam, setShowJoinTeam]     = useState(false);
+  const [teamForm, setTeamForm]       = useState({ name:'', description:'' });
   const [inviteCodeInput, setInviteCodeInput] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [selectedTeam, setSelectedTeam]     = useState(null);
+  const [isCreatingTeam, setIsCreatingTeam] = useState(false);
 
   const [form, setForm] = useState({
-    name: storedUser.name || currentUser?.name || '',
-    email: storedUser.email || currentUser?.email || '',
+    name:     storedUser.name     || currentUser?.name  || '',
+    email:    storedUser.email    || currentUser?.email || '',
     password: storedUser.password || '',
   });
-
   const fileRef = useRef();
+  const initials = (form.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 
-  const initials = (form.name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-
-  /* ── Initial Fetch ─────────────────────────────────────────── */
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === 'team') {
-      fetchTeams();
-    }
-  }, [activeTab]);
+  useEffect(() => { fetchProfile(); }, []);
+  useEffect(() => { if (activeTab==='team') fetchTeams(); }, [activeTab]);
 
   const fetchProfile = async () => {
     try {
-      const resp = await api.get('/users/me');
-      if (resp.status === 200) {
-        const u = resp.data;
-        setForm({ name: u.name, email: u.email, password: '' });
-        setAvatar(u.avatarUrl);
-      }
-    } catch (err) {
-      toast.error('Erro ao carregar dados do perfil');
-    }
+      const r = await api.get('/users/me');
+      if (r.status===200) { setForm({ name:r.data.name, email:r.data.email, password:'' }); setAvatar(r.data.avatarUrl); }
+    } catch { toast.error('Erro ao carregar perfil'); }
   };
 
   const fetchTeams = async () => {
-    if (!currentSession.id) {
-       // Mock ID if missing in session
-       currentSession.id = 'manual-' + Date.now();
-    }
+    if (!currentSession.id) currentSession.id = 'manual-'+Date.now();
     setLoadingTeams(true);
     try {
-      const resp = await api.get(`/teams?userId=${currentSession.id || ''}`);
-      if (resp.status === 200) {
-        setTeams(resp.data);
-      }
-    } catch (err) {
-      console.error('Erro ao buscar equipes:', err);
-    } finally {
-      setLoadingTeams(false);
-    }
+      const r = await api.get(`/teams?userId=${currentSession.id||''}`);
+      if (r.status===200) setTeams(r.data);
+    } catch (e) { console.error(e); }
+    finally { setLoadingTeams(false); }
   };
 
-  /* ── Photo upload ──────────────────────────────────────────── */
-  const handlePhoto = async (e) => {
+  const handlePhoto = async e => {
     const file = e.target.files[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error('A imagem é muito grande! Máximo 5MB.'); return; }
-    
+    if (file.size > 5*1024*1024) { toast.error('Máximo 5MB'); return; }
     const formData = new FormData();
     formData.append('avatar', file);
-
-    const loading = toast.loading('Enviando imagem...');
+    const t = toast.loading('Enviando imagem...');
     try {
-      const resp = await api.post('/users/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      if (resp.status === 200) {
-        setAvatar(resp.data.avatarUrl);
-        localStorage.setItem('user_avatar', resp.data.avatarUrl);
-        onUpdateUser?.({ ...currentUser, avatar: resp.data.avatarUrl });
-        toast.success('Foto de perfil atualizada!', { id: loading });
+      const r = await api.post('/users/avatar', formData, { headers:{'Content-Type':'multipart/form-data'} });
+      if (r.status===200) {
+        setAvatar(r.data.avatarUrl);
+        localStorage.setItem('user_avatar', r.data.avatarUrl);
+        onUpdateUser?.({ ...currentUser, avatar:r.data.avatarUrl });
+        toast.success('Foto atualizada!', { id:t });
       }
-    } catch (err) {
-      toast.error('Erro ao fazer upload da imagem', { id: loading });
-    }
+    } catch { toast.error('Erro no upload', { id:t }); }
   };
 
-  /* ── Form handlers (Personal) ──────────────────────────────── */
-  const handleChange = (e) => setForm(p => ({ ...p, [e.target.id]: e.target.value }));
-  const handleSave = async (e) => {
+  const handleChange = e => setForm(p=>({...p,[e.target.id]:e.target.value}));
+
+  const handleSave = async e => {
     e.preventDefault();
     if (isSaving) return;
-    if (!form.name.trim()) { toast.error('O nome não pode estar vazio.'); return; }
-    if (!form.email.trim()) { toast.error('O e-mail não pode estar vazio.'); return; }
-    if (form.password && form.password.length < 6) { toast.error('A senha deve ter ao menos 6 caracteres.'); return; }
-
+    if (!form.name.trim())  { toast.error('Nome não pode estar vazio'); return; }
+    if (!form.email.trim()) { toast.error('E-mail não pode estar vazio'); return; }
+    if (form.password && form.password.length<6) { toast.error('Senha mínimo 6 caracteres'); return; }
     setIsSaving(true);
-    const loadingToast = toast.loading('Salvando alterações...');
-
+    const t = toast.loading('Salvando...');
     try {
-      const resp = await api.put('/users/me', form);
-      if (resp.status === 200) {
-        onUpdateUser?.({ name: form.name, email: form.email });
-        toast.success("Perfil atualizado!", { id: loadingToast });
-        setEditing(false);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.error || "Erro ao salvar perfil!", { id: loadingToast });
-    } finally { setIsSaving(false); }
+      const r = await api.put('/users/me', form);
+      if (r.status===200) { onUpdateUser?.({ name:form.name, email:form.email }); toast.success('Perfil atualizado!', {id:t}); setEditing(false); }
+    } catch (e) { toast.error(e.response?.data?.error || 'Erro ao salvar', {id:t}); }
+    finally { setIsSaving(false); }
   };
 
-  /* ── Team Logic ────────────────────────────────────────────── */
-  const handleCreateTeam = async (e) => {
+  const handleCreateTeam = async e => {
     e.preventDefault();
     if (isCreatingTeam) return;
     if (!teamForm.name.trim()) return toast.error('Dê um nome à equipe!');
-
     setIsCreatingTeam(true);
-    const loading = toast.loading('Criando equipe...');
+    const t = toast.loading('Criando equipe...');
     try {
-      const resp = await api.post('/teams', { ...teamForm, userId: currentSession.id });
-      if (resp.status === 201) {
-        toast.success('Equipe criada com sucesso!', { id: loading });
-        setShowCreateTeam(false);
-        setTeamForm({ name: '', description: '' });
-        fetchTeams();
-      } else {
-        toast.error('Erro ao criar equipe.', { id: loading });
-      }
-    } catch (err) { 
-      toast.error(err.response?.data?.error || 'Falha de conexão com o servidor.', { id: loading }); 
-    } finally {
-      setIsCreatingTeam(false);
-    }
+      const r = await api.post('/teams', {...teamForm, userId:currentSession.id});
+      if (r.status===201) { toast.success('Equipe criada!', {id:t}); setShowCreateTeam(false); setTeamForm({name:'',description:''}); fetchTeams(); }
+      else toast.error('Erro ao criar equipe', {id:t});
+    } catch (e) { toast.error(e.response?.data?.error || 'Falha de conexão', {id:t}); }
+    finally { setIsCreatingTeam(false); }
   };
 
-  const handleJoinTeam = async (e) => {
+  const handleJoinTeam = async e => {
     e.preventDefault();
-    const cleanCode = inviteCodeInput.trim();
-    if (!cleanCode) return toast.error('Digite um código válido!');
-    
-    const loading = toast.loading('Entrando em equipe...');
+    const code = inviteCodeInput.trim();
+    if (!code) return toast.error('Digite um código válido!');
+    const t = toast.loading('Entrando em equipe...');
     try {
-      const resp = await api.post('/teams/join', { inviteCode: cleanCode, userId: currentSession.id });
-      if (resp.status === 200) {
-        toast.success('Você agora faz parte da equipe!', { id: loading });
-        setShowJoinTeam(false);
-        setInviteCodeInput('');
-        fetchTeams();
-      } else {
-        toast.error('Código inválido ou você já é membro.', { id: loading });
-      }
-    } catch (err) { 
-      toast.error(err.response?.data?.error || 'Falha de conexão.', { id: loading }); 
-    }
+      const r = await api.post('/teams/join', {inviteCode:code, userId:currentSession.id});
+      if (r.status===200) { toast.success('Bem-vindo à equipe!', {id:t}); setShowJoinTeam(false); setInviteCodeInput(''); fetchTeams(); }
+      else toast.error('Código inválido ou já é membro', {id:t});
+    } catch (e) { toast.error(e.response?.data?.error || 'Falha de conexão', {id:t}); }
   };
 
-  const handleResetTeamCode = async (teamId) => {
+  const handleResetTeamCode = async id => {
     try {
-      const resp = await api.put(`/teams/${teamId}/reset-code`);
-      if (resp.status === 200) {
-        toast.success('Código de convite resetado!');
-        fetchTeams();
-      }
-    } catch (err) { toast.error('Erro ao resetar código.'); }
+      const r = await api.put(`/teams/${id}/reset-code`);
+      if (r.status===200) { toast.success('Código resetado!'); fetchTeams(); }
+    } catch { toast.error('Erro ao resetar código'); }
   };
 
   const togglePermission = async (team, pageId) => {
-    // Agora permissões são um array de objetos. Verificamos se existe o registro lá.
     const hasAccess = team.permissions?.some(p => p.name === pageId);
-    
     try {
-      const resp = await api.put(`/teams/${team.id}/permissions`, { 
-        permissionName: pageId, 
-        enabled: !hasAccess 
-      });
-      if (resp.status === 200) {
-        toast.success(`Acesso ${!hasAccess ? 'concedido' : 'revogado'} para ${pageId}.`);
-        fetchTeams();
-      }
-    } catch (err) { toast.error('Erro ao atualizar permissões na tabela.'); }
+      const r = await api.put(`/teams/${team.id}/permissions`, {permissionName:pageId, enabled:!hasAccess});
+      if (r.status===200) { toast.success(`Acesso ${!hasAccess?'concedido':'revogado'}`); fetchTeams(); }
+    } catch { toast.error('Erro ao atualizar permissões'); }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Código copiado!');
-  };
+  const copyToClipboard = text => { navigator.clipboard.writeText(text); toast.success('Código copiado!'); };
 
+  /* ───────────────────── render ───────────────────── */
   return (
-    <div className="auth-overlay">
-      <div className="auth-card" style={{ maxWidth: 640 }}>
-        {/* Header with Navigation */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-          <button className="auth-link" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }} onClick={() => onNavigate('list')}>
-            <ArrowLeft size={18} /> Painel Administrativo
-          </button>
-          <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '12px' }}>
-            <button 
-              onClick={() => setActiveTab('personal')}
-              style={{ padding: '6px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'personal' ? 'var(--primary)' : 'transparent', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
-              Perfil
-            </button>
-            <button 
-              onClick={() => setActiveTab('team')}
-              style={{ padding: '6px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'team' ? 'var(--primary)' : 'transparent', color: '#fff', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s' }}>
-              Minha Equipe
-            </button>
+    <div className="view-section active" style={{ maxWidth:760, margin:'0 auto' }}>
+
+      {/* ── Back nav ── */}
+      <button
+        onClick={() => onNavigate('list')}
+        className="sgc-btn-ghost"
+        style={{ gap:8, marginBottom:'1.5rem', fontWeight:700 }}
+      >
+        <ArrowLeft size={16}/> Painel Administrativo
+      </button>
+
+      {/* ── Tab Bar ── */}
+      <div className="sgc-tabs" style={{ alignSelf:'flex-start', marginBottom:'2rem', width:'fit-content' }}>
+        <button className={`sgc-tab-btn ${activeTab==='personal'?'active':''}`} onClick={()=>setActiveTab('personal')}>
+          <User size={14}/> Perfil
+        </button>
+        <button className={`sgc-tab-btn ${activeTab==='team'?'active':''}`} onClick={()=>setActiveTab('team')}>
+          <Users size={14}/> Minha Equipe
+        </button>
+      </div>
+
+      {activeTab==='personal' ? (
+        /* ═══════════════ PERSONAL TAB ═══════════════ */
+        <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
+
+          {/* Avatar + name hero card */}
+          <div className="sgc-card" style={{ flexDirection:'row', display:'flex', alignItems:'center', gap:'1.5rem' }}>
+            {/* Avatar */}
+            <div style={{ position:'relative', flexShrink:0 }}>
+              <div style={{
+                width:86, height:86, borderRadius:22, overflow:'hidden',
+                background:'linear-gradient(135deg, #0066FF, #10B981)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontSize:'1.75rem', fontWeight:900, color:'#fff',
+                boxShadow:'0 8px 28px rgba(0,102,255,0.3)',
+                border:'3px solid rgba(0,102,255,0.2)'
+              }}>
+                {avatar
+                  ? <img src={avatar} alt="Avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                  : <span>{initials}</span>
+                }
+              </div>
+              <label style={{
+                position:'absolute', bottom:-4, right:-4,
+                width:30, height:30, borderRadius:9,
+                background:'linear-gradient(135deg,#0066FF,#10B981)',
+                color:'#fff', display:'flex', alignItems:'center', justifyContent:'center',
+                cursor:'pointer', boxShadow:'0 4px 12px rgba(0,102,255,0.35)',
+                border:'2px solid var(--card)', transition:'transform 0.25s'
+              }}
+                onMouseEnter={e=>e.currentTarget.style.transform='scale(1.1)'}
+                onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+              >
+                <Camera size={13}/>
+                <input type="file" accept="image/*" ref={fileRef} style={{ display:'none' }} onChange={handlePhoto}/>
+              </label>
+            </div>
+
+            {/* name / email */}
+            <div style={{ flex:1, minWidth:0 }}>
+              <h2 style={{ margin:0, fontSize:'1.4rem', fontWeight:900, letterSpacing:'-0.03em',
+                background:'linear-gradient(90deg, #0066FF, #10B981)',
+                WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+                Olá, {form.name.split(' ')[0]} 👋
+              </h2>
+              <p style={{ margin:'4px 0 0', color:'var(--muted-foreground)', fontSize:'0.875rem' }}>{form.email}</p>
+            </div>
+
+            {/* status badge */}
+            <span className="sgc-badge green" style={{ flexShrink:0 }}>
+              <CheckCircle2 size={11}/> Verificado
+            </span>
           </div>
-        </div>
 
-        {activeTab === 'personal' ? (
-          /* ── PERSONAL SECTION ────────────────────────────────── */
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '2.5rem' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{ width: 88, height: 88, borderRadius: '24px', overflow: 'hidden', background: 'linear-gradient(135deg,#7c3aed,#5b21b6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem', fontWeight: 800, color: '#fff', boxShadow: '0 8px 32px rgba(124,58,237,0.3)', border: '2px solid rgba(255,255,255,0.1)' }}>
-                  {avatar ? <img src={avatar} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span>{initials}</span>}
-                </div>
-                <label className="camera-label" style={{ position: 'absolute', bottom: -6, right: -6, width: 32, height: 32, borderRadius: '10px', background: '#7c3aed', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', border: '3px solid #13151b', boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}>
-                  <Camera size={14} /><input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={handlePhoto} />
-                </label>
-              </div>
-              <div>
-                <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>Olá, {form.name.split(' ')[0]}</h1>
-                <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>{form.email}</p>
-              </div>
-            </div>
-
-            {!editing ? (
-              <>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
-                  {[ { icon: <UserCircle2 size={20} />, label: 'Nome de Exibição', value: form.name }, { icon: <Mail size={20} />, label: 'Endereço de E-mail', value: form.email }, { icon: <ShieldCheck size={20} />, label: 'Segurança', value: 'Conta Verificada ✓', color: '#34d399' }].map(({ icon, label, value, color }) => (
-                    <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '1.25rem' }}>
-                      <div style={{ background: 'rgba(124,58,237,0.1)', color: '#a78bfa', width: 44, height: 44, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{icon}</div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ margin: 0, fontSize: '0.7rem', color: '#64748b', fontWeight: 600, textTransform: 'uppercase' }}>{label}</p>
-                        <p style={{ margin: 0, fontWeight: 700, fontSize: '1.05rem', color: color || '#fff' }}>{value}</p>
-                      </div>
+          {/* Info cards / Edit form */}
+          {!editing ? (
+            <>
+              <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem' }}>
+                {[
+                  { Icon:UserCircle2, label:'Nome de Exibição', value:form.name,       hint:null },
+                  { Icon:Mail,        label:'Endereço de E-mail', value:form.email,    hint:null },
+                  { Icon:ShieldCheck, label:'Segurança',          value:'Conta Verificada', hint:'green' },
+                ].map(({ Icon, label, value, hint }) => (
+                  <div key={label} className="sgc-card" style={{ flexDirection:'row', display:'flex', alignItems:'center', gap:'1rem', padding:'1rem 1.25rem' }}>
+                    <div className={`sgc-kpi-icon ${hint==='green'?'green':'blue'}`} style={{ width:42, height:42, flexShrink:0 }}>
+                      <Icon size={18}/>
                     </div>
-                  ))}
-                </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button onClick={() => setEditing(true)} className="auth-btn-primary" style={{ flex: 1, margin: 0, display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center' }}><Edit size={18} /> Editar Perfil</button>
-                  <button onClick={onLogout} style={{ width: 48, height: 48, borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', background: 'rgba(239, 68, 68, 0.05)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Sair"><LogOut size={20} /></button>
-                </div>
-              </>
-            ) : (
-              <form onSubmit={handleSave} className="auth-form">
-                <div className="auth-field"><label htmlFor="name">Nome Completo</label><div className="auth-input-wrap"><User size={18} className="auth-input-icon" /><input id="name" type="text" value={form.name} onChange={handleChange} required disabled={isSaving} /></div></div>
-                <div className="auth-field"><label htmlFor="email">E-mail Profissional</label><div className="auth-input-wrap"><Mail size={18} className="auth-input-icon" /><input id="email" type="email" value={form.email} onChange={handleChange} required disabled={isSaving} /></div></div>
-                <div className="auth-field"><label htmlFor="password">Trocar Senha <span>(opcional)</span></label><div className="auth-input-wrap"><Lock size={18} className="auth-input-icon" /><input id="password" type={showPass ? 'text' : 'password'} value={form.password} onChange={handleChange} placeholder="Mínimo 6 dígitos" disabled={isSaving} /><button type="button" className="auth-eye-btn" onClick={() => setShowPass(v => !v)}>{showPass ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                  <button type="button" onClick={() => setEditing(false)} style={{ flex: 1, height: 48, borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Cancelar</button>
-                  <button type="submit" disabled={isSaving} className="auth-btn-primary" style={{ flex: 1.5, margin: 0 }}>{isSaving ? 'Salvando...' : 'Confirmar'}</button>
-                </div>
-              </form>
-            )}
-          </>
-        ) : (
-          /* ── TEAM SECTION ──────────────────────────────────── */
-          <div style={{ animation: 'authFadeInScale 0.3s ease both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2rem' }}>
-              <div><h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#fff' }}>Gestão de Equipes</h2><p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>Crie ou participe de grupos de trabalho</p></div>
-              <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <button onClick={() => setShowJoinTeam(true)} className="auth-link" style={{ textDecoration: 'none', background: 'rgba(255,255,255,0.05)', padding: '8px 16px', borderRadius: '10px' }}>Entrar em Equipe</button>
-                <button onClick={() => setShowCreateTeam(true)} className="auth-btn-primary" style={{ width: 'auto', margin: 0, padding: '8px 16px', borderRadius: '10px' }}><Plus size={18} style={{ marginRight: 4 }} /> Criar</button>
+                    <div>
+                      <p style={{ margin:0, fontSize:'0.68rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'var(--muted-foreground)' }}>{label}</p>
+                      <p style={{ margin:0, fontWeight:700, fontSize:'1rem', color: hint==='green' ? '#10B981' : 'var(--foreground)' }}>{value}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
 
-            {showCreateTeam && (
-              <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid var(--primary)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <h3 style={{ marginTop: 0, color: '#fff', fontSize: '1.1rem' }}>Configurar Nova Equipe</h3>
-                <form onSubmit={handleCreateTeam} className="auth-form">
-                  <div className="auth-field"><label>Nome da Equipe</label><input type="text" placeholder="Ex: Time de Suporte" value={teamForm.name} onChange={e => setTeamForm(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
-                  <div className="auth-field"><label>Descrição (opcional)</label><input type="text" placeholder="Setor ou objetivo" value={teamForm.description} onChange={e => setTeamForm(p => ({ ...p, description: e.target.value }))} style={{ width: '100%', padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} /></div>
-                  <div style={{ display: 'flex', gap: '0.75rem' }}>
-                    <button type="button" onClick={() => setShowCreateTeam(false)} disabled={isCreatingTeam} style={{ flex: 1, height: 40, borderRadius: '8px', border: '1px solid #333', background: 'transparent', color: '#fff', cursor: 'pointer' }}>Cancelar</button>
-                    <button type="submit" className="auth-btn-primary" disabled={isCreatingTeam} style={{ flex: 1, margin: 0 }}>
-                      {isCreatingTeam ? 'Criando...' : 'Criar Agora'}
+              <div style={{ display:'flex', gap:'0.75rem' }}>
+                <button className="sgc-btn-primary" onClick={()=>setEditing(true)} style={{ flex:1, justifyContent:'center' }}>
+                  <Edit size={15}/> Editar Perfil
+                </button>
+                <button
+                  onClick={onLogout}
+                  style={{ width:46, height:46, borderRadius:12, border:'1.5px solid rgba(239,68,68,0.25)', color:'#ef4444', background:'rgba(239,68,68,0.06)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 0.25s' }}
+                  onMouseEnter={e=>{e.currentTarget.style.background='rgba(239,68,68,0.12)';}}
+                  onMouseLeave={e=>{e.currentTarget.style.background='rgba(239,68,68,0.06)';}}
+                  title="Sair"
+                ><LogOut size={18}/></button>
+              </div>
+            </>
+          ) : (
+            <div className="sgc-card">
+              <div className="sgc-card-header">
+                <h3 className="sgc-card-title">
+                  <span className="sgc-card-icon"><Edit size={15}/></span>
+                  Editar Informações
+                </h3>
+              </div>
+              <form onSubmit={handleSave} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                <div className="sgc-form-group">
+                  <label className="sgc-label">Nome Completo</label>
+                  <div style={{ position:'relative' }}>
+                    <User size={15} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#0066FF', pointerEvents:'none' }}/>
+                    <input className="sgc-input" id="name" type="text" style={{ paddingLeft:38 }} value={form.name} onChange={handleChange} required disabled={isSaving}/>
+                  </div>
+                </div>
+                <div className="sgc-form-group">
+                  <label className="sgc-label">E-mail Profissional</label>
+                  <div style={{ position:'relative' }}>
+                    <Mail size={15} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#0066FF', pointerEvents:'none' }}/>
+                    <input className="sgc-input" id="email" type="email" style={{ paddingLeft:38 }} value={form.email} onChange={handleChange} required disabled={isSaving}/>
+                  </div>
+                </div>
+                <div className="sgc-form-group">
+                  <label className="sgc-label">Trocar Senha <span style={{ textTransform:'none', fontWeight:500, opacity:0.6 }}>(opcional)</span></label>
+                  <div style={{ position:'relative' }}>
+                    <Lock size={15} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'#0066FF', pointerEvents:'none' }}/>
+                    <input className="sgc-input" id="password" type={showPass?'text':'password'} style={{ paddingLeft:38, paddingRight:42 }}
+                      value={form.password} onChange={handleChange} placeholder="Mínimo 6 dígitos" disabled={isSaving}/>
+                    <button type="button" onClick={()=>setShowPass(v=>!v)}
+                      style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'var(--muted-foreground)', cursor:'pointer' }}>
+                      {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
                     </button>
                   </div>
-                </form>
-              </div>
-            )}
+                </div>
+                <div style={{ display:'flex', gap:'0.75rem', paddingTop:'0.5rem' }}>
+                  <button type="button" className="sgc-btn-outline" onClick={()=>setEditing(false)} disabled={isSaving} style={{ flex:1, justifyContent:'center' }}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="sgc-btn-primary" disabled={isSaving} style={{ flex:1.5, justifyContent:'center' }}>
+                    <Save size={15}/> {isSaving ? 'Salvando...' : 'Confirmar'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
 
-            {showJoinTeam && (
-              <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', marginBottom: '1.5rem' }}>
-                <h3 style={{ marginTop: 0, color: '#fff', fontSize: '1.1rem' }}>Participar de Equipe</h3>
-                <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>Insira o código enviado pelo administrador.</p>
-                <form onSubmit={handleJoinTeam} style={{ display: 'flex', gap: '0.75rem' }}>
-                  <input type="text" placeholder="SGC-0000" value={inviteCodeInput} onChange={e => setInviteCodeInput(e.target.value.toUpperCase())} style={{ flex: 1, padding: '10px', borderRadius: '8px', background: '#000', border: '1px solid #333', color: '#fff' }} />
-                  <button type="submit" className="auth-btn-primary" style={{ width: 'auto', margin: 0 }}>Entrar</button>
-                  <button type="button" onClick={() => setShowJoinTeam(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X /></button>
-                </form>
-              </div>
-            )}
+      ) : (
+        /* ═══════════════ TEAM TAB ═══════════════ */
+        <div style={{ display:'flex', flexDirection:'column', gap:'1.25rem' }}>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-               {loadingTeams ? <p style={{ color: '#64748b' }}>Carregando equipes...</p> : 
-                teams.length === 0 ? <p style={{ color: '#64748b', textAlign: 'center', padding: '2rem' }}>Você ainda não faz parte de nenhuma equipe.</p> :
-                teams.map(team => {
-                  const isAdmin = team.members.find(m => m.userId === currentSession.id)?.role === 'ADMIN';
-                  const isSelected = selectedTeam?.id === team.id;
-                  return (
-                    <div key={team.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', overflow: 'hidden' }}>
-                      <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <div style={{ width: 44, height: 44, borderRadius: '12px', background: 'rgba(124,58,237,0.15)', color: '#a78bfa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Users size={20} />
-                          </div>
-                          <div><h4 style={{ margin: 0, color: '#fff', fontWeight: 700 }}>{team.name}</h4><p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>{team.description || 'Sem descrição'}</p></div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                          {isAdmin && <span style={{ fontSize: '0.7rem', background: 'var(--primary)', color: '#fff', padding: '2px 8px', borderRadius: '6px', fontWeight: 700 }}>ADMIN</span>}
-                          <button onClick={() => setSelectedTeam(isSelected ? null : team)} style={{ background: 'none', border: 'none', color: isSelected ? 'var(--primary)' : '#64748b', cursor: 'pointer' }}>
-                             <Settings size={20} />
-                          </button>
-                        </div>
-                      </div>
-
-                      {isSelected && (
-                        <div style={{ padding: '1.5rem', paddingTop: 0, borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.1)' }}>
-                          <div style={{ marginTop: '1.5rem' }}>
-                            <h5 style={{ margin: '0 0 1rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Convidar Membros</h5>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#000', padding: '10px 14px', borderRadius: '10px', border: '1px solid #333' }}>
-                              <Key size={16} style={{ color: 'var(--primary)' }} />
-                              <span style={{ flex: 1, fontFamily: 'monospace', fontSize: '1.1rem', color: '#fff' }}>{team.inviteCode}</span>
-                              <button onClick={() => copyToClipboard(team.inviteCode)} className="action-btn" title="Copiar"><Share2 size={16} /></button>
-                              {isAdmin && <button onClick={() => handleResetTeamCode(team.id)} className="action-btn" title="Resetar Código"><RefreshCw size={16} /></button>}
-                            </div>
-                          </div>
-
-                          <div style={{ marginTop: '2rem' }}>
-                            <h5 style={{ margin: '0 0 1rem', color: '#94a3b8', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Permissões de Acesso (RBAC)</h5>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-                              {PAGE_OPTIONS.map(page => {
-                                const hasAccess = team.permissions?.some(p => p.name === page.id) ?? true;
-                                return (
-                                  <div key={page.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                      <page.Icon size={16} style={{ color: hasAccess ? 'var(--primary)' : '#64748b' }} />
-                                      <span style={{ fontSize: '0.85rem', color: hasAccess ? '#fff' : '#64748b' }}>{page.label}</span>
-                                    </div>
-                                    {isAdmin ? (
-                                      <button 
-                                        onClick={() => togglePermission(team, page.id)}
-                                        style={{ width: 40, height: 20, borderRadius: '10px', background: hasAccess ? 'var(--primary)' : '#334155', border: 'none', position: 'relative', cursor: 'pointer', transition: 'background 0.2s' }}>
-                                        <div style={{ position: 'absolute', top: 2, left: hasAccess ? 22 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s ease' }} />
-                                      </button>
-                                    ) : (
-                                      hasAccess ? <Check size={16} style={{ color: '#10b981' }} /> : <X size={16} style={{ color: '#ef4444' }} />
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            {!isAdmin && <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1rem', fontStyle: 'italic' }}>* Somente o administrador da equipe pode alterar permissões.</p>}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-               }
+          {/* Team header */}
+          <div className="sgc-page-header" style={{ marginBottom:0 }}>
+            <div className="sgc-page-title-block">
+              <h2 style={{ margin:0, fontSize:'1.4rem', fontWeight:900, letterSpacing:'-0.03em',
+                background:'linear-gradient(90deg,#0066FF,#10B981)', WebkitBackgroundClip:'text',
+                WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+                Gestão de Equipes
+              </h2>
+              <p style={{ margin:0, fontSize:'0.82rem', color:'var(--muted-foreground)' }}>Crie ou participe de grupos de trabalho</p>
+            </div>
+            <div className="sgc-page-actions">
+              <button className="sgc-btn-outline" onClick={()=>setShowJoinTeam(true)}>Entrar em Equipe</button>
+              <button className="sgc-btn-primary" onClick={()=>setShowCreateTeam(true)}><Plus size={15}/> Criar Equipe</button>
             </div>
           </div>
-        )}
-      </div>
-      
-      <style>{`
-        .camera-label:hover { background: #6d28d9 !important; transform: scale(1.05); }
-        .action-btn { background: none; border: none; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; transition: all 0.2s; }
-        .action-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
-      `}</style>
+
+          {/* Create team form */}
+          {showCreateTeam && (
+            <div className="sgc-card" style={{ borderColor:'rgba(0,102,255,0.25)', background:'rgba(0,102,255,0.03)' }}>
+              <div className="sgc-card-header">
+                <h3 className="sgc-card-title"><span className="sgc-card-icon"><Plus size={15}/></span> Configurar Nova Equipe</h3>
+              </div>
+              <form onSubmit={handleCreateTeam} style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+                <div className="sgc-form-group">
+                  <label className="sgc-label">Nome da Equipe</label>
+                  <input className="sgc-input" type="text" placeholder="Ex: Time de Suporte" value={teamForm.name}
+                    onChange={e=>setTeamForm(p=>({...p,name:e.target.value}))}/>
+                </div>
+                <div className="sgc-form-group">
+                  <label className="sgc-label">Descrição (opcional)</label>
+                  <input className="sgc-input" type="text" placeholder="Setor ou objetivo" value={teamForm.description}
+                    onChange={e=>setTeamForm(p=>({...p,description:e.target.value}))}/>
+                </div>
+                <div style={{ display:'flex', gap:'0.75rem' }}>
+                  <button type="button" className="sgc-btn-outline" onClick={()=>setShowCreateTeam(false)} disabled={isCreatingTeam}>Cancelar</button>
+                  <button type="submit" className="sgc-btn-primary" disabled={isCreatingTeam} style={{ flex:1, justifyContent:'center' }}>
+                    {isCreatingTeam ? 'Criando...' : 'Criar Agora'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Join team form */}
+          {showJoinTeam && (
+            <div className="sgc-card">
+              <div className="sgc-card-header">
+                <h3 className="sgc-card-title"><span className="sgc-card-icon"><Key size={15}/></span> Entrar em Equipe</h3>
+                <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center' }} onClick={()=>setShowJoinTeam(false)}><X size={15}/></button>
+              </div>
+              <p style={{ fontSize:'0.82rem', color:'var(--muted-foreground)', marginBottom:'1rem' }}>
+                Insira o código enviado pelo administrador.
+              </p>
+              <form onSubmit={handleJoinTeam} style={{ display:'flex', gap:'0.75rem' }}>
+                <input className="sgc-input" type="text" placeholder="SGC-0000" value={inviteCodeInput}
+                  onChange={e=>setInviteCodeInput(e.target.value.toUpperCase())} style={{ flex:1 }}/>
+                <button type="submit" className="sgc-btn-primary">Entrar</button>
+              </form>
+            </div>
+          )}
+
+          {/* Teams list */}
+          {loadingTeams ? (
+            <div className="sgc-card">
+              <div className="sgc-empty"><div className="sgc-empty-icon"><Users size={26}/></div><span className="sgc-empty-desc">Carregando equipes...</span></div>
+            </div>
+          ) : teams.length === 0 ? (
+            <div className="sgc-card">
+              <div className="sgc-empty">
+                <div className="sgc-empty-icon"><Users size={26}/></div>
+                <span className="sgc-empty-title">Sem equipes</span>
+                <span className="sgc-empty-desc">Crie ou entre em uma equipe para começar.</span>
+              </div>
+            </div>
+          ) : teams.map(team => {
+            const myRole   = team.members?.find(m => m.userId === currentSession.id)?.role;
+            const isAdmin  = myRole === 'ADMIN';
+            const isOpen   = selectedTeam?.id === team.id;
+
+            return (
+              <div key={team.id} className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
+                {/* Team row */}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'1.25rem 1.5rem', cursor:'pointer' }}
+                  onClick={()=>setSelectedTeam(isOpen ? null : team)}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'1rem' }}>
+                    <div className="sgc-kpi-icon blue"><Users size={18}/></div>
+                    <div>
+                      <div style={{ fontWeight:800, fontSize:'0.95rem' }}>{team.name}</div>
+                      <div style={{ fontSize:'0.78rem', color:'var(--muted-foreground)' }}>{team.description||'Sem descrição'}</div>
+                    </div>
+                  </div>
+                  <div style={{ display:'flex', alignItems:'center', gap:'0.75rem' }}>
+                    {isAdmin && <span className="sgc-badge green">ADMIN</span>}
+                    <span className={`sgc-badge ${isOpen?'blue':'gray'}`}>{isOpen?'Minimizar':'Gerenciar'}</span>
+                  </div>
+                </div>
+
+                {/* Expand: invite code + permissions */}
+                {isOpen && (
+                  <div style={{ borderTop:'1px solid rgba(0,102,255,0.08)', padding:'1.5rem' }}>
+
+                    {/* Invite code */}
+                    <p className="sgc-label" style={{ marginBottom:'0.75rem' }}>Código de Convite</p>
+                    <div style={{ display:'flex', alignItems:'center', gap:'0.75rem', background:'rgba(0,102,255,0.04)', border:'1.5px dashed rgba(0,102,255,0.2)', borderRadius:12, padding:'0.75rem 1rem', marginBottom:'2rem' }}>
+                      <Key size={16} style={{ color:'#0066FF', flexShrink:0 }}/>
+                      <span style={{ flex:1, fontFamily:'monospace', fontWeight:800, fontSize:'1.1rem', letterSpacing:'0.1em', color:'var(--foreground)' }}>{team.inviteCode}</span>
+                      <button className="sgc-btn-ghost" style={{ gap:4 }} onClick={()=>copyToClipboard(team.inviteCode)}>
+                        <Share2 size={14}/> Copiar
+                      </button>
+                      {isAdmin && (
+                        <button className="sgc-btn-ghost" style={{ gap:4 }} onClick={()=>handleResetTeamCode(team.id)}>
+                          <RefreshCw size={14}/> Resetar
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Permissions */}
+                    <p className="sgc-label" style={{ marginBottom:'0.75rem' }}>Permissões de Acesso (RBAC)</p>
+                    <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'0.6rem' }}>
+                      {PAGE_OPTIONS.map(page => {
+                        const has = team.permissions?.some(p=>p.name===page.id) ?? true;
+                        return (
+                          <div key={page.id} style={{
+                            display:'flex', alignItems:'center', justifyContent:'space-between',
+                            padding:'0.75rem 1rem', borderRadius:12,
+                            background: has ? 'rgba(0,102,255,0.04)' : 'rgba(0,0,0,0.02)',
+                            border:`1px solid ${has?'rgba(0,102,255,0.14)':'rgba(0,0,0,0.06)'}`,
+                            transition:'all 0.25s'
+                          }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'0.6rem' }}>
+                              <page.Icon size={14} style={{ color: has ? '#0066FF' : 'var(--muted-foreground)' }}/>
+                              <span style={{ fontSize:'0.82rem', fontWeight:600, color: has ? 'var(--foreground)' : 'var(--muted-foreground)' }}>{page.label}</span>
+                            </div>
+                            {isAdmin ? (
+                              <button onClick={()=>togglePermission(team,page.id)} style={{
+                                width:38, height:20, borderRadius:10,
+                                background: has ? 'linear-gradient(90deg,#0066FF,#10B981)' : 'rgba(0,0,0,0.12)',
+                                border:'none', position:'relative', cursor:'pointer', transition:'background 0.25s',
+                                boxShadow: has ? '0 3px 8px rgba(0,102,255,0.3)' : 'none'
+                              }}>
+                                <div style={{ position:'absolute', top:2, left: has?20:2, width:16, height:16, borderRadius:'50%', background:'#fff', transition:'left 0.25s', boxShadow:'0 1px 4px rgba(0,0,0,0.2)' }}/>
+                              </button>
+                            ) : (
+                              has
+                                ? <Check size={14} style={{ color:'#10B981' }}/>
+                                : <X    size={14} style={{ color:'#ef4444' }}/>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {!isAdmin && <p style={{ fontSize:'0.73rem', color:'var(--muted-foreground)', marginTop:'0.75rem', fontStyle:'italic' }}>* Somente o administrador pode alterar permissões.</p>}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

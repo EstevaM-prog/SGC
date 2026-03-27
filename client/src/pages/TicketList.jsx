@@ -1,88 +1,82 @@
 import React, { useState } from 'react';
+import { List, Plus, Filter } from 'lucide-react';
 import DataTable from '../components/DataTable';
 import TableActions from '../components/TableActions';
 
 export default function TicketList({ tickets, searchTerm, onNewTicket, onEdit, onDelete }) {
   const [statusFilter, setStatusFilter] = useState('');
 
-  // Filter logic
-  const validTickets = tickets.filter(r => !r.deleted && r.type !== 'cnpj_record');
-
-  const filteredTickets = validTickets.filter(t => {
+  const valid = tickets.filter(r => !r.deleted && r.type !== 'cnpj_record');
+  const filtered = valid.filter(t => {
     if (statusFilter && t.situacao !== statusFilter) return false;
-
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      const textMatch = (t.numero || '').toLowerCase().includes(q)
-        || (t.requisitante || '').toLowerCase().includes(q)
-        || (t.razao || '').toLowerCase().includes(q)
-        || (t.cnpj || '').toLowerCase().includes(q)
-        || (t.situacao || '').toLowerCase().includes(q)
-        || (t.pedido || '').toLowerCase().includes(q);
-
-      if (!textMatch) return false;
+      return (t.numero||'').toLowerCase().includes(q)
+          || (t.requisitante||'').toLowerCase().includes(q)
+          || (t.razao||'').toLowerCase().includes(q)
+          || (t.cnpj||'').toLowerCase().includes(q)
+          || (t.situacao||'').toLowerCase().includes(q)
+          || (t.pedido||'').toLowerCase().includes(q);
     }
     return true;
   });
 
+  const STATUS_OPTIONS = ['Aberto','Processando','Escriturar','Solucionado','Cancelado'];
+
   return (
     <section id="view-list" className="view-section active">
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">Lista de Chamados</h2>
-          <p className="section-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
+
+      {/* ── Page Header ── */}
+      <div className="sgc-page-header">
+        <div className="sgc-page-title-block">
+          <h1 className="sgc-page-title">Lista de Chamados</h1>
+          <p className="sgc-page-subtitle">Gerencie e acompanhe todos os chamados do sistema</p>
         </div>
-        <button className="btn-secondary" onClick={onNewTicket}>
-          Novo Chamado
-        </button>
+        <div className="sgc-page-actions">
+          <TableActions
+            data={filtered.map(({ id, type, deleted, createdAt, updatedAt, ...rest }) => rest)}
+            onImport={items => {
+              if (window.confirm(`Deseja importar ${items.length} registros?`))
+                items.forEach(item => onNewTicket({ ...item, type:'ticket' }));
+            }}
+            filename="lista-chamados"
+          />
+          <button className="sgc-btn-primary" onClick={onNewTicket}>
+            <Plus size={16} /> Novo Chamado
+          </button>
+        </div>
       </div>
 
-      <div className="filter-section-container" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <label htmlFor="situacao" className="filter-label" style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--muted-foreground)', textTransform: 'uppercase' }}>
-            Filtrar por status:
-          </label>
-          <select
-            id="situacao"
-            className="custom-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{ minWidth: '160px' }}
-          >
-            <option value="">Todos os Status</option>
-            <option value="Aberto">Aberto</option>
-            <option value="Processando">Processando</option>
-            <option value="Escriturar">Escriturar</option>
-            <option value="Solucionado">Solucionado</option>
-            <option value="Cancelado">Cancelado</option>
-          </select>
+      {/* ── Filter Bar ── */}
+      <div className="sgc-filter-bar">
+        <div style={{ display:'flex', alignItems:'center', gap:'0.5rem' }}>
+          <Filter size={15} style={{ color:'#0066FF' }} />
+          <span style={{ fontSize:'0.78rem', fontWeight:700, color:'var(--muted-foreground)', textTransform:'uppercase', letterSpacing:'0.05em' }}>
+            Status:
+          </span>
         </div>
 
-        <TableActions
-          data={filteredTickets.map(t => {
-            const { id, type, deleted, createdAt, updatedAt, ...rest } = t;
-            return rest; // Remove internal IDs for export
-          })}
-          onImport={(items) => {
-            // Mapping for standard tickets – logic could be more complex
-            if (window.confirm(`Deseja importar ${items.length} registros?`)) {
-              items.forEach(item => {
-                // Ensure correct structure if keys are different
-                onNewTicket({ ...item, type: 'ticket' }); // This depends on how onNewTicket handles saving
-              });
-            }
-          }}
-          filename="lista-chamados"
-        />
+        <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
+          <button
+            className={`sgc-tab-btn ${!statusFilter ? 'active' : ''}`}
+            style={{ height:34, padding:'0 0.75rem', fontSize:'0.8rem' }}
+            onClick={() => setStatusFilter('')}
+          >Todos</button>
+          {STATUS_OPTIONS.map(s => (
+            <button
+              key={s}
+              className={`sgc-tab-btn ${statusFilter === s ? 'active' : ''}`}
+              style={{ height:34, padding:'0 0.75rem', fontSize:'0.8rem' }}
+              onClick={() => setStatusFilter(statusFilter === s ? '' : s)}
+            >{s}</button>
+          ))}
+        </div>
       </div>
 
-      <div className="card">
-        <DataTable
-          tickets={filteredTickets}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+      {/* ── Table Card ── */}
+      <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
+        <DataTable tickets={filtered} onEdit={onEdit} onDelete={onDelete} />
       </div>
-    </section >
+    </section>
   );
 }

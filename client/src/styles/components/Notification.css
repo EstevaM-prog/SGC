@@ -1,145 +1,188 @@
+/* ═══════════════════════════════════════════════════════════════
+   NOTIFICATION — Blue/Green SGC Design System
+═══════════════════════════════════════════════════════════════ */
+
 .notification-wrapper {
   position: relative;
-  /* Obrigatório para o popover saber onde se alinhar */
   display: flex;
   align-items: center;
 }
 
-/* Ponto vermelho de aviso */
+/* ── Bell button ── */
+/* Reuses .sgc-tb-icon-btn from Header.css — just the dot is specific */
+
+/* ── Unread dot ── */
 .tb-notif-dot {
   position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 7px;
-  height: 7px;
-  background-color: #ff4d4d;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  background: #10B981;
   border-radius: 50%;
-  border: 1.5px solid white;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 2px var(--card, #fff);
+  animation: notif-pulse 2s ease infinite;
+  pointer-events: none;
 }
 
-/* Estilo da mini tela */
+body.dark .tb-notif-dot {
+  box-shadow: 0 0 0 2px #020d1a;
+}
+
+@keyframes notif-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.7), 0 0 0 2px var(--card, #fff); }
+  60%  { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0),   0 0 0 2px var(--card, #fff); }
+  100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0),   0 0 0 2px var(--card, #fff); }
+}
+
+/* ── Popover ── */
 .tb-notif-popover {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   right: 0;
-  width: 280px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  width: 320px;
+  background: var(--card);
+  border: 1px solid rgba(0, 102, 255, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 102, 255, 0.08);
   z-index: 9999;
   overflow: hidden;
-  animation: slideDown 0.2s ease-out;
+  animation: notif-drop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+body.dark .tb-notif-popover {
+  background: #0c1929;
+  border-color: rgba(0, 102, 255, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 102, 255, 0.15);
+}
+
+@keyframes notif-drop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Top gradient bar */
+.tb-notif-popover::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0066FF, #10B981);
+  border-radius: 18px 18px 0 0;
+}
+
+/* ── Header ── */
 .tb-notif-header {
-  padding: 12px 16px;
-  background: #f8fafc;
   display: flex;
   justify-content: space-between;
-  font-size: 13px;
-  font-weight: 600;
-  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+  padding: 1rem 1.1rem 0.75rem;
+  margin-top: 3px;               /* offset for gradient bar */
+}
+
+.tb-notif-header > span:first-child {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
 }
 
 .tb-notif-count {
-  color: #64748b;
-  font-weight: normal;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #0066FF;
+  background: rgba(0, 102, 255, 0.08);
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  padding: 2px 8px;
+  border-radius: 99px;
 }
 
+/* ── List ── */
+.tb-notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0 0.5rem 0.5rem;
+}
+
+.tb-notif-list::-webkit-scrollbar { width: 4px; }
+.tb-notif-list::-webkit-scrollbar-track { background: transparent; }
+.tb-notif-list::-webkit-scrollbar-thumb { background: rgba(0, 102, 255, 0.2); border-radius: 99px; }
+
+/* ── Item ── */
 .tb-notif-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
-  transition: background 0.2s;
-}
-
-.tb-notif-item:hover {
-  background: #f8fafc;
-}
-
-.tb-notif-item p {
-  margin: 0;
-  font-size: 13px;
-  color: #334155;
-}
-
-.tb-notif-item small {
-  color: #94a3b8;
-  font-size: 11px;
-}
-
-.tb-notif-all {
-  width: 100%;
-  padding: 10px;
-  background: white;
-  border: none;
-  color: #3b82f6;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 0.7rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+  transition: background 0.2s ease, border-color 0.2s ease;
   cursor: pointer;
 }
 
-.tb-notif-all:hover {
-  text-decoration: underline;
+.tb-notif-item:hover {
+  background: rgba(0, 102, 255, 0.04);
+  border-color: rgba(0, 102, 255, 0.1);
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+body.dark .tb-notif-item:hover {
+  background: rgba(0, 102, 255, 0.07);
 }
 
-.topbar-glass {
-  /* ... suas outras regras ... */
-  overflow: visible !important;
-  /* CRÍTICO: permite que o popover apareça */
-  position: relative;
-  z-index: 100;
-  /* Garante que o header fique acima do conteúdo da página */
+.tb-notif-item p {
+  margin: 0 0 3px;
+  font-size: 0.82rem;
+  color: var(--foreground);
+  font-weight: 500;
+  line-height: 1.45;
 }
 
-.notification-wrapper {
+.tb-notif-item small {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* ── Type variants ── */
+.tb-notif-item.success { background: rgba(16, 185, 129, 0.04); }
+.tb-notif-item.success:hover { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); }
+.tb-notif-item.success p { color: #10B981; }
+
+.tb-notif-item.info { background: rgba(0, 102, 255, 0.04); }
+.tb-notif-item.info:hover { background: rgba(0, 102, 255, 0.08); border-color: rgba(0, 102, 255, 0.2); }
+.tb-notif-item.info p { color: #0066FF; }
+
+.tb-notif-item.warning { background: rgba(245, 158, 11, 0.04); }
+.tb-notif-item.warning:hover { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); }
+.tb-notif-item.warning p { color: #d97706; }
+
+/* ── Empty ── */
+.tb-notif-empty {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* ── Footer button ── */
+.tb-notif-all {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(0, 102, 255, 0.08);
+  color: #0066FF;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  position: relative;
-  /* Base para o popover se guiar */
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.tb-notif-popover {
-  position: absolute;
-  top: 50px;
-  /* Distância do topo (ajuste conforme a altura do seu header) */
-  right: 0;
-  width: 300px;
-  background-color: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  /* Valor altíssimo para ficar na frente de tudo */
-  display: block;
-  /* Garante que seja um bloco */
-  color: #333;
-  /* Cor do texto caso o tema esteja escuro */
-}
-
-/* Estilo para os itens dentro da lista */
-.tb-notif-list {
-  max-height: 350px;
-  overflow-y: auto;
-}
-
-.tb-notif-item {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.tb-notif-item:hover {
-  background-color: #f8fafc;
+.tb-notif-all:hover {
+  background: rgba(0, 102, 255, 0.05);
+  color: #10B981;
 }

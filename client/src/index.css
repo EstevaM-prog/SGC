@@ -1,7 +1,9 @@
 @import './styles/variables.css';
 @import './styles/global.css';
+@import './styles/pages/Pages.css';
 @import './styles/components/Sidebar.css';
 @import './styles/components/Header.css';
 @import './styles/components/DataTable.css';
 @import './styles/components/Modal.css';
 @import './styles/components/Toast.css';
+

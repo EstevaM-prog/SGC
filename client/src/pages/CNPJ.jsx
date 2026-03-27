@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Edit, Download, Upload, FileCheck, FileDown, AlertTriangle } from 'lucide-react';
+import { Edit, Download, Upload, Table, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 import '../styles/pages/CNPJ.css';
@@ -8,10 +8,9 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket, add
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Helper: Mask CNPJ (handle letters/symbols like in TicketForm)
   const formatCNPJ = (v = '') => {
     if (!v) return '';
-    let val = v.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 14);
+    let val = v.replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,14);
     if (val.length > 12) return val.replace(/^(.{2})(.{3})(.{3})(.{4})(.{2}).*/, '$1.$2.$3/$4-$5');
     if (val.length > 8)  return val.replace(/^(.{2})(.{3})(.{3})(.{4}).*/, '$1.$2.$3/$4');
     if (val.length > 5)  return val.replace(/^(.{2})(.{3})(.{0,3}).*/, '$1.$2.$3');
@@ -19,214 +18,144 @@ export default function CNPJ({ tickets, onEdit, onAddTicket, onUpdateTicket, add
     return val;
   };
 
-  // Primary Key Logic: De-duplicate tickets by CNPJ
   const uniqueList = useMemo(() => {
     const map = new Map();
-    tickets
-      .filter(r => !r.deleted && (r.cnpj || '').trim() !== '')
-      .forEach(t => {
-        // We keep the most recent version (latest update)
-        const cleanCnpj = t.cnpj.replace(/\D/g, '');
-        const existing = map.get(cleanCnpj);
-        if (!existing || new Date(t.updatedAt) > new Date(existing.updatedAt)) {
-          map.set(cleanCnpj, t);
-        }
-      });
+    tickets.filter(r => !r.deleted && (r.cnpj||'').trim() !== '').forEach(t => {
+      const key = t.cnpj.replace(/\D/g,'');
+      const ex  = map.get(key);
+      if (!ex || new Date(t.updatedAt) > new Date(ex.updatedAt)) map.set(key, t);
+    });
     return Array.from(map.values()).sort((a,b) => a.razao.localeCompare(b.razao));
   }, [tickets]);
 
-  // Export to Excel (.xlsx)
   const handleExport = () => {
     toast.success('Exportando lista...');
-    const data = uniqueList.map(item => ({
-      'Razão Social': item.razao,
-      'CNPJ': item.cnpj,
-      'Requisitante': item.requisitante,
-      'Setor': item.setor,
-      'Código Ética': item.codEtica === 'sim' ? 'Sim' : 'Não'
+    const data = uniqueList.map(i => ({
+      'Razão Social': i.razao, 'CNPJ': i.cnpj,
+      'Requisitante': i.requisitante, 'Setor': i.setor,
     }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Empresas");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Empresas');
     XLSX.writeFile(wb, `Lista_CNPJ_${new Date().toISOString().split('T')[0]}.xlsx`);
-
-    if (addActivity) {
-      addActivity({
-        text: `Exportação de CNPJs`,
-        description: `Exportado arquivo Excel com ${data.length} empresas registradas.`,
-        type: 'info',
-        iconType: 'resolved'
-      });
-    }
+    if (addActivity) addActivity({ text:'Exportação de CNPJs', description:`${data.length} empresas exportadas.`, type:'info' });
   };
 
-  // Import from Excel/CSV
-  const handleImportClick = () => fileInputRef.current?.click();
-
-  const handleFileChange = (e) => {
+  const handleFileChange = e => {
     const file = e.target.files?.[0];
     if (!file || isImporting) return;
-
     setIsImporting(true);
-    const loadingToast = toast.loading('Processando arquivo...');
-
+    const t = toast.loading('Processando arquivo...');
     const reader = new FileReader();
-    reader.onload = async (evt) => {
+    reader.onload = async evt => {
       try {
-        const bstr = evt.target.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
-
-        if (data.length === 0) {
-          toast.error('O arquivo está vazio!', { id: loadingToast });
-          setIsImporting(false);
-          return;
-        }
-
-        let importedCount = 0;
-        let updatedCount = 0;
-        let errorsCount = 0;
-
-        // Process in small batches or simulate delay
-        await new Promise(r => setTimeout(r, 1000));
-
+        const wb = XLSX.read(evt.target.result, { type:'binary' });
+        const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        if (!data.length) { toast.error('Arquivo vazio!', { id:t }); setIsImporting(false); return; }
+        await new Promise(r => setTimeout(r, 800));
+        let added = 0, updated = 0;
         data.forEach(row => {
-          const rawCnpj = (row['CNPJ'] || row['cnpj'] || '').toString();
-          const cleanCnpj = rawCnpj.replace(/\D/g, '');
-          const razao = row['Razão Social'] || row['razao'] || '';
-          
-          if (!cleanCnpj || !razao) {
-            errorsCount++;
-            return;
-          }
-
-          const existing = uniqueList.find(t => t.cnpj.replace(/\D/g, '') === cleanCnpj);
-
-          const payload = {
-            razao,
-            cnpj: formatCNPJ(cleanCnpj),
-            requisitante: row['Requisitante'] || row['requisitante'] || '',
-            setor: row['Setor'] || row['setor'] || '',
-            updatedAt: new Date().toISOString()
-          };
-
-          if (existing) {
-            onUpdateTicket(existing.id, payload);
-            updatedCount++;
-          } else {
-            onAddTicket(payload);
-            importedCount++;
-          }
+          const rawCnpj = (row['CNPJ']||row['cnpj']||'').toString();
+          const cleanCnpj = rawCnpj.replace(/\D/g,'');
+          const razao = row['Razão Social']||row['razao']||'';
+          if (!cleanCnpj || !razao) return;
+          const ex = uniqueList.find(i => i.cnpj.replace(/\D/g,'') === cleanCnpj);
+          const payload = { razao, cnpj:formatCNPJ(cleanCnpj), requisitante:row['Requisitante']||'', setor:row['Setor']||'', updatedAt:new Date().toISOString() };
+          if (ex) { onUpdateTicket(ex.id, payload); updated++; }
+          else { onAddTicket(payload); added++; }
         });
-
-        if (addActivity) {
-          addActivity({
-            text: `Importação de Arquivo Realizada`,
-            description: `Importado arquivo com ${data.length} registros (${importedCount} novos, ${updatedCount} atualizados).`,
-            type: 'success',
-            iconType: 'resolved'
-          });
-        }
-
-        toast.success("Criado com sucesso!", { id: loadingToast });
-      } catch (err) {
-        console.error(err);
-        toast.error("Erro no chamado!", { id: loadingToast });
-      } finally {
-        setIsImporting(false);
-      }
-      e.target.value = ''; // Reset input
+        if (addActivity) addActivity({ text:'Importação de Arquivo', description:`${added} novos, ${updated} atualizados.`, type:'success' });
+        toast.success('Importado com sucesso!', { id:t });
+      } catch { toast.error('Erro ao processar!', { id:t }); }
+      finally { setIsImporting(false); e.target.value=''; }
     };
     reader.readAsBinaryString(file);
   };
 
   return (
     <section id="view-cnpj" className="view-section active">
-      <div className="section-header">
-        <div>
-          <h2 className="section-title">Gerenciamento de Empresas (CNPJ)</h2>
-          <p className="section-subtitle">Banco de dados de parceiros e clientes. Sincronizado com os chamados.</p>
-        </div>
 
-        <div className="section-header-actions" style={{ display: 'flex', gap: '0.75rem' }}>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".xlsx,.xls,.csv" 
-            style={{ display: 'none' }} 
-          />
-          <button 
-            className="tb-icon-btn" 
-            onClick={handleImportClick} 
-            title="Importar Excel/CSV"
-            disabled={isImporting}
-            style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: 'auto', padding: '0 1rem', display: 'flex', gap: '8px' }}
-          >
-            <Upload size={18} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-              {isImporting ? 'Processando...' : 'Importar'}
-            </span>
+      {/* ── Page Header ── */}
+      <div className="sgc-page-header">
+        <div className="sgc-page-title-block">
+          <h1 className="sgc-page-title">Tabela CNPJ</h1>
+          <p className="sgc-page-subtitle">
+            Banco de dados de parceiros e clientes — {uniqueList.length} empresa{uniqueList.length !== 1?'s':''} cadastrada{uniqueList.length !== 1?'s':''}
+          </p>
+        </div>
+        <div className="sgc-page-actions">
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.xls,.csv" style={{ display:'none' }} />
+          <button className="sgc-btn-outline" onClick={() => fileInputRef.current?.click()} disabled={isImporting}>
+            <Upload size={15}/> {isImporting ? 'Importando...' : 'Importar'}
           </button>
-          
-          <button 
-            className="tb-icon-btn" 
-            onClick={handleExport} 
-            title="Exportar para Excel"
-            style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', width: 'auto', padding: '0 1rem', display: 'flex', gap: '8px' }}
-          >
-            <Download size={18} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Exportar</span>
+          <button className="sgc-btn-primary" onClick={handleExport}>
+            <Download size={15}/> Exportar Excel
           </button>
         </div>
       </div>
 
-      <div className="card">
-        <div className="table-wrapper">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Razão Social</th>
-                <th>CNPJ (Primary Key)</th>
-                <th>Requisitante</th>
-                <th>Setor</th>
-                <th className="text-right">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {uniqueList.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="empty-state">
-                    <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.6 }}>
-                      <AlertTriangle size={32} style={{ margin: '0 auto 1rem' }} />
-                      <p>Nenhuma empresa cadastrada ou arquivo importado.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                uniqueList.map(item => (
+      {/* ── KPI Strip ── */}
+      <div className="sgc-kpi-grid" style={{ gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', marginBottom:'1.5rem' }}>
+        <div className="sgc-kpi-card">
+          <div className="sgc-kpi-icon gradient"><Table size={20}/></div>
+          <div className="sgc-kpi-body">
+            <span className="sgc-kpi-label">Empresas Cadastradas</span>
+            <span className="sgc-kpi-value">{uniqueList.length}</span>
+          </div>
+        </div>
+        <div className="sgc-kpi-card">
+          <div className="sgc-kpi-icon green"><Edit size={20}/></div>
+          <div className="sgc-kpi-body">
+            <span className="sgc-kpi-label">Última Atualização</span>
+            <span className="sgc-kpi-value" style={{ fontSize:'1rem' }}>
+              {uniqueList[0]?.updatedAt ? new Date(uniqueList[0].updatedAt).toLocaleDateString('pt-BR') : '—'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Table ── */}
+      {uniqueList.length === 0 ? (
+        <div className="sgc-card">
+          <div className="sgc-empty">
+            <div className="sgc-empty-icon"><AlertTriangle size={28}/></div>
+            <span className="sgc-empty-title">Nenhuma empresa cadastrada</span>
+            <span className="sgc-empty-desc">Importe um arquivo Excel/CSV ou crie um chamado para adicionar empresas.</span>
+          </div>
+        </div>
+      ) : (
+        <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
+          <div className="sgc-table-wrap" style={{ border:'none' }}>
+            <table className="sgc-table">
+              <thead><tr>
+                <th>Razão Social</th><th>CNPJ</th><th>Requisitante</th><th>Setor</th><th style={{ textAlign:'right' }}>Ações</th>
+              </tr></thead>
+              <tbody>
+                {uniqueList.map(item => (
                   <tr key={item.id}>
-                    <td style={{ fontWeight: 600 }}>{item.razao}</td>
-                    <td style={{ fontFamily: 'monospace', letterSpacing: '0.5px' }}>{item.cnpj}</td>
+                    <td style={{ fontWeight:700 }}>{item.razao}</td>
+                    <td style={{ fontFamily:'monospace', fontSize:'0.85rem', letterSpacing:'0.5px', color:'#0066FF' }}>{item.cnpj}</td>
                     <td>{item.requisitante}</td>
-                    <td><span className="chip" style={{ background: 'var(--secondary)' }}>{item.setor || '-'}</span></td>
-                    <td className="actions-cell">
-                      <div className="action-buttons">
-                        <button className="action-btn edit" title="Editar" onClick={() => onEdit(item)}>
-                          <Edit size={16} />
+                    <td>
+                      {item.setor
+                        ? <span className="sgc-badge blue">{item.setor}</span>
+                        : <span style={{ color:'var(--muted-foreground)', fontSize:'0.8rem' }}>—</span>
+                      }
+                    </td>
+                    <td>
+                      <div style={{ display:'flex', justifyContent:'flex-end' }}>
+                        <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#0066FF' }}
+                          onClick={() => onEdit(item)} title="Editar">
+                          <Edit size={15}/>
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

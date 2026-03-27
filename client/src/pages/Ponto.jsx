@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Clock, Calendar, CheckCircle2, XCircle, Pencil } from 'lucide-react';
+import { Plus, Trash2, Clock, Calendar, CheckCircle2, XCircle, Pencil, Timer } from 'lucide-react';
 import toast from 'react-hot-toast';
 import '../styles/pages/Ponto.css';
 
@@ -8,260 +8,174 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
     data: new Date().toISOString().split('T')[0],
-    entrada: '',
-    saida: ''
+    entrada: '', saida: ''
   });
 
-  // Configuração padrão: 1h de almoço (60min) e 8h de jornada (480min)
-  const INTERVALO_PADRAO = 60;
-  const JORNADA_PADRAO = 480;
+  const INTERVALO = 60;
+  const JORNADA   = 480;
 
-  const calculateMinutes = (entrada, saida) => {
-    if (!entrada || !saida) return 0;
-    const [h1, m1] = entrada.split(':').map(Number);
-    const [h2, m2] = saida.split(':').map(Number);
-    let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-    if (diff < 0) diff += 24 * 60;
-    return diff;
+  const calcMin = (e, s) => {
+    if (!e || !s) return 0;
+    const [h1,m1] = e.split(':').map(Number);
+    const [h2,m2] = s.split(':').map(Number);
+    let d = (h2*60+m2)-(h1*60+m1);
+    if (d < 0) d += 1440;
+    return d;
   };
+  const saldo   = (e, s) => calcMin(e,s) === 0 ? 0 : calcMin(e,s) - INTERVALO - JORNADA;
+  const fmtSaldo = min => `${min<0?'−':'+'}${Math.floor(Math.abs(min)/60)}h ${String(Math.abs(min)%60).padStart(2,'0')}m`;
 
-  const getSaldoMinutos = (entrada, saida) => {
-    const minutosTrabalhados = calculateMinutes(entrada, saida);
-    if (minutosTrabalhados === 0) return 0;
-    return minutosTrabalhados - INTERVALO_PADRAO - JORNADA_PADRAO;
-  };
-
-  const formatSaldo = (minutos) => {
-    const sinal = minutos < 0 ? "-" : "+";
-    const absMinutos = Math.abs(minutos);
-    const hours = Math.floor(absMinutos / 60);
-    const minutes = absMinutos % 60;
-    return `${sinal}${hours}h ${minutes.toString().padStart(2, '0')}m`;
-  };
-
-  const handleEdit = (t) => {
+  const handleEdit = t => {
     setEditingId(t.id);
-    setFormData({
-      data: t.data,
-      entrada: t.entrada,
-      saida: t.saida
-    });
+    setFormData({ data:t.data, entrada:t.entrada, saida:t.saida });
     setShowForm(true);
   };
 
-  const handleSave = async (e) => {
+  const handleSave = async e => {
     e.preventDefault();
-    const loadingToast = toast.loading(editingId ? 'Atualizando ponto...' : 'Registrando ponto...');
-
+    const id = toast.loading(editingId ? 'Atualizando ponto...' : 'Registrando ponto...');
     try {
-      const saldoMin = getSaldoMinutos(formData.entrada, formData.saida);
-      const saldoFormatado = formatSaldo(saldoMin);
-
-      const recordData = {
-        ...formData,
-        resultado: saldoFormatado,
-        saldoMinutos: saldoMin, // Guardamos o valor numérico para cálculos
-        type: 'ponto_record',
-        updatedAt: new Date().toISOString()
-      };
-
-      await new Promise(r => setTimeout(r, 600));
-
-      if (editingId) {
-        updateTicket(editingId, recordData);
-      } else {
-        addTicket({
-          ...recordData,
-          createdAt: new Date().toISOString()
-        });
-      }
-
-      if (addActivity) {
-        addActivity({
-          text: editingId ? `Registro de Ponto Alterado` : `Novo Registro de Ponto`,
-          description: `Data: ${new Date(formData.data + 'T00:00:00').toLocaleDateString('pt-BR')} | Entrada: ${formData.entrada} | Saída: ${formData.saida} | Saldo: ${saldoFormatado}`,
-          type: editingId ? 'warning' : 'info',
-          iconType: 'time'
-        });
-      }
-
-      toast.success("Criado com sucesso!", { id: loadingToast });
-      setEditingId(null);
-      setFormData({
-        data: new Date().toISOString().split('T')[0],
-        entrada: '',
-        saida: ''
+      const s     = saldo(formData.entrada, formData.saida);
+      const sfmt  = fmtSaldo(s);
+      const payload = { ...formData, resultado:sfmt, saldoMinutos:s, type:'ponto_record', updatedAt:new Date().toISOString() };
+      await new Promise(r => setTimeout(r, 500));
+      if (editingId) updateTicket(editingId, payload);
+      else addTicket({ ...payload, createdAt: new Date().toISOString() });
+      if (addActivity) addActivity({
+        text: editingId ? 'Registro de Ponto Alterado' : 'Novo Registro de Ponto',
+        description: `${formData.data} | ${formData.entrada} → ${formData.saida} | Saldo: ${sfmt}`,
+        type: editingId ? 'warning' : 'info', iconType:'time'
       });
+      toast.success('Salvo com sucesso!', { id });
+      setEditingId(null);
+      setFormData({ data: new Date().toISOString().split('T')[0], entrada:'', saida:'' });
       setShowForm(false);
-    } catch (err) {
-      console.error(err);
-      toast.error("Erro no chamado!", { id: loadingToast });
-    }
+    } catch { toast.error('Erro ao salvar!', { id }); }
   };
 
-  const handleCancel = () => {
-    setShowForm(false);
-    setEditingId(null);
-    setFormData({
-      data: new Date().toISOString().split('T')[0],
-      entrada: '',
-      saida: ''
-    });
-  };
+  const cancel = () => { setShowForm(false); setEditingId(null); setFormData({ data:new Date().toISOString().split('T')[0], entrada:'', saida:'' }); };
 
-  const pontoRecords = tickets.filter(t => t.type === 'ponto_record' && !t.deleted);
-
-  // Cálculo do saldo total (minutos totais acumulados)
-  const totalSaldoMinutos = pontoRecords.reduce((acc, t) => acc + (t.saldoMinutos || 0), 0);
-  const totalFormatado = formatSaldo(totalSaldoMinutos);
-  const isNegative = totalSaldoMinutos < 0;
-  const isPositive = totalSaldoMinutos > 0;
+  const records = tickets.filter(t => t.type === 'ponto_record' && !t.deleted);
+  const totalMin = records.reduce((a,t) => a + (t.saldoMinutos||0), 0);
+  const totalFmt = fmtSaldo(totalMin);
+  const isNeg = totalMin < 0;
+  const isPos = totalMin > 0;
 
   return (
     <div className="view-section active">
-      <div className="section-header ponto-header">
-        <div className="ponto-title-wrap">
-          <h2 className="section-title">Registro de Ponto</h2>
-          <p className="section-subtitle">Gerencie seu controle de horas trabalhadas</p>
-        </div>
 
-        <div className="ponto-stats-wrap">
-          <div className={`card ponto-balance-card`} style={{
-            borderLeft: `4px solid ${isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--border)')}`
+      {/* ── Page Header ── */}
+      <div className="sgc-page-header">
+        <div className="sgc-page-title-block">
+          <h1 className="sgc-page-title">Registro de Ponto</h1>
+          <p className="sgc-page-subtitle">Controle de horas trabalhadas e banco de horas</p>
+        </div>
+        <div className="sgc-page-actions">
+          {/* Saldo card */}
+          <div style={{
+            display:'flex', alignItems:'center', gap:'0.875rem',
+            padding:'0.6rem 1.1rem', borderRadius:14,
+            background: isNeg ? 'rgba(239,68,68,0.08)' : isPos ? 'rgba(16,185,129,0.08)' : 'rgba(0,102,255,0.06)',
+            border: `1.5px solid ${isNeg ? 'rgba(239,68,68,0.2)' : isPos ? 'rgba(16,185,129,0.2)' : 'rgba(0,102,255,0.15)'}`,
           }}>
-            <div className="ponto-balance-content">
-              <label className="ponto-balance-label">
-                Saldo Acumulado
-              </label>
-              <div className="ponto-balance-value-row">
-                <span className="ponto-balance-value" style={{
-                  color: isNegative ? 'var(--destructive)' : (isPositive ? 'var(--success)' : 'var(--foreground)')
-                }}>
-                  {totalFormatado}
-                </span>
-                <span className={`status-badge ${isNegative ? 'status-cancelado' : (isPositive ? 'status-solucionado' : '')}`} style={{ fontSize: '0.65rem' }}>
-                  {isNegative ? 'DEVEDOR' : (isPositive ? 'EXTRAS' : 'ZERADO')}
-                </span>
-              </div>
+            <Timer size={18} style={{ color: isNeg ? '#ef4444' : isPos ? '#10B981' : '#0066FF' }} />
+            <div>
+              <div style={{ fontSize:'0.65rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.07em', color:'var(--muted-foreground)' }}>Saldo Acumulado</div>
+              <div style={{ fontSize:'1rem', fontWeight:800, color: isNeg ? '#ef4444' : isPos ? '#10B981' : 'var(--foreground)' }}>{totalFmt}</div>
             </div>
+            <span className={`sgc-badge ${isNeg ? 'red' : isPos ? 'green' : 'blue'}`}>{isNeg ? 'DEVEDOR' : isPos ? 'EXTRAS' : 'ZERADO'}</span>
           </div>
 
           <button
-            className="btn-primary"
-            onClick={showForm ? handleCancel : () => setShowForm(true)}
+            className={showForm ? 'sgc-btn-outline' : 'sgc-btn-primary'}
+            onClick={showForm ? cancel : () => setShowForm(true)}
           >
-            {showForm ? <XCircle size={18} /> : <Plus size={18} />}
-            <span>{showForm ? 'Cancelar' : 'Bater Ponto'}</span>
+            {showForm ? <><XCircle size={16}/> Cancelar</> : <><Plus size={16}/> Bater Ponto</>}
           </button>
         </div>
       </div>
 
+      {/* ── Form ── */}
       {showForm && (
-        <div className="card" style={{ marginBottom: '2rem', animation: 'fadeIn 0.3s ease' }}>
-          <form onSubmit={handleSave} className="form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-                <Calendar size={14} style={{ marginRight: '6px' }} /> Data
-              </label>
-              <input
-                type="date"
-                className="form-input"
-                value={formData.data}
-                onChange={e => setFormData({ ...formData, data: e.target.value })}
-                required
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
-              />
+        <div className="sgc-card" style={{ marginBottom:'1.5rem', animation:'page-enter 0.35s both' }}>
+          <div className="sgc-card-header">
+            <h3 className="sgc-card-title">
+              <span className="sgc-card-icon"><Clock size={15}/></span>
+              {editingId ? 'Editar Registro' : 'Novo Registro de Ponto'}
+            </h3>
+          </div>
+          <form onSubmit={handleSave} style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:'1rem' }}>
+            <div className="sgc-form-group">
+              <label className="sgc-label"><Calendar size={12}/> Data</label>
+              <input className="sgc-input" type="date" value={formData.data}
+                onChange={e => setFormData({...formData,data:e.target.value})} required />
             </div>
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-                <Clock size={14} style={{ marginRight: '6px' }} /> Entrada
-              </label>
-              <input
-                type="time"
-                className="form-input"
-                value={formData.entrada}
-                onChange={e => setFormData({ ...formData, entrada: e.target.value })}
-                required
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
-              />
+            <div className="sgc-form-group">
+              <label className="sgc-label"><Clock size={12}/> Entrada</label>
+              <input className="sgc-input" type="time" value={formData.entrada}
+                onChange={e => setFormData({...formData,entrada:e.target.value})} required />
             </div>
-            <div className="form-group">
-              <label className="form-label" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
-                <Clock size={14} style={{ marginRight: '6px' }} /> Saída
-              </label>
-              <input
-                type="time"
-                className="form-input"
-                value={formData.saida}
-                onChange={e => setFormData({ ...formData, saida: e.target.value })}
-                required
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--input)', color: 'var(--foreground)' }}
-              />
+            <div className="sgc-form-group">
+              <label className="sgc-label"><Clock size={12}/> Saída</label>
+              <input className="sgc-input" type="time" value={formData.saida}
+                onChange={e => setFormData({...formData,saida:e.target.value})} required />
             </div>
-            <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                <CheckCircle2 size={18} /> {editingId ? 'Salvar Edição' : 'Salvar Registro'}
+            <div className="sgc-form-group" style={{ justifyContent:'flex-end' }}>
+              <label className="sgc-label" style={{ opacity:0 }}>.</label>
+              <button type="submit" className="sgc-btn-primary" style={{ justifyContent:'center' }}>
+                <CheckCircle2 size={15}/> {editingId ? 'Salvar Edição' : 'Salvar Registro'}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="card">
-        <div className="table-wrapper" style={{ overflowX: 'auto' }}>
-          <table className="data-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '1rem' }}>Data</th>
-                <th style={{ padding: '1rem' }}>Entrada</th>
-                <th style={{ padding: '1rem' }}>Saída</th>
-                <th style={{ padding: '1rem' }}>Resultado</th>
-                <th style={{ padding: '1rem', textAlign: 'right' }}>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pontoRecords.length > 0 ? (
-                pontoRecords.map((t) => (
-                  <tr key={t.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ padding: '1rem' }}>{new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                    <td style={{ padding: '1rem' }}>{t.entrada}</td>
-                    <td style={{ padding: '1rem' }}>{t.saida}</td>
-                    <td style={{ padding: '1rem' }}>
-                      <span className={`status-badge ${t.resultado.startsWith('-') ? 'status-cancelado' : 'status-solucionado'}`}>
+      {/* ── Table ── */}
+      {records.length > 0 ? (
+        <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
+          <div className="sgc-table-wrap" style={{ border:'none' }}>
+            <table className="sgc-table">
+              <thead><tr>
+                <th>Data</th><th>Entrada</th><th>Saída</th><th>Resultado</th><th style={{ textAlign:'right' }}>Ações</th>
+              </tr></thead>
+              <tbody>
+                {records.map(t => (
+                  <tr key={t.id}>
+                    <td style={{ fontWeight:600 }}>{new Date(t.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>{t.entrada}</td>
+                    <td>{t.saida}</td>
+                    <td>
+                      <span className={`sgc-badge ${(t.resultado||'').startsWith('+') ? 'green' : 'red'}`}>
                         {t.resultado}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem' }}>
-                      <div className="action-buttons">
-                        <button
-                          className="action-btn edit"
-                          onClick={() => handleEdit(t)}
-                          title="Editar"
-                        >
-                          <Pencil size={16} />
+                    <td>
+                      <div style={{ display:'flex', justifyContent:'flex-end', gap:6 }}>
+                        <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#0066FF' }}
+                          onClick={() => handleEdit(t)} title="Editar">
+                          <Pencil size={15}/>
                         </button>
-                        <button
-                          className="action-btn delete"
-                          onClick={() => softDeleteTicket(t.id)}
-                          title="Remover"
-                        >
-                          <Trash2 size={16} />
+                        <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#ef4444' }}
+                          onClick={() => softDeleteTicket(t.id)} title="Remover">
+                          <Trash2 size={15}/>
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="empty-state" style={{ padding: '3rem', textAlign: 'center', color: 'var(--muted-foreground)' }}>
-                    Nenhum registro de ponto encontrado.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="sgc-card">
+          <div className="sgc-empty">
+            <div className="sgc-empty-icon"><Clock size={28}/></div>
+            <span className="sgc-empty-title">Nenhum registro encontrado</span>
+            <span className="sgc-empty-desc">Clique em "Bater Ponto" para começar.</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
