@@ -140,17 +140,20 @@ export const joinTeam = async (req, res) => {
   try {
     const { inviteCode, userId } = req.body;
 
+    console.log(`[joinTeam] Buscando equipe com código: ${inviteCode} para o usuário ${userId}`);
+    
     // Como o código é um hash, não podemos usar findUnique diretamente.
-    // Vamos buscar por ID do time se tivéssemos, mas como só temos o código, 
-    // precisamos buscar equipes com convites ativos e comparar.
     const teams = await prisma.team.findMany({
       where: {
         inviteCodeExpires: { gt: new Date() }
       }
     });
 
+    console.log(`[joinTeam] Encontradas ${teams.length} equipes não expiradas.`);
+    
     let foundTeam = null;
     for (const team of teams) {
+      if (!team.inviteCode) continue;
       const isMatch = await bcrypt.compare(inviteCode, team.inviteCode);
       if (isMatch) {
         foundTeam = team;
@@ -158,7 +161,10 @@ export const joinTeam = async (req, res) => {
       }
     }
 
-    if (!foundTeam) return res.status(404).json({ error: 'Código inválido ou expirado' });
+    if (!foundTeam) {
+      console.warn(`[joinTeam] Nenhuma equipe com código coincidente encontrada (ou código já expirou). Equipes checadas: ${teams.length}`);
+      return res.status(404).json({ error: 'Código inválido ou expirado' });
+    }
 
     const team = await prisma.team.update({
       where: { id: foundTeam.id },

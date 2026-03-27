@@ -70,7 +70,7 @@ router.post('/join', authenticate, joinTeam);
  *       200:
  *         description: OK
  */
-router.put('/:id/reset-code', authenticate, resetInviteCode);
+router.put('/:teamId/reset-code', authenticate, resetInviteCode);
 
 /**
  * @openapi
@@ -84,7 +84,7 @@ router.put('/:id/reset-code', authenticate, resetInviteCode);
  *       200:
  *         description: OK
  */
-router.put('/:id/permissions', authenticate, updatePermissions);
+router.put('/:teamId/permissions', authenticate, updatePermissions);
 
 /**
  * @openapi
