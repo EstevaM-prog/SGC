@@ -1,61 +1,88 @@
 :root {
-  /* Light Theme Colors */
-  --background: hsl(220, 25%, 96%);
-  --foreground: hsl(220, 20%, 12%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(220, 20%, 12%);
-  --primary: hsl(199, 89%, 48%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --primary-glow: hsl(199, 89%, 65%);
-  --secondary: hsl(220, 18%, 92%);
-  --secondary-foreground: hsl(220, 20%, 12%);
-  --muted: hsl(220, 18%, 94%);
-  --muted-foreground: hsl(220, 12%, 45%);
-  --accent: hsl(187, 85%, 53%);
-  --success: hsl(142, 76%, 36%);
-  --warning: hsl(38, 92%, 50%);
-  --destructive: hsl(0, 84%, 60%);
-  --info: hsl(217, 91%, 60%);
-  --border: hsl(220, 18%, 88%);
-  --input: hsl(220, 18%, 92%);
-  --ring: hsl(199, 89%, 48%);
+  /* ═══════════════════════════════════════════════════════════
+     SGC — MINIMAL PALETTE (Light Mode)
+     Philosophy: Clean, Quiet, Professional
+  ═══════════════════════════════════════════════════════════ */
 
-  /* Sidebar */
-  --sidebar-bg: hsl(0, 0%, 100%);
-  --sidebar-border: hsl(220, 18%, 90%);
+  --background:         #F9FAFB;
+  --foreground:         #111827;
+  --card:               #FFFFFF;
+  --card-foreground:    #111827;
 
-  /* Shadows */
-  --shadow-sm: 0 2px 8px hsla(220, 20%, 12%, 0.04);
-  --shadow-md: 0 4px 16px hsla(220, 20%, 12%, 0.08);
-  --shadow-lg: 0 8px 32px hsla(220, 20%, 12%, 0.12);
-  --shadow-glow: 0 0 32px hsla(199, 89%, 48%, 0.2);
+  --primary:            #2563EB;          /* Indigo Blue — calm & trustworthy */
+  --primary-deep:       #1D4ED8;
+  --primary-faded:      rgba(37, 99, 235, 0.08);
+  --primary-foreground: #FFFFFF;
 
-  /* Spacing */
-  --sidebar-width: 280px;
+  --secondary:          #F3F4F6;
+  --secondary-foreground: #374151;
+
+  --muted:              #F3F4F6;
+  --muted-foreground:   #6B7280;
+
+  --accent:             #059669;          /* Emerald Green — subtle confirmation */
+  --success:            #059669;
+  --warning:            #D97706;
+  --destructive:        #DC2626;
+  --info:               #2563EB;
+
+  --border:             #E5E7EB;
+  --input:              #F9FAFB;
+  --ring:               #2563EB;
+
+  --sidebar-bg:         #FFFFFF;
+  --sidebar-border:     #E5E7EB;
+
+  /* Shadows — very subtle */
+  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md:   0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg:   0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 16px rgba(37, 99, 235, 0.12);
+
+  /* Layout */
+  --sidebar-width:     280px;
   --sidebar-collapsed: 80px;
-  --topbar-height: 64px;
-
-  /* Transitions */
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --topbar-height:     64px;
+  --transition:        all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.dark {
-  --background: hsl(220, 30%, 6%);
-  --foreground: hsl(220, 15%, 95%);
-  --card: hsl(220, 28%, 8%);
-  --card-foreground: hsl(220, 15%, 95%);
-  --primary: hsl(199, 89%, 52%);
-  --secondary: hsl(220, 25%, 14%);
-  --secondary-foreground: hsl(220, 15%, 95%);
-  --muted: hsl(220, 25%, 12%);
-  --muted-foreground: hsl(220, 12%, 60%);
-  --accent: hsl(187, 85%, 55%);
-  --border: hsl(220, 25%, 16%);
-  --input: hsl(220, 25%, 14%);
-  --sidebar-bg: hsl(220, 28%, 7%);
-  --sidebar-border: hsl(220, 25%, 14%);
-  --shadow-sm: 0 2px 8px hsla(0, 0%, 0%, 0.2);
-  --shadow-md: 0 4px 16px hsla(0, 0%, 0%, 0.3);
-  --shadow-lg: 0 8px 32px hsla(0, 0%, 0%, 0.4);
-  --shadow-glow: 0 0 40px hsla(199, 89%, 52%, 0.3);
+  /* ═══════════════════════════════════════════════════════════
+     SGC — MINIMAL PALETTE (Dark Mode)
+     Philosophy: Deep, Calm, Focused
+  ═══════════════════════════════════════════════════════════ */
+
+  --background:         #0F1117;
+  --foreground:         #F9FAFB;
+  --card:               #1A1D27;
+  --card-foreground:    #F9FAFB;
+
+  --primary:            #3B82F6;          /* Soft Blue — stands out without shouting */
+  --primary-deep:       #2563EB;
+  --primary-faded:      rgba(59, 130, 246, 0.10);
+  --primary-foreground: #FFFFFF;
+
+  --secondary:          #23263A;
+  --secondary-foreground: #E5E7EB;
+
+  --muted:              #1E2133;
+  --muted-foreground:   #9CA3AF;
+
+  --accent:             #10B981;
+  --success:            #10B981;
+  --warning:            #F59E0B;
+  --destructive:        #EF4444;
+  --info:               #60A5FA;
+
+  --border:             rgba(255, 255, 255, 0.07);
+  --input:              #1A1D27;
+  --ring:               #3B82F6;
+
+  --sidebar-bg:         #0F1117;
+  --sidebar-border:     rgba(255, 255, 255, 0.06);
+
+  --shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg:   0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.12);
 }

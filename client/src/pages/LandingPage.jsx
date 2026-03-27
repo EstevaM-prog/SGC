@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  BarChart3, 
-  Users, 
-  Ticket, 
-  Shield, 
-  ChevronRight, 
-  Bell, 
-  Calendar, 
-  Workflow, 
+import {
+  BarChart3,
+  Users,
+  Ticket,
+  Shield,
+  ChevronRight,
+  Bell,
+  Calendar,
+  Workflow,
   Layers
 } from 'lucide-react';
 import '../styles/pages/LandingPage.css';
@@ -66,7 +66,7 @@ export default function LandingPage({ onStart, onLogin, onDocs, isAuthenticated 
           <div className="lp-logo-icon">S</div>
           <span>Sistema SGC</span>
         </div>
-        
+
         <div className="lp-nav-links">
           <button className="lp-nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Início</button>
           <button className="lp-nav-link" onClick={() => document.getElementById('features').scrollIntoView({ behavior: 'smooth' })}>Recursos</button>
@@ -89,10 +89,10 @@ export default function LandingPage({ onStart, onLogin, onDocs, isAuthenticated 
           Chamados para sua Equipe.
         </h1>
         <p className="lp-hero-summary">
-          O sistema de gestão definitivo (SGC) projetado para equipes de alta performance. 
+          O sistema de gestão definitivo (SGC) projetado para equipes de alta performance.
           Unifique operações de pagamentos, compras e fretes com análises avançadas.
         </p>
-        
+
         <div className="lp-button-group">
           <button className="lp-btn-primary" onClick={handleStart}>
             {isAuthenticated ? 'Acessar Painel' : 'Começar Grátis'}
@@ -107,8 +107,8 @@ export default function LandingPage({ onStart, onLogin, onDocs, isAuthenticated 
       {/* Features Showcase */}
       <section id="features" className="lp-features">
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-           <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: '#fff' }}>Recursos Poderosos</h2>
-           <p style={{ color: 'var(--lp-muted)', maxWidth: '600px', margin: '0 auto' }}>Projetado para clareza, foco e máxima produtividade em ambientes corporativos.</p>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: '#fff' }}>Recursos Poderosos</h2>
+          <p style={{ color: 'var(--lp-muted)', maxWidth: '600px', margin: '0 auto' }}>Projetado para clareza, foco e máxima produtividade em ambientes corporativos.</p>
         </div>
 
         <div className="lp-feature-grid">
@@ -124,18 +124,18 @@ export default function LandingPage({ onStart, onLogin, onDocs, isAuthenticated 
 
       {/* Tech Stack Subtle Section */}
       <section className="lp-features" style={{ paddingTop: '50px' }}>
-         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3rem', opacity: 0.5 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Layers size={16} /> React 19</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Shield size={16} /> Prisma + Postgres</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Workflow size={16} /> Node.js / Express</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><BarChart3 size={16} /> Recharts</div>
-         </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '3rem', opacity: 0.5 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Layers size={16} /> React 19</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Shield size={16} /> Prisma + Postgres</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><Workflow size={16} /> Node.js / Express</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}><BarChart3 size={16} /> Recharts</div>
+        </div>
       </section>
 
       <footer style={{ padding: '80px 8%', borderTop: '1px solid var(--lp-border)', textAlign: 'center', marginTop: '100px' }}>
         <p style={{ fontSize: '0.9rem', color: 'var(--lp-muted)' }}>
-           © 2026 Sistema de Gestão SGC. Todos os direitos reservados. <br />
-           Uma abordagem minimalista para a eficiência da equipe.
+          © 2026 Sistema de Gestão SGC. Todos os direitos reservados. <br />
+          Uma abordagem minimalista para a eficiência da equipe.
         </p>
       </footer>
     </div>

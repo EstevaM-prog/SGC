@@ -33,15 +33,19 @@
 .proc-card-mini::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #0066FF, #10B981);
+  background: var(--primary);
   opacity: 0;
   transition: opacity 0.3s ease;
   border-radius: 16px 16px 0 0;
 }
 
-.proc-card-mini:hover::before { opacity: 1; }
+.proc-card-mini:hover::before {
+  opacity: 1;
+}
 
 .proc-card-mini:hover {
   transform: translateY(-4px);
@@ -52,7 +56,7 @@
 .proc-card-icon-wrap {
   width: 46px;
   height: 46px;
-  background: linear-gradient(135deg, #0066FF, #10B981);
+  background: var(--primary);
   border-radius: 13px;
   display: flex;
   align-items: center;
@@ -67,7 +71,10 @@
   transform: scale(1.08) rotate(-6deg);
 }
 
-.proc-card-info { flex: 1; min-width: 0; }
+.proc-card-info {
+  flex: 1;
+  min-width: 0;
+}
 
 .proc-card-category {
   display: inline-block;
@@ -102,7 +109,9 @@
   transition: opacity 0.25s ease;
 }
 
-.proc-card-mini:hover .proc-card-actions-mini { opacity: 1; }
+.proc-card-mini:hover .proc-card-actions-mini {
+  opacity: 1;
+}
 
 .proc-card-edit-btn,
 .proc-card-read-btn {
@@ -145,8 +154,13 @@
 }
 
 @keyframes proc-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .proc-modal-content {
@@ -168,16 +182,25 @@
 .proc-modal-content::before {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #0066FF, #10B981);
+  background: var(--primary);
   border-radius: 24px 24px 0 0;
   z-index: 1;
 }
 
 @keyframes proc-modal-in {
-  from { opacity: 0; transform: scale(0.92) translateY(20px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .proc-modal-header {
@@ -250,10 +273,7 @@
   font-weight: 900;
   margin: 0 0 0.75rem;
   line-height: 1.15;
-  background: linear-gradient(90deg, #0066FF, #10B981);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
   letter-spacing: -0.03em;
 }
 
@@ -286,7 +306,10 @@
   flex-wrap: wrap;
 }
 
-.proc-modal-actions { display: flex; gap: 0.75rem; }
+.proc-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+}
 
 .btn-edit-proc,
 .btn-delete-proc,
@@ -328,7 +351,7 @@
 }
 
 .btn-close-proc {
-  background: linear-gradient(105deg, #0066FF, #10B981);
+  background: var(--primary);
   border: none;
   color: #fff;
   box-shadow: 0 6px 18px rgba(0, 102, 255, 0.25);
@@ -341,10 +364,31 @@
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .proc-modal-overlay { padding: 0; }
-  .proc-modal-content { height: 100dvh; max-height: 100dvh; border-radius: 0; }
-  .proc-modal-footer { flex-direction: column; }
-  .proc-modal-actions { width: 100%; }
-  .proc-modal-actions button, .btn-close-proc { flex: 1; justify-content: center; }
-  .procedures-grid { grid-template-columns: 1fr; }
+  .proc-modal-overlay {
+    padding: 0;
+  }
+
+  .proc-modal-content {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .proc-modal-footer {
+    flex-direction: column;
+  }
+
+  .proc-modal-actions {
+    width: 100%;
+  }
+
+  .proc-modal-actions button,
+  .btn-close-proc {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .procedures-grid {
+    grid-template-columns: 1fr;
+  }
 }

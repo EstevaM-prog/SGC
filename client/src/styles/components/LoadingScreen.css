@@ -69,19 +69,13 @@
 .loading-bar-progress {
   height: 100%;
   width: 50%;
-  background: linear-gradient(90deg, #818cf8, #a78bfa);
+  background: #818cf8;
   animation: progressPulse 2s infinite ease-in-out;
   border-radius: 2px;
 }
 
 .blob {
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
-  filter: blur(80px);
-  z-index: 10;
-  animation: blobFloat 10s infinite linear alternate;
+  display: none;
 }
 
 .blob-1 { top: -100px; left: -100px; }

@@ -95,20 +95,20 @@
 
 /* Gradients for Stat Icons */
 .gradient-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  box-shadow: var(--shadow-glow);
+  background: var(--primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .gradient-info {
-  background: linear-gradient(135deg, var(--info), var(--primary));
+  background: var(--info);
 }
 
 .gradient-success {
-  background: linear-gradient(135deg, var(--success), hsl(142, 76%, 46%));
+  background: var(--success);
 }
 
 .gradient-danger {
-  background: linear-gradient(135deg, var(--destructive), hsl(0, 84%, 70%));
+  background: var(--destructive);
 }
 
 /* Responsive grid for main dashboard content */

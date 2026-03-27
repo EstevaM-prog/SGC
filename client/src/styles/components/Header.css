@@ -19,27 +19,34 @@
   top: 0;
   z-index: 50;
 
-  /* Light mode: blue-tinted glass */
-  background: rgba(240, 247, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(0, 102, 255, 0.1);
-  box-shadow: 0 1px 0 rgba(0, 102, 255, 0.06), 0 4px 24px rgba(0, 102, 255, 0.05);
+  /* Light mode: neutral glass */
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 
   animation: topbar-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes topbar-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 body.dark .sgc-topbar {
-  background: rgba(2, 13, 26, 0.88);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-bottom: 1px solid rgba(0, 102, 255, 0.12);
-  box-shadow: 0 1px 0 rgba(0, 102, 255, 0.08), 0 4px 32px rgba(0, 0, 0, 0.4);
+  background: rgba(15, 17, 23, 0.90);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -60,13 +67,13 @@ body.dark .sgc-topbar {
 .sgc-tb-sep {
   width: 1px;
   height: 22px;
-  background: linear-gradient(180deg, transparent, rgba(0, 102, 255, 0.2), transparent);
+  background: var(--border);
   margin: 0 0.25rem;
   flex-shrink: 0;
 }
 
 body.dark .sgc-tb-sep {
-  background: linear-gradient(180deg, transparent, rgba(0, 102, 255, 0.25), transparent);
+  background: var(--border);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -223,8 +230,15 @@ body.dark .sgc-tb-search-input::placeholder {
 }
 
 @keyframes pop-in {
-  from { transform: scale(0); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .sgc-tb-search-clear:hover {
@@ -344,10 +358,7 @@ body.dark .sgc-tb-user:hover {
 
 .sgc-tb-user-name strong {
   font-weight: 700;
-  background: linear-gradient(90deg, #0066FF, #10B981);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
 }
 
 .sgc-tb-user-role {
@@ -369,8 +380,8 @@ body.dark .sgc-tb-user-role {
   flex-shrink: 0;
 }
 
-.sgc-tb-avatar > span:first-child,
-.sgc-tb-avatar > img {
+.sgc-tb-avatar>span:first-child,
+.sgc-tb-avatar>img {
   width: 38px;
   height: 38px;
   border-radius: 12px;
@@ -378,7 +389,7 @@ body.dark .sgc-tb-user-role {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: linear-gradient(135deg, #0066FF 0%, #10B981 100%);
+  background: var(--primary);
   color: #fff;
   font-weight: 800;
   font-size: 0.9rem;
@@ -387,7 +398,7 @@ body.dark .sgc-tb-user-role {
 }
 
 /* Needs explicit rule for the initials span */
-.sgc-tb-avatar > span:first-child {
+.sgc-tb-avatar>span:first-child {
   position: absolute;
   inset: 0;
   border-radius: 12px;
@@ -399,9 +410,9 @@ body.dark .sgc-tb-user-role {
   border-radius: 12px;
 }
 
-.sgc-tb-user:hover .sgc-tb-avatar > span:first-child,
+.sgc-tb-user:hover .sgc-tb-avatar>span:first-child,
 .sgc-tb-user:hover .sgc-tb-avatar img,
-.sgc-tb-avatar.hovered > span:first-child,
+.sgc-tb-avatar.hovered>span:first-child,
 .sgc-tb-avatar.hovered img {
   transform: scale(1.08) rotate(-4deg);
 }
@@ -429,9 +440,17 @@ body.dark .sgc-tb-user:hover .sgc-tb-avatar-ring {
 }
 
 @keyframes ring-spin {
-  from { box-shadow: 0 0 12px rgba(0, 102, 255, 0.25), 0 0 0 0 rgba(16, 185, 129, 0.2); }
-  50%  { box-shadow: 0 0 18px rgba(0, 102, 255, 0.4),  0 0 0 4px rgba(16, 185, 129, 0.1); }
-  to   { box-shadow: 0 0 12px rgba(0, 102, 255, 0.25), 0 0 0 0 rgba(16, 185, 129, 0.2); }
+  from {
+    box-shadow: 0 0 12px rgba(0, 102, 255, 0.25), 0 0 0 0 rgba(16, 185, 129, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(0, 102, 255, 0.4), 0 0 0 4px rgba(16, 185, 129, 0.1);
+  }
+
+  to {
+    box-shadow: 0 0 12px rgba(0, 102, 255, 0.25), 0 0 0 0 rgba(16, 185, 129, 0.2);
+  }
 }
 
 /* ── Online status dot ── */
@@ -453,9 +472,17 @@ body.dark .sgc-tb-status-dot {
 }
 
 @keyframes dot-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.7); }
-  60%  { box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+
+  60% {
+    box-shadow: 0 0 0 5px rgba(16, 185, 129, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -482,7 +509,12 @@ body.dark .sgc-tb-status-dot {
 /* ─────────────────────────────────────────────────────────────
    LEGACY COMPAT (classes used by Notification component etc.)
 ───────────────────────────────────────────────────────────── */
-.desktop-only { }
+.desktop-only {
+  /* visible by default, hidden on mobile via media query below */
+}
+
 @media (max-width: 768px) {
-  .desktop-only { display: none !important; }
+  .desktop-only {
+    display: none !important;
+  }
 }

@@ -35,7 +35,7 @@ export default function Notification({ onNavigateTo, notifications = [], unreadC
     <div className="notification-wrapper" ref={notificationRef} style={{ position: 'relative' }}>
       <button
         type="button"
-        className="tb-icon-btn"
+        className="sgc-tb-icon-btn"
         onClick={(e) => {
           e.stopPropagation();
           const next = !showNotifications;
@@ -44,9 +44,11 @@ export default function Notification({ onNavigateTo, notifications = [], unreadC
         }}
         title="Notificações"
       >
+        <span className="sgc-tb-btn-bg" />
         <Bell size={18} />
         {unreadCount > 0 && <span className="tb-notif-dot" />}
       </button>
+
 
       {showNotifications && (
         <div className="tb-notif-popover">

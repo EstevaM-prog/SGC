@@ -56,9 +56,7 @@
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #f472b6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #818cf8;
 }
 
 .welcome-subtitle {
@@ -98,7 +96,7 @@
 .card-icon {
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: #6366f1;
   border-radius: 1rem;
   display: flex;
   align-items: center;
@@ -158,14 +156,7 @@
 
 /* DECORATIONS */
 .mesh-gradient {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-              radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-              radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-  filter: blur(100px);
-  z-index: 10;
-  opacity: 0.4;
+  display: none;
 }
 
 .floating-icons {

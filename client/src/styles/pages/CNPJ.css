@@ -4,7 +4,7 @@
 .btn-export-cnpj,
 .btn-import-cnpj {
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 10px;
