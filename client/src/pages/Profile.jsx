@@ -171,9 +171,12 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
 
   const handleJoinTeam = async (e) => {
     e.preventDefault();
+    const cleanCode = inviteCodeInput.trim();
+    if (!cleanCode) return toast.error('Digite um código válido!');
+    
     const loading = toast.loading('Entrando em equipe...');
     try {
-      const resp = await api.post('/teams/join', { inviteCode: inviteCodeInput, userId: currentSession.id });
+      const resp = await api.post('/teams/join', { inviteCode: cleanCode, userId: currentSession.id });
       if (resp.status === 200) {
         toast.success('Você agora faz parte da equipe!', { id: loading });
         setShowJoinTeam(false);
