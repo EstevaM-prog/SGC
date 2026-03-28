@@ -68,6 +68,7 @@ const swaggerOptions = {
       { name: 'Shopping', description: 'Chamados de Compras corporativas' },
       { name: 'Freight', description: 'Chamados de Fretes de carga' },
       { name: 'Trash', description: 'Recuperação de itens excluídos' },
+      { name: 'System', description: 'Infraestrutura e Saúde' },
     ],
     components: {
       securitySchemes: {
@@ -95,6 +96,18 @@ app.use('/api/procedures', procedureRoutes);
 app.use('/api/ponto', pontoRoutes);
 app.use('/api/trash', trashRoutes);
 
+/**
+ * @openapi
+ * /api/health:
+ *   get:
+ *     tags: [System]
+ *     description: Health Check avançado que valida a saúde da API e pinga o Banco de Dados para reportar latência
+ *     responses:
+ *       200:
+ *         description: Todos os sistemas operantes
+ *       503:
+ *         description: Conexão com o Banco de Dados falhou
+ */
 app.get('/api/health', checkHealth);
 
 app.post('/api/support', async (req, res) => {
