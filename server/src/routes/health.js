@@ -92,7 +92,7 @@ const wakeUp = async () => {
 
 if (process.env.NODE_ENV !== 'test') {
   // Damos 5 segundos antes do primeiro ping para garantir que o server local já subiu
-  setTimeout(wakeUp, 5000); 
+  setTimeout(wakeUp, 60000);
   const TREZE_MINUTOS = 13 * 60 * 1000;
   setInterval(wakeUp, TREZE_MINUTOS);
 }
