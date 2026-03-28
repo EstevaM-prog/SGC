@@ -20,6 +20,28 @@ export const checkHealth = async (req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     health.services.database = 'up';
 
+    // Se o usuário pedir explícitamente para checar as APIs no ar (?external=true),
+    // pingamos as URLs do Render/Railway. Fica restrito ao `external=true` para
+    // evitar que o servidor em Produção entre em "Loop Infinito" chamando a si mesmo!
+    if (req.query.external === 'true') {
+      health.external_apis = [];
+      await Promise.all(apis.map(async (url) => {
+        try {
+          const fetchStart = Date.now();
+          const response = await fetch(url);
+          health.external_apis.push({
+            name: url.split('//')[1].split('.')[0],
+            url,
+            status: response.ok ? 'up' : 'down',
+            statusCode: response.status,
+            latency: `${Date.now() - fetchStart}ms`
+          });
+        } catch (err) {
+          health.external_apis.push({ name: url.split('//')[1].split('.')[0], url, status: 'offline' });
+        }
+      }));
+    }
+
     // Calcula quanto tempo a API levou para responder internamente
     health.latency = `${Date.now() - start}ms`;
 

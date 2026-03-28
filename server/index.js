@@ -102,6 +102,12 @@ app.use('/api/trash', trashRoutes);
  *   get:
  *     tags: [System]
  *     description: Health Check avançado que valida a saúde da API e pinga o Banco de Dados para reportar latência
+ *     parameters:
+ *       - in: query
+ *         name: external
+ *         schema:
+ *           type: boolean
+ *         description: Passar true para pingar e checar o status das APIs em Produção (Render/Railway)
  *     responses:
  *       200:
  *         description: Todos os sistemas operantes
