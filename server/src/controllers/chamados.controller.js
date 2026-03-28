@@ -31,9 +31,14 @@ export const createChamados = async (req, res) => {
 
 export const getChamados = async (req, res) => {
   try {
+    // SECURITY/PERF: Previne travamento (OOM) caso hajam milhares de registros. 
+    // Pode expandir caso o Front passe um query limit maior no Axios se precisar.
+    const limit = parseInt(req.query.limit) || 200; 
+
     const items = await prisma.chamado.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {
@@ -45,10 +50,23 @@ export const updateChamados = async (req, res) => {
   try {
     const { id } = req.params;
     const data = req.body;
+    
+    // SECURITY: Mapeamento de colunas explícito (Elimina o Mass Assignment / Injeção)
     const chamado = await prisma.chamado.update({
       where: { id },
       data: {
-        ...data,
+        situacao: data.situacao,
+        numero: data.numero,
+        pedido: data.pedido,
+        notaFiscal: data.notaFiscal,
+        valor: data.valor !== undefined && data.valor !== null ? parseFloat(data.valor) : undefined,
+        forma: data.forma,
+        razao: data.razao,
+        cnpj: data.cnpj,
+        setor: data.setor,
+        codEtica: data.codEtica,
+        requisitante: data.requisitante,
+        obs: data.obs,
         dataEmissao: data.dataEmissao ? new Date(data.dataEmissao) : undefined,
         vencimento: data.vencimento ? new Date(data.vencimento) : undefined,
       }
@@ -99,9 +117,12 @@ export const permanentDeleteChamados = async (req, res) => {
 
 export const getTrashChamados = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200;
+    
     const items = await prisma.chamado.findMany({
       where: { deleted: true },
-      orderBy: { deletedAt: 'desc' }
+      orderBy: { deletedAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {

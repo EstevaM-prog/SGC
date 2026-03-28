@@ -7,7 +7,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "stress": "~/.local/bin/k6 run tests/stress-test.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.2",

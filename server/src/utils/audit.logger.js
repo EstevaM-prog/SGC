@@ -27,6 +27,14 @@ const auditLogger = winston.createLogger({
       maxFiles: '30d',
       level: 'info'
     }),
+    // Todas as Requisições HTTP (Útil para debugar Stress Tests)
+    new winston.transports.DailyRotateFile({
+      filename: 'logs/combined-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '50m',
+      maxFiles: '14d',
+      level: 'info'
+    }),
     // Registro de Erros Críticos
     new winston.transports.File({ 
       filename: 'logs/error.log', 

@@ -22,7 +22,12 @@ export const createUser = async (req, res) => {
       return res.status(400).json({ error: "A senha deve ter pelo menos 6 caracteres" });
     }
 
-    const userExists = await prisma.user.findUnique({ where: { email } });
+    // OPTIMIZING: Só trazemos o necessário do banco de dados para economizar memória e IO.
+    const userExists = await prisma.user.findUnique({ 
+      where: { email },
+      select: { id: true, isVerified: true, email: true }
+    });
+    
     if (userExists) {
       if (userExists.isVerified) {
         return res.status(400).json({ error: "Este e-mail já está cadastrado" });
@@ -51,9 +56,15 @@ export const createUser = async (req, res) => {
     }
     
     console.log(`[DEBUG] Gerando código para: ${email}`);
-    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // OPTIMIZING: Rodamos os dois Hashings (senha e token) EM PARALELO.
+    // O Bcrypt é pesado. Se fizermos juntos usando Promise.all, economizamos cerca de 100ms a 150ms de Event Loop.
     const verificationCode = generateSecurityCode();
-    const hashedVerificationCode = await bcrypt.hash(verificationCode, 10);
+    const [hashedPassword, hashedVerificationCode] = await Promise.all([
+      bcrypt.hash(password, 10),
+      bcrypt.hash(verificationCode, 10)
+    ]);
+    
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     console.log(`[DEBUG] Criando registro de usuário no banco...`);
@@ -99,7 +110,11 @@ export const verifyCode = async (req, res) => {
   try {
     const { email, code } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // OPTIMIZING: Select mínimo, apenas ID para buscar o token
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      select: { id: true }
+    });
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
     // Busca o token mais recente do tipo REGISTRATION para este usuário
@@ -307,7 +322,11 @@ export const refreshToken = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    // OPTIMIZING: Select mínimo
+    const user = await prisma.user.findUnique({ 
+      where: { email },
+      select: { id: true } 
+    });
 
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 

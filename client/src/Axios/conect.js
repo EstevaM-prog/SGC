@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-03ln.onrender.com/api' : 'https://sgc-03ln.onrender.com/api')
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-03ln.onrender.com/api' : 'https://sgc-2-mvsv.onrender.com/api')
 });
 
 let isRefreshing = false;

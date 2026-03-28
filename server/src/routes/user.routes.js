@@ -1,11 +1,11 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { 
-  createUser, 
-  loginUser, 
-  refreshToken, 
-  getUsers, 
-  updateUsers, 
+import {
+  createUser,
+  loginUser,
+  refreshToken,
+  getUsers,
+  updateUsers,
   deleteUsers,
   verifyCode,
   forgotPassword,
@@ -21,10 +21,20 @@ const router = express.Router();
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // 5 tentativas
+  max: 20, // 20 tentativas
   message: { error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.ip === '127.0.0.1' || req.ip === '::ffff:127.0.0.1' || req.ip === '::1',
+});
+
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 10, // 10 tentativas
+  message: { error: 'Muitas tentativas de registro. Tente novamente em 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.ip === '127.0.0.1' || req.ip === '::ffff:127.0.0.1' || req.ip === '::1',
 });
 
 /**
@@ -34,7 +44,7 @@ const loginLimiter = rateLimit({
  *     tags: [Users]
  *     description: Inicia registro de usuário e envia código 2FA
  */
-router.post('/', createUser);
+router.post('/', registerLimiter, createUser);
 
 /**
  * @openapi
@@ -68,13 +78,13 @@ router.get('/me', authenticate, getMyProfile);
 /**
  * @openapi
  * /api/users/me:
- *   put:
+ *   patch:
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
- *     description: Atualiza os dados do perfil logado
+ *     description: Atualiza parcialmente os dados do perfil logado
  */
-router.put('/me', authenticate, updateMyProfile);
+router.patch('/me', authenticate, updateMyProfile);
 
 /**
  * @openapi
@@ -152,7 +162,7 @@ router.post('/reset-password', resetPassword);
  */
 router.get('/', authenticate, getUsers);
 
-router.put('/:id', authenticate, updateUsers);
+router.patch('/:id', authenticate, updateUsers);
 router.delete('/:id', authenticate, deleteUsers);
 
 export default router;

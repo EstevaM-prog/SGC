@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import morgan from 'morgan';
 import logger from './src/utils/logger.js';
+import auditLogger from './src/utils/audit.logger.js';
 
 // Import routes
 import userRoutes from './src/routes/user.routes.js';
@@ -16,6 +17,7 @@ import freightRoutes from './src/routes/ticketFreight.js';
 import procedureRoutes from './src/routes/ticketProdureceres.js';
 import pontoRoutes from './src/routes/ticketPonto.js';
 import trashRoutes from './src/routes/trash.routes.js';
+import { checkHealth } from './src/routes/health.js';
 
 import { sendSupportEmail } from './src/utils/mailer.js';
 
@@ -30,6 +32,11 @@ app.set('trust proxy', 1);
 
 // Middlewares
 app.use(morgan('dev'));
+app.use(morgan('combined', { 
+  stream: { 
+    write: message => auditLogger.info(message.trim()) 
+  } 
+}));
 app.use(cors({
   origin: '*', // Permite qualquer origem (ideal para dev e deploy inicial)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -88,9 +95,7 @@ app.use('/api/procedures', procedureRoutes);
 app.use('/api/ponto', pontoRoutes);
 app.use('/api/trash', trashRoutes);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'SGC Backend is running' });
-});
+app.get('/api/health', checkHealth);
 
 app.post('/api/support', async (req, res) => {
   const success = await sendSupportEmail(req.body);
