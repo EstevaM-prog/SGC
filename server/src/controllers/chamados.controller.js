@@ -31,9 +31,27 @@ export const createChamados = async (req, res) => {
 
 export const getChamados = async (req, res) => {
   try {
-    // SECURITY/PERF: Previne travamento (OOM) caso hajam milhares de registros. 
-    // Pode expandir caso o Front passe um query limit maior no Axios se precisar.
     const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [items, total] = await Promise.all([
+        prisma.chamado.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.chamado.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
 
     const items = await prisma.chamado.findMany({
       where: { deleted: false },

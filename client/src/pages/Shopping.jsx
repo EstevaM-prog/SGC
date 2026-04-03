@@ -35,6 +35,8 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
   const [showTrash, setShowTrash]       = useState(false);
   const [formData, setFormData]         = useState(EMPTY);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage]   = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (!editingId) {
@@ -151,55 +153,98 @@ export default function Shopping({ tickets, addTicket, updateTicket, softDeleteT
       )}
 
       {/* ── Table ── */}
-      {(showTrash ? trash : filtered).length === 0 ? (
-        <div className="sgc-card">
-          <div className="sgc-empty">
-            <div className="sgc-empty-icon"><ShoppingCart size={28}/></div>
-            <span className="sgc-empty-title">{showTrash ? 'Lixeira vazia' : 'Nenhuma compra cadastrada'}</span>
-            <span className="sgc-empty-desc">{showTrash ? 'Nenhum item excluído.' : 'Clique em "Nova Compra" para começar.'}</span>
+      {(() => {
+        const displayList = showTrash ? trash : filtered;
+        const totalPages = Math.ceil(displayList.length / itemsPerPage);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const currentItems = displayList.slice(startIndex, startIndex + itemsPerPage);
+
+        const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+        const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+
+        if (displayList.length === 0) {
+          return (
+            <div className="sgc-card">
+              <div className="sgc-empty">
+                <div className="sgc-empty-icon"><ShoppingCart size={28}/></div>
+                <span className="sgc-empty-title">{showTrash ? 'Lixeira vazia' : 'Nenhuma compra cadastrada'}</span>
+                <span className="sgc-empty-desc">{showTrash ? 'Nenhum item excluído.' : 'Clique em "Nova Compra" para começar.'}</span>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
+            <div className="sgc-table-wrap" style={{ border:'none', overflowX:'auto' }}>
+              <table className="sgc-table">
+                <thead><tr>
+                  <th>Status</th><th>Nº Chamado</th><th>Solicitação</th><th>Pedido</th>
+                  <th>Prazo Entrega</th><th>Valor</th><th>Prazo Pagto</th>
+                  <th>Razão Social</th><th>CNPJ</th><th>Requisitante</th>
+                  <th>Obs</th><th style={{ textAlign:'right' }}>Ações</th>
+                </tr></thead>
+                <tbody>
+                  {currentItems.map(t => (
+                    <tr key={t.id}>
+                      <td><span className={`sgc-badge ${STATUS_COLOR[t.situacao]||'gray'}`}>{t.situacao}</span></td>
+                      <td style={{ fontWeight:600 }}>{t.numero}</td>
+                      <td>{t.solicitacao}</td><td>{t.pedido}</td>
+                      <td>{fmtDate(t.prazoEntrega)}</td>
+                      <td style={{ fontWeight:600, color:'#10B981' }}>{fmtCur(t.valor)}</td>
+                      <td>{fmtDate(t.prazoPagto)}</td>
+                      <td>{t.razao}</td>
+                      <td style={{ fontFamily:'monospace', fontSize:'0.8rem' }}>{t.cnpj}</td>
+                      <td>{t.requisitante}</td>
+                      <td style={{ maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={t.obs}>{t.obs}</td>
+                      <td>
+                        <div style={{ display:'flex', justifyContent:'flex-end', gap:4 }}>
+                          {showTrash ? (<>
+                            <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#10B981' }} onClick={()=>restoreTicket(t.id)} title="Restaurar"><RotateCcw size={14}/></button>
+                            <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#ef4444' }} onClick={()=>permanentDeleteTicket(t.id)} title="Excluir"><XCircle size={14}/></button>
+                          </>) : (<>
+                            <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#0066FF' }} onClick={()=>handleEdit(t)} title="Editar"><Edit size={14}/></button>
+                            <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#ef4444' }} onClick={()=>softDeleteTicket(t.id)} title="Excluir"><Trash2 size={14}/></button>
+                          </>)}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {totalPages > 1 && (
+              <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)' }}>
+                <span style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>
+                  Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, displayList.length)} de {displayList.length} registros
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button 
+                    onClick={handlePrevPage} 
+                    disabled={currentPage === 1}
+                    className="sgc-btn-ghost" 
+                    style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+                  >
+                    Anterior
+                  </button>
+                  <span style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button 
+                    onClick={handleNextPage} 
+                    disabled={currentPage === totalPages}
+                    className="sgc-btn-ghost" 
+                    style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+                  >
+                    Próxima
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      ) : (
-        <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
-          <div className="sgc-table-wrap" style={{ border:'none', overflowX:'auto' }}>
-            <table className="sgc-table">
-              <thead><tr>
-                <th>Status</th><th>Nº Chamado</th><th>Solicitação</th><th>Pedido</th>
-                <th>Prazo Entrega</th><th>Valor</th><th>Prazo Pagto</th>
-                <th>Razão Social</th><th>CNPJ</th><th>Requisitante</th>
-                <th>Obs</th><th style={{ textAlign:'right' }}>Ações</th>
-              </tr></thead>
-              <tbody>
-                {(showTrash ? trash : filtered).map(t => (
-                  <tr key={t.id}>
-                    <td><span className={`sgc-badge ${STATUS_COLOR[t.situacao]||'gray'}`}>{t.situacao}</span></td>
-                    <td style={{ fontWeight:600 }}>{t.numero}</td>
-                    <td>{t.solicitacao}</td><td>{t.pedido}</td>
-                    <td>{fmtDate(t.prazoEntrega)}</td>
-                    <td style={{ fontWeight:600, color:'#10B981' }}>{fmtCur(t.valor)}</td>
-                    <td>{fmtDate(t.prazoPagto)}</td>
-                    <td>{t.razao}</td>
-                    <td style={{ fontFamily:'monospace', fontSize:'0.8rem' }}>{t.cnpj}</td>
-                    <td>{t.requisitante}</td>
-                    <td style={{ maxWidth:120, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }} title={t.obs}>{t.obs}</td>
-                    <td>
-                      <div style={{ display:'flex', justifyContent:'flex-end', gap:4 }}>
-                        {showTrash ? (<>
-                          <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#10B981' }} onClick={()=>restoreTicket(t.id)} title="Restaurar"><RotateCcw size={14}/></button>
-                          <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#ef4444' }} onClick={()=>permanentDeleteTicket(t.id)} title="Excluir"><XCircle size={14}/></button>
-                        </>) : (<>
-                          <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#0066FF' }} onClick={()=>handleEdit(t)} title="Editar"><Edit size={14}/></button>
-                          <button className="sgc-btn-ghost" style={{ width:32, height:32, padding:0, justifyContent:'center', color:'#ef4444' }} onClick={()=>softDeleteTicket(t.id)} title="Excluir"><Trash2 size={14}/></button>
-                        </>)}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+        );
+      })()}
     </section>
   );
 

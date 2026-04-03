@@ -5,6 +5,7 @@ import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import morgan from 'morgan';
+import compression from 'compression';
 import logger from './src/utils/logger.js';
 import auditLogger from './src/utils/audit.logger.js';
 
@@ -43,6 +44,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-ID', 'X-Access-Token'],
   exposedHeaders: ['Authorization', 'X-Access-Token']
 }));
+app.use(compression());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 

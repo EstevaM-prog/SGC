@@ -10,6 +10,8 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
     data: new Date().toISOString().split('T')[0],
     entrada: '', saida: ''
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const INTERVALO = 60;
   const JORNADA   = 480;
@@ -133,39 +135,81 @@ export default function Ponto({ tickets, addTicket, updateTicket, softDeleteTick
       {/* ── Table ── */}
       {records.length > 0 ? (
         <div className="sgc-card" style={{ padding:0, overflow:'hidden' }}>
-          <div className="sgc-table-wrap" style={{ border:'none' }}>
-            <table className="sgc-table">
-              <thead><tr>
-                <th>Data</th><th>Entrada</th><th>Saída</th><th>Resultado</th><th style={{ textAlign:'right' }}>Ações</th>
-              </tr></thead>
-              <tbody>
-                {records.map(t => (
-                  <tr key={t.id}>
-                    <td style={{ fontWeight:600 }}>{new Date(t.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                    <td>{t.entrada}</td>
-                    <td>{t.saida}</td>
-                    <td>
-                      <span className={`sgc-badge ${(t.resultado||'').startsWith('+') ? 'green' : 'red'}`}>
-                        {t.resultado}
+          {(() => {
+            const totalPages = Math.ceil(records.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const currentRecords = records.slice(startIndex, startIndex + itemsPerPage);
+            
+            const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+            const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+
+            return (
+              <>
+                <div className="sgc-table-wrap" style={{ border:'none' }}>
+                  <table className="sgc-table">
+                    <thead><tr>
+                      <th>Data</th><th>Entrada</th><th>Saída</th><th>Resultado</th><th style={{ textAlign:'right' }}>Ações</th>
+                    </tr></thead>
+                    <tbody>
+                      {currentRecords.map(t => (
+                        <tr key={t.id}>
+                          <td style={{ fontWeight:600 }}>{new Date(t.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                          <td>{t.entrada}</td>
+                          <td>{t.saida}</td>
+                          <td>
+                            <span className={`sgc-badge ${(t.resultado||'').startsWith('+') ? 'green' : 'red'}`}>
+                              {t.resultado}
+                            </span>
+                          </td>
+                          <td>
+                            <div style={{ display:'flex', justifyContent:'flex-end', gap:6 }}>
+                              <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#0066FF' }}
+                                onClick={() => handleEdit(t)} title="Editar">
+                                <Pencil size={15}/>
+                              </button>
+                              <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#ef4444' }}
+                                onClick={() => softDeleteTicket(t.id)} title="Remover">
+                                <Trash2 size={15}/>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {totalPages > 1 && (
+                  <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>
+                      Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, records.length)} de {records.length} registros
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <button 
+                        onClick={handlePrevPage} 
+                        disabled={currentPage === 1}
+                        className="sgc-btn-ghost" 
+                        style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+                      >
+                        Anterior
+                      </button>
+                      <span style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+                        {currentPage} / {totalPages}
                       </span>
-                    </td>
-                    <td>
-                      <div style={{ display:'flex', justifyContent:'flex-end', gap:6 }}>
-                        <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#0066FF' }}
-                          onClick={() => handleEdit(t)} title="Editar">
-                          <Pencil size={15}/>
-                        </button>
-                        <button className="sgc-btn-ghost" style={{ width:34, height:34, padding:0, justifyContent:'center', color:'#ef4444' }}
-                          onClick={() => softDeleteTicket(t.id)} title="Remover">
-                          <Trash2 size={15}/>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <button 
+                        onClick={handleNextPage} 
+                        disabled={currentPage === totalPages}
+                        className="sgc-btn-ghost" 
+                        style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       ) : (
         <div className="sgc-card">

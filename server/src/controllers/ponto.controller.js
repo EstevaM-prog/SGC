@@ -2,9 +2,32 @@ import prisma from '../db.js';
 
 export const getPonto = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [tickets, total] = await Promise.all([
+        prisma.ponto.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.ponto.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items: tickets,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
     const tickets = await prisma.ponto.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(tickets);
   } catch (error) {

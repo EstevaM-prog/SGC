@@ -28,9 +28,32 @@ export const createShopping = async (req, res) => {
 
 export const getShopping = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [items, total] = await Promise.all([
+        prisma.shoppingTicket.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.shoppingTicket.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
     const items = await prisma.shoppingTicket.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {
