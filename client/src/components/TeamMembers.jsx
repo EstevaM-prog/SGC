@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Shield, Check, X, Loader2 } from 'lucide-react';
-import api from '../Axios/conect.js';
+import api, { formatImageUrl } from '../Axios/conect.js';
 import toast from 'react-hot-toast';
 
 export default function TeamMembers({ teamId, currentUserRole }) {
@@ -82,7 +82,7 @@ export default function TeamMembers({ teamId, currentUserRole }) {
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center overflow-hidden border border-white/10">
                       {member.user.avatarUrl ? (
-                         <img src={member.user.avatarUrl} alt={member.user.name} className="w-full h-full object-cover" />
+                         <img src={formatImageUrl(member.user.avatarUrl)} alt={member.user.name} className="w-full h-full object-cover" />
                       ) : (
                         <User size={20} className="text-indigo-400" />
                       )}

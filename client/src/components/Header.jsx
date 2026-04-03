@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Notification from './Notification';
 import '../styles/components/Notification.css';
+import { formatImageUrl } from '../Axios/conect.js';
 
 export default function Header({
   toggleSidebar,
@@ -175,7 +176,7 @@ export default function Header({
 
           <div className={`sgc-tb-avatar ${avatarHovered ? 'hovered' : ''}`}>
             {userAvatar
-              ? <img src={userAvatar} alt={userName} />
+              ? <img src={formatImageUrl(userAvatar)} alt={userName} />
               : <span>{initials}</span>
             }
             <span className="sgc-tb-avatar-ring" />

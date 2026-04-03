@@ -5,7 +5,7 @@ import {
   CheckCircle2, Layout, Building2, Zap
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../Axios/conect.js';
+import api, { formatImageUrl } from '../Axios/conect.js';
 
 /* ── Page options for permissions ── */
 const PAGE_OPTIONS = [
@@ -182,7 +182,7 @@ export default function Profile({ currentUser, onLogout, onNavigate, onUpdateUse
                 border:'3px solid rgba(0,102,255,0.2)'
               }}>
                 {avatar
-                  ? <img src={avatar} alt="Avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                  ? <img src={formatImageUrl(avatar)} alt="Avatar" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                   : <span>{initials}</span>
                 }
               </div>

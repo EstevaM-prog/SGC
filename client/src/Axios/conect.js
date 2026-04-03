@@ -4,6 +4,17 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-03ln.onrender.com/api' : 'https://sgc-2-mvsv.onrender.com/api')
 });
 
+export const getApiHost = () => {
+  return api.defaults.baseURL.replace(/\/api$/, '');
+};
+
+export const formatImageUrl = (url) => {
+  if (!url) return url;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('/uploads')) return `${getApiHost()}${url}`;
+  return url;
+};
+
 let isRefreshing = false;
 let failedQueue = [];
 
