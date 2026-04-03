@@ -18,6 +18,7 @@ import freightRoutes from './src/routes/ticketFreight.js';
 import procedureRoutes from './src/routes/ticketProdureceres.js';
 import pontoRoutes from './src/routes/ticketPonto.js';
 import trashRoutes from './src/routes/trash.routes.js';
+import dashboardRoutes from './src/routes/dashboard.routes.js';
 import { checkHealth } from './src/routes/health.js';
 
 import { sendSupportEmail } from './src/utils/mailer.js';
@@ -97,6 +98,7 @@ app.use('/api/freights', freightRoutes);
 app.use('/api/procedures', procedureRoutes);
 app.use('/api/ponto', pontoRoutes);
 app.use('/api/trash', trashRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 /**
  * @openapi
