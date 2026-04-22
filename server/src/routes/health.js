@@ -61,8 +61,7 @@ export const checkHealth = async (req, res) => {
 // ============================================
 
 const apis = [
-  'https://sgc-03ln.onrender.com/api/health',
-  'https://sgc-2-mvsv.onrender.com/api/health'
+  'https://sgc-production-railway.up.railway.app/api/health'
   // Adicione aqui as do Railway quando tiver as URLs
 ];
 
