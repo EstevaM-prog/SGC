@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id                  String   @id @default(cuid())
+  id                  Int   @id @default(autoincrement())
   name                String
   email               String   @unique
   password            String
@@ -26,7 +26,7 @@ model User {
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   name        String
   description String?
   icon        String?
@@ -39,9 +39,9 @@ model Team {
 }
 
 model TeamMember {
-  id      String   @id @default(cuid())
-  userId  String
-  teamId  String
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  teamId  Int
   role    String   @default("MEMBER") // ADMIN, MEMBER
   permissions Json?    @default("{}") // RBAC custom permissions for this user in this team
   user    User     @relation(fields: [userId], references: [id])
@@ -50,7 +50,7 @@ model TeamMember {
 }
 
 model Chamado {
-  id           String    @id @default(cuid())
+  id           Int   @id @default(autoincrement())
   situacao     String?
   numero       String?
   dataEmissao  DateTime?
@@ -74,7 +74,7 @@ model Chamado {
 }
 
 model ShoppingTicket {
-  id            String    @id @default(cuid())
+  id            Int   @id @default(autoincrement())
   situacao      String?
   numero        String?
   solicitacao   String?
@@ -95,7 +95,7 @@ model ShoppingTicket {
 }
 
 model FreightTicket {
-  id            String    @id @default(cuid())
+  id            Int   @id @default(autoincrement())
   situacao      String?
   numero        String?
   solicitacao   String?
@@ -116,7 +116,7 @@ model FreightTicket {
 }
 
 model Procedimento {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   titulo      String
   descricao   String?
   categoria   String?
@@ -126,7 +126,7 @@ model Procedimento {
 }
 
 model Lixeira {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   originalId  String   
   tipo        String   
   conteudo    String   
@@ -134,10 +134,10 @@ model Lixeira {
 }
 
 model AuthToken {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   code        String   @unique
   tokenType   String   // "REGISTRATION" ou "PASSWORD_RESET"
-  userId      String
+  userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -149,7 +149,7 @@ model AuthToken {
 }
 
 model Ponto {
-  id           String    @id @default(cuid())
+  id           Int   @id @default(autoincrement())
   data         String?
   entrada      String?
   saida        String?
@@ -165,7 +165,7 @@ model Ponto {
 }
 
 model Permission {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   name        String   @unique 
   teams       Team[]
   createdAt   DateTime @default(now())
@@ -177,9 +177,9 @@ model Permission {
 }
 
 model RefreshToken {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   token       String   @unique
-  userId      String
+  userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt   DateTime
   revoked     Boolean  @default(false)

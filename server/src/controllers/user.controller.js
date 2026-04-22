@@ -198,6 +198,11 @@ export const loginUser = async (req, res) => {
     const refreshTokenString = crypto.randomBytes(40).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias
 
+    // Limpa tokens de refresh antigos do usuário para não acumular no banco
+    await prisma.refreshToken.deleteMany({
+      where: { userId: user.id }
+    });
+
     await prisma.refreshToken.create({
       data: {
         token: refreshTokenString,
