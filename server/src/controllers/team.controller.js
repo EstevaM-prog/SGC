@@ -100,10 +100,16 @@ export const getTeams = async (req, res) => {
     if (!userId || userId === 'undefined') {
        return res.status(200).json([]); // Retorna lista vazia em vez de 500
     }
+    
+    const parsedUserId = parseInt(userId, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: 'ID de usuário inválido.' });
+    }
+
     const teams = await prisma.team.findMany({
       where: {
         members: {
-          some: { userId }
+          some: { userId: parsedUserId }
         }
       },
       include: {
