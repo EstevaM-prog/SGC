@@ -269,7 +269,7 @@ export default function Dashboard({ tickets = [] }) {
                     <div style={{ padding:'2px 0' }}>
                       <div style={{ fontWeight:700, fontSize:'0.85rem' }}>NF: {t.notaFiscal||'---'}</div>
                       <div style={{ fontSize:'0.78rem', color:'#0066FF', fontWeight:600 }}>{fmt(typeof t.valor==='number'?t.valor:0)}</div>
-                      <div style={{ fontSize:'0.65rem', opacity:0.5, fontFamily:'monospace' }}>#{(t.id||'').slice(-8).toUpperCase()}</div>
+                      <div style={{ fontSize:'0.65rem', opacity:0.5, fontFamily:'monospace' }}>#{String(t.id || '').slice(-8).toUpperCase()}</div>
                     </div>
                   );
                   const venc = t.vencimento ? (() => { const d=new Date(t.vencimento); return `${String(d.getUTCDate()).padStart(2,'0')}/${String(d.getUTCMonth()+1).padStart(2,'0')}/${d.getUTCFullYear()}`; })() : '—';

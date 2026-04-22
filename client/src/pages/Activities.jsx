@@ -23,14 +23,14 @@ export default function ActivitiesPage({ activities = [], onClear }) {
         </div>
         
         <div style={{ display: 'flex', gap: '0.75rem' }}>
-          <div className="tb-search" style={{ border: '1px solid var(--border)', background: 'var(--card)' }}>
-             <Search size={16} className="tb-search-icon" />
+          <div className="sgc-tb-search">
+             <Search size={16} className="sgc-tb-search-icon" />
              <input 
                type="search" 
                placeholder="Pesquisar registro..." 
                value={searchTerm}
                onChange={(e) => setSearchTerm(e.target.value)}
-               className="tb-search-input" 
+               className="sgc-tb-search-input" 
              />
           </div>
           <button className="btn-outline" onClick={onClear} title="Limpar histórico">

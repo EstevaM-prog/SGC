@@ -6,13 +6,18 @@ import jwt from 'jsonwebtoken';
 export const createTeam = async (req, res) => {
   try {
     const { name, description, userId } = req.body;
+    
+    const parsedUserId = parseInt(userId, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: 'ID de usuário inválido.' });
+    }
 
     // Verificar se já existe uma equipe com o mesmo nome criada por este usuário
     const existingTeam = await prisma.team.findFirst({
       where: {
         name,
         members: {
-          some: { userId, role: 'ADMIN' }
+          some: { userId: parsedUserId, role: 'ADMIN' }
         }
       }
     });
@@ -21,12 +26,29 @@ export const createTeam = async (req, res) => {
       return res.status(400).json({ error: 'Você já possui uma equipe com este nome.' });
     }
 
-    // Generate absolutely unique code SGC-XXXX
+    // Gerar código sequencial: SGC-0001, SGC-0002, etc.
+    let nextNumber = 1;
+    const lastTeam = await prisma.team.findFirst({
+      where: { inviteCode: { startsWith: 'SGC-' } },
+      orderBy: { id: 'desc' }
+    });
+
+    if (lastTeam && lastTeam.inviteCode) {
+      const match = lastTeam.inviteCode.match(/^SGC-(\d+)$/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      } else {
+        const count = await prisma.team.count();
+        nextNumber = count + 1;
+      }
+    }
+
     let rawInviteCode;
     while (true) {
-      rawInviteCode = 'SGC-' + Math.floor(1000 + Math.random() * 9000);
-      const exists = await prisma.team.findFirst({ where: { inviteCode: rawInviteCode } });
+      rawInviteCode = `SGC-${String(nextNumber).padStart(4, '0')}`;
+      const exists = await prisma.team.findUnique({ where: { inviteCode: rawInviteCode } });
       if (!exists) break;
+      nextNumber++;
     }
     
     // Agora salvamos diretamente o código gerado, garantindo facilidade de busca no DB
@@ -53,7 +75,7 @@ export const createTeam = async (req, res) => {
         },
         members: {
           create: {
-            userId,
+            userId: parsedUserId,
             role: 'ADMIN'
           }
         }
@@ -101,11 +123,29 @@ export const getTeams = async (req, res) => {
 export const resetInviteCode = async (req, res) => {
   try {
     const { teamId } = req.params;
+    // Gerar código sequencial: SGC-0001, SGC-0002, etc.
+    let nextNumber = 1;
+    const lastTeam = await prisma.team.findFirst({
+      where: { inviteCode: { startsWith: 'SGC-' } },
+      orderBy: { id: 'desc' }
+    });
+
+    if (lastTeam && lastTeam.inviteCode) {
+      const match = lastTeam.inviteCode.match(/^SGC-(\d+)$/);
+      if (match) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      } else {
+        const count = await prisma.team.count();
+        nextNumber = count + 1;
+      }
+    }
+
     let rawInviteCode;
     while (true) {
-      rawInviteCode = 'SGC-' + Math.floor(1000 + Math.random() * 9000);
-      const exists = await prisma.team.findFirst({ where: { inviteCode: rawInviteCode } });
+      rawInviteCode = `SGC-${String(nextNumber).padStart(4, '0')}`;
+      const exists = await prisma.team.findUnique({ where: { inviteCode: rawInviteCode } });
       if (!exists) break;
+      nextNumber++;
     }
     
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -150,8 +190,13 @@ export const updatePermissions = async (req, res) => {
 export const joinTeam = async (req, res) => {
   try {
     const { inviteCode, userId } = req.body;
+    
+    const parsedUserId = parseInt(userId, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: 'ID de usuário inválido.' });
+    }
 
-    console.log(`[joinTeam] Buscando equipe com código: ${inviteCode} para o usuário ${userId}`);
+    console.log(`[joinTeam] Buscando equipe com código: ${inviteCode} para o usuário ${parsedUserId}`);
     
     // Primeira tentativa de busca: Código limpo e exato (No novo padrão sem hash)
     let foundTeam = await prisma.team.findFirst({
@@ -179,19 +224,19 @@ export const joinTeam = async (req, res) => {
     }
 
     if (!foundTeam) {
-      console.warn(`[joinTeam] Código de convite '${inviteCode}' inválido ou expirado para o usuário ${userId}`);
+      console.warn(`[joinTeam] Código de convite '${inviteCode}' inválido ou expirado para o usuário ${parsedUserId}`);
       return res.status(404).json({ error: 'Código inválido ou expirado' });
     }
 
     // 1. Verifica se já existe o membro para evitar erro de constraint única
     const existingMember = await prisma.teamMember.findUnique({
       where: {
-        userId_teamId: { userId, teamId: foundTeam.id }
+        userId_teamId: { userId: parsedUserId, teamId: foundTeam.id }
       }
     });
 
     if (existingMember) {
-      console.log(`[joinTeam] Usuário ${userId} já está na equipe ${foundTeam.id}`);
+      console.log(`[joinTeam] Usuário ${parsedUserId} já está na equipe ${foundTeam.id}`);
       return res.status(200).json({ 
         message: 'Você já faz parte desta equipe!', 
         team: foundTeam, 
@@ -214,7 +259,7 @@ export const joinTeam = async (req, res) => {
       data: {
         members: {
           create: {
-            userId,
+            userId: parsedUserId,
             role: 'MEMBER',
             permissions: defaultPermissions
           }
@@ -222,7 +267,7 @@ export const joinTeam = async (req, res) => {
       },
       include: {
         members: {
-          where: { userId },
+          where: { userId: parsedUserId },
           include: {
             user: { select: { id: true, name: true, avatarUrl: true } }
           }
