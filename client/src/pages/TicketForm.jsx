@@ -19,11 +19,12 @@ export default function TicketForm({ ticket, onSave, onCancel, addActivity }) {
         ...t,
         valor: t.valor ? Number(t.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '',
         vencimento: formatDateForInput(t.vencimento),
-        dataEmissao: formatDateForInput(t.dataEmissao)
+        dataEmissao: formatDateForInput(t.dataEmissao),
+        notasFiscais: t.notaFiscal ? t.notaFiscal.split(', ') : ['']
       };
     }
     return {
-      situacao: '', numero: '', dataEmissao: '', pedido: '', notaFiscal: '',
+      situacao: '', numero: '', dataEmissao: '', pedido: '', notasFiscais: [''],
       vencimento: '', valor: '', forma: '', razao: '', cnpj: '', setor: '',
       codEtica: 'nao', requisitante: '', obs: ''
     };
@@ -83,6 +84,21 @@ export default function TicketForm({ ticket, onSave, onCancel, addActivity }) {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const handleNotaFiscalChange = (index, value) => {
+    const novasNfs = [...formData.notasFiscais];
+    novasNfs[index] = value;
+    setFormData(prev => ({ ...prev, notasFiscais: novasNfs }));
+  };
+
+  const addNotaFiscal = () => {
+    setFormData(prev => ({ ...prev, notasFiscais: [...prev.notasFiscais, ''] }));
+  };
+
+  const removeNotaFiscal = (index) => {
+    const novasNfs = formData.notasFiscais.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, notasFiscais: novasNfs.length ? novasNfs : [''] }));
+  };
+
   const validate = () => {
     const newErrors = {};
     if (formData.razao.length > 0 && formData.razao.length < 3) newErrors.razao = 'Mínimo 3 caracteres';
@@ -109,10 +125,12 @@ export default function TicketForm({ ticket, onSave, onCancel, addActivity }) {
 
       const payload = {
         ...formData,
+        notaFiscal: formData.notasFiscais.filter(nf => nf.trim() !== '').join(', '),
         valor: isNaN(parsedValor) ? 0 : parsedValor,
         vencimento: convertDate(formData.vencimento),
         dataEmissao: convertDate(formData.dataEmissao)
       };
+      delete payload.notasFiscais;
 
       await new Promise(resolve => setTimeout(resolve, 800));
       await onSave(payload);
@@ -180,9 +198,30 @@ export default function TicketForm({ ticket, onSave, onCancel, addActivity }) {
               <input type="text" id="pedido" value={formData.pedido} onChange={handleChange} maxLength="12" disabled={isSubmitting} />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="notaFiscal">Nota Fiscal *</label>
-              <input type="text" id="notaFiscal" value={formData.notaFiscal} onChange={handleChange} maxLength="12" required disabled={isSubmitting} />
+            <div className="form-group" style={{ gridColumn: 'span 1' }}>
+              <label>Nota Fiscal *</label>
+              {formData.notasFiscais.map((nf, index) => (
+                <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                  <input 
+                    type="text" 
+                    value={nf} 
+                    onChange={(e) => handleNotaFiscalChange(index, e.target.value)} 
+                    maxLength="12" 
+                    required={index === 0} 
+                    disabled={isSubmitting} 
+                    placeholder="Número da NF"
+                    style={{ flex: 1 }}
+                  />
+                  {formData.notasFiscais.length > 1 && (
+                    <button type="button" onClick={() => removeNotaFiscal(index)} disabled={isSubmitting} style={{ padding: '0 12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
+                      X
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button type="button" onClick={addNotaFiscal} disabled={isSubmitting} style={{ fontSize: '0.8rem', padding: '4px 8px', background: '#e0e7ff', color: '#4f46e5', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '4px' }}>
+                + Adicionar outra NF
+              </button>
             </div>
 
             <div className="form-group">

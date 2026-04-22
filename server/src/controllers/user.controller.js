@@ -60,6 +60,7 @@ export const createUser = async (req, res) => {
     // OPTIMIZING: Rodamos os dois Hashings (senha e token) EM PARALELO.
     // O Bcrypt é pesado. Se fizermos juntos usando Promise.all, economizamos cerca de 100ms a 150ms de Event Loop.
     const verificationCode = generateSecurityCode();
+    console.log(`[CÓDIGO DE VERIFICAÇÃO] O código para ${email} é: ${verificationCode}`);
     const [hashedPassword, hashedVerificationCode] = await Promise.all([
       bcrypt.hash(password, 10),
       bcrypt.hash(verificationCode, 10)
@@ -336,6 +337,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
     const code = generateSecurityCode();
+    console.log(`[CÓDIGO DE RECUPERAÇÃO] O código para ${email} é: ${code}`);
     const hashedCode = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
