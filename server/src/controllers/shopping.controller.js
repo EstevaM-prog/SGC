@@ -63,7 +63,7 @@ export const getShopping = async (req, res) => {
 
 export const updateShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
     const shopping = await prisma.shoppingTicket.update({
       where: { id },
@@ -81,7 +81,7 @@ export const updateShopping = async (req, res) => {
 
 export const deleteShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.shoppingTicket.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -94,7 +94,7 @@ export const deleteShopping = async (req, res) => {
 
 export const restoreShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const shopping = await prisma.shoppingTicket.update({
       where: { id },
       data: { deleted: false, deletedAt: null }
@@ -107,7 +107,7 @@ export const restoreShopping = async (req, res) => {
 
 export const permanentDeleteShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.shoppingTicket.delete({
       where: { id }
     });

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../Axios/conect.js';
 import { Trash2, ShoppingCart, Truck, List, RotateCcw, AlertTriangle } from 'lucide-react';
 import DataTable from '../components/DataTable';
 
@@ -8,10 +9,27 @@ export default function Trash({
   freightTickets  = [], onRestoreFreight,  onPermanentDeleteFreight,
 }) {
   const [activeTab, setActiveTab] = useState('chamados');
+  const [chamadosDeleted, setChamadosDeleted] = useState([]);
+  const [shoppingDeleted, setShoppingDeleted] = useState([]);
+  const [freightDeleted, setFreightDeleted] = useState([]);
 
-  const chamadosDeleted = tickets.filter(r => r.deleted);
-  const shoppingDeleted = shoppingTickets.filter(r => r.deleted);
-  const freightDeleted  = freightTickets.filter(r => r.deleted);
+  useEffect(() => {
+    const fetchTrash = async () => {
+      try {
+        const [cResp, sResp, fResp] = await Promise.all([
+          api.get('/trash/chamados'),
+          api.get('/trash/shopping'),
+          api.get('/trash/freight')
+        ]);
+        if (cResp.status === 200) setChamadosDeleted(cResp.data);
+        if (sResp.status === 200) setShoppingDeleted(sResp.data);
+        if (fResp.status === 200) setFreightDeleted(fResp.data);
+      } catch (err) {
+        console.error('Erro ao buscar lixeira:', err);
+      }
+    };
+    fetchTrash();
+  }, []);
 
   const TABS = [
     { id:'chamados', label:'Chamados', Icon:List,         count:chamadosDeleted.length },
@@ -19,10 +37,38 @@ export default function Trash({
     { id:'freight',  label:'Fretes',   Icon:Truck,        count:freightDeleted.length  },
   ];
 
+  // Helper wrappers to update local state immediately on action success
+  const handleRestore = async (id) => {
+    await onRestore(id);
+    setChamadosDeleted(prev => prev.filter(t => t.id !== id));
+  };
+  const handlePermanentDelete = async (id) => {
+    await onPermanentDelete(id);
+    setChamadosDeleted(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleRestoreShopping = async (id) => {
+    await onRestoreShopping(id);
+    setShoppingDeleted(prev => prev.filter(t => t.id !== id));
+  };
+  const handlePermanentDeleteShopping = async (id) => {
+    await onPermanentDeleteShopping(id);
+    setShoppingDeleted(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleRestoreFreight = async (id) => {
+    await onRestoreFreight(id);
+    setFreightDeleted(prev => prev.filter(t => t.id !== id));
+  };
+  const handlePermanentDeleteFreight = async (id) => {
+    await onPermanentDeleteFreight(id);
+    setFreightDeleted(prev => prev.filter(t => t.id !== id));
+  };
+
   const current =
-    activeTab === 'chamados' ? { data:chamadosDeleted, onRestore, onDelete:onPermanentDelete } :
-    activeTab === 'shopping' ? { data:shoppingDeleted, onRestore:onRestoreShopping, onDelete:onPermanentDeleteShopping } :
-                               { data:freightDeleted,  onRestore:onRestoreFreight,  onDelete:onPermanentDeleteFreight  };
+    activeTab === 'chamados' ? { data:chamadosDeleted, onRestore:handleRestore, onDelete:handlePermanentDelete } :
+    activeTab === 'shopping' ? { data:shoppingDeleted, onRestore:handleRestoreShopping, onDelete:handlePermanentDeleteShopping } :
+                               { data:freightDeleted,  onRestore:handleRestoreFreight,  onDelete:handlePermanentDeleteFreight  };
 
   const total = chamadosDeleted.length + shoppingDeleted.length + freightDeleted.length;
 

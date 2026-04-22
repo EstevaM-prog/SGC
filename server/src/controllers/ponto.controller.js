@@ -51,7 +51,7 @@ export const createPonto = async (req, res) => {
 
 export const updatePonto = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const ticketData = req.body;
     const ticket = await prisma.ponto.update({
       where: { id },
@@ -66,7 +66,7 @@ export const updatePonto = async (req, res) => {
 
 export const deletePonto = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.ponto.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }

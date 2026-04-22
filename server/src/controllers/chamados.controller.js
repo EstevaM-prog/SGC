@@ -66,7 +66,7 @@ export const getChamados = async (req, res) => {
 
 export const updateChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
     
     // SECURITY: Mapeamento de colunas explícito (Elimina o Mass Assignment / Injeção)
@@ -97,7 +97,7 @@ export const updateChamados = async (req, res) => {
 
 export const deleteChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.chamado.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -110,7 +110,7 @@ export const deleteChamados = async (req, res) => {
 
 export const restoreChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const chamado = await prisma.chamado.update({
       where: { id },
       data: { deleted: false, deletedAt: null }
@@ -123,7 +123,7 @@ export const restoreChamados = async (req, res) => {
 
 export const permanentDeleteChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.chamado.delete({
       where: { id }
     });

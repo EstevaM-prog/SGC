@@ -63,7 +63,7 @@ export const getFreight = async (req, res) => {
 
 export const updateFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
     const freight = await prisma.freightTicket.update({
       where: { id },
@@ -81,7 +81,7 @@ export const updateFreight = async (req, res) => {
 
 export const deleteFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.freightTicket.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -94,7 +94,7 @@ export const deleteFreight = async (req, res) => {
 
 export const restoreFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const freight = await prisma.freightTicket.update({
       where: { id },
       data: { deleted: false, deletedAt: null }
@@ -107,7 +107,7 @@ export const restoreFreight = async (req, res) => {
 
 export const permanentDeleteFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.freightTicket.delete({
       where: { id }
     });
