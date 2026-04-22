@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'sgc-production-railway.up.railway.app/api' : 'sgc-production-railway.up.railway.app')
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'sgc-production-railway.up.railway.app/api' : 'sgc-production-railway.up.railway.app/api')
 });
 
 export const getApiHost = () => {
