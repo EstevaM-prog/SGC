@@ -156,16 +156,17 @@ body:not(.dark) .card {
 
 /* Estilo Único do Botão Primário (Solid/Gradient) */
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: white;
   box-shadow: var(--shadow-md);
 }
 
 /* Estilo Único do Botão Secundário (Outline ou Ghost) */
 .btn-secondary {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white;
-  box-shadow: var(--shadow-md);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Estados de Hover */

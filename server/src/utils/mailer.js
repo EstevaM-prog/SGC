@@ -50,7 +50,7 @@ export async function sendVerificationEmail(to, code, type = 'REGISTRATION') {
     }
 
     await transporter.sendMail({
-      from: '"Sistema SGC" <[EMAIL_ADDRESS]>',
+      from: `"Sistema SGC" <${process.env.MAIL_USER}>`,
       to,
       subject,
       html,
@@ -74,11 +74,30 @@ export function generateSecurityCode() {
  */
 export async function sendSupportEmail({ name, email, subject, message }) {
   try {
+    // Envia ao suporte
     await transporter.sendMail({
       from: `"${name}" <${email}>`,
       to: process.env.SUPPORT_EMAIL || 'support@sgc.com',
       subject: `[SUPORTE SGC] ${subject}`,
       html: `<p>MENSAGEM DE: ${name} (${email})</p><hr/><p>${message}</p>`,
+    });
+
+    // Envia cópia ao usuário
+    await transporter.sendMail({
+      from: `"Suporte SGC" <${process.env.SUPPORT_EMAIL || 'support@sgc.com'}>`,
+      to: email,
+      subject: `[CONFIRMAÇÃO SGC] Recebemos seu chamado: ${subject}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px;">
+          <h2>Olá, ${name}!</h2>
+          <p>Recebemos sua solicitação de suporte. Nossa equipe analisará e responderá em breve.</p>
+          <hr/>
+          <p><strong>Cópia da sua mensagem:</strong></p>
+          <blockquote style="background: #f9f9f9; padding: 15px; border-left: 5px solid #ccc;">
+            ${message}
+          </blockquote>
+        </div>
+      `,
     });
     return true;
   } catch (err) {

@@ -16,6 +16,8 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
   const [showTrash, setShowTrash] = useState(false);
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Restore draft
   useEffect(() => {
@@ -167,39 +169,82 @@ export default function Freight({ tickets, addTicket, updateTicket, softDeleteTi
       )}
 
       <div className="card">
-        <div className="table-wrapper">
-          <table className="data-table">
-            <thead><tr>
-              <th>Status</th><th>Nº Chamado</th><th>Nº Solicitação</th><th>Pedido</th>
-              <th>Nota Fiscal</th><th>Dacte</th><th>Valor (R$)</th>
-              <th>Razão Social</th><th>CNPJ</th><th>Requisitante</th>
-              <th className="small">Observação</th><th className="text-right">Ações</th>
-            </tr></thead>
-            <tbody>
-              {(showTrash ? trash : filtered).length === 0
-                ? <tr><td colSpan="12" className="empty-state">{showTrash ? 'Lixeira vazia.' : 'Nenhum frete cadastrado. Clique em "Novo Frete" para começar.'}</td></tr>
-                : (showTrash ? trash : filtered).map(t => (
-                  <tr key={t.id}>
-                    <td><span className={`status-badge status-${(t.situacao || '').toLowerCase().replace(/\s+/g, '-')}`}>{t.situacao}</span></td>
-                    <td>{t.numero}</td><td>{t.solicitacao}</td><td>{t.pedido}</td>
-                    <td>{t.notaFiscal}</td><td>{t.dacte}</td>
-                    <td>{formatCurrency(t.valor)}</td>
-                    <td>{t.razao}</td><td>{t.cnpj}</td><td>{t.requisitante}</td>
-                    <td className="small" title={t.obs}>{(t.obs || '').length > 60 ? t.obs.slice(0, 60) + '…' : t.obs}</td>
-                    <td className="actions-cell"><div className="action-buttons">
-                      {showTrash ? <>
-                        <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16} /></button>
-                        <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16} /></button>
-                      </> : <>
-                        <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16} /></button>
-                        <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16} /></button>
-                      </>}
-                    </div></td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
+        {(() => {
+          const displayList = showTrash ? trash : filtered;
+          const totalPages = Math.ceil(displayList.length / itemsPerPage);
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const currentItems = displayList.slice(startIndex, startIndex + itemsPerPage);
+          
+          const handlePrevPage = () => setCurrentPage(prev => Math.max(prev - 1, 1));
+          const handleNextPage = () => setCurrentPage(prev => Math.min(prev + 1, totalPages));
+
+          return (
+            <>
+              <div className="table-wrapper">
+                <table className="data-table">
+                  <thead><tr>
+                    <th>Status</th><th>Nº Chamado</th><th>Nº Solicitação</th><th>Pedido</th>
+                    <th>Nota Fiscal</th><th>Dacte</th><th>Valor (R$)</th>
+                    <th>Razão Social</th><th>CNPJ</th><th>Requisitante</th>
+                    <th className="small">Observação</th><th className="text-right">Ações</th>
+                  </tr></thead>
+                  <tbody>
+                    {displayList.length === 0
+                      ? <tr><td colSpan="12" className="empty-state">{showTrash ? 'Lixeira vazia.' : 'Nenhum frete cadastrado. Clique em "Novo Frete" para começar.'}</td></tr>
+                      : currentItems.map(t => (
+                        <tr key={t.id}>
+                          <td><span className={`status-badge status-${(t.situacao || '').toLowerCase().replace(/\s+/g, '-')}`}>{t.situacao}</span></td>
+                          <td>{t.numero}</td><td>{t.solicitacao}</td><td>{t.pedido}</td>
+                          <td>{t.notaFiscal}</td><td>{t.dacte}</td>
+                          <td>{formatCurrency(t.valor)}</td>
+                          <td>{t.razao}</td><td>{t.cnpj}</td><td>{t.requisitante}</td>
+                          <td className="small" title={t.obs}>{(t.obs || '').length > 60 ? t.obs.slice(0, 60) + '…' : t.obs}</td>
+                          <td className="actions-cell"><div className="action-buttons">
+                            {showTrash ? <>
+                              <button className="action-btn" title="Restaurar" onClick={() => restoreTicket(t.id)}><RotateCcw size={16} /></button>
+                              <button className="action-btn delete" title="Excluir" onClick={() => permanentDeleteTicket(t.id)}><XCircle size={16} /></button>
+                            </> : <>
+                              <button className="action-btn edit" title="Editar" onClick={() => handleEdit(t)}><Edit size={16} /></button>
+                              <button className="action-btn delete" title="Lixeira" onClick={() => softDeleteTicket(t.id)}><Trash size={16} /></button>
+                            </>}
+                          </div></td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {totalPages > 1 && (
+                <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>
+                    Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, displayList.length)} de {displayList.length} registros
+                  </span>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button 
+                      onClick={handlePrevPage} 
+                      disabled={currentPage === 1}
+                      className="btn-outline" 
+                      style={{ padding: '0.5rem 1rem', height: 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+                    >
+                      Anterior
+                    </button>
+                    <span style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button 
+                      onClick={handleNextPage} 
+                      disabled={currentPage === totalPages}
+                      className="btn-outline" 
+                      style={{ padding: '0.5rem 1rem', height: 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </section>
   );

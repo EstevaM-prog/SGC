@@ -11,21 +11,22 @@ datasource db {
 }
 
 model User {
-  id                  String   @id @default(cuid())
+  id                  Int   @id @default(autoincrement())
   name                String
   email               String   @unique
   password            String
-  avatar              String?
+  avatarUrl           String?
   role                String   @default("USER")
   isVerified          Boolean  @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   teams               TeamMember[]
   authTokens          AuthToken[]
+  refreshTokens       RefreshToken[]
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   name        String
   description String?
   icon        String?
@@ -38,17 +39,18 @@ model Team {
 }
 
 model TeamMember {
-  id      String   @id @default(cuid())
-  userId  String
-  teamId  String
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  teamId  Int
   role    String   @default("MEMBER") // ADMIN, MEMBER
+  permissions Json?    @default("{}") // RBAC custom permissions for this user in this team
   user    User     @relation(fields: [userId], references: [id])
   team    Team     @relation(fields: [teamId], references: [id])
   @@unique([userId, teamId])
 }
 
 model Chamado {
-  id           String    @id @default(cuid())
+  id           Int   @id @default(autoincrement())
   situacao     String?
   numero       String?
   dataEmissao  DateTime?
@@ -67,12 +69,12 @@ model Chamado {
   deletedAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-
   @@index([cnpj])
+  @@index([deleted, createdAt])
 }
 
 model ShoppingTicket {
-  id            String    @id @default(cuid())
+  id            Int   @id @default(autoincrement())
   situacao      String?
   numero        String?
   solicitacao   String?
@@ -88,12 +90,12 @@ model ShoppingTicket {
   deletedAt     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
   @@index([cnpj])
+  @@index([deleted, createdAt])
 }
 
 model FreightTicket {
-  id            String    @id @default(cuid())
+  id            Int   @id @default(autoincrement())
   situacao      String?
   numero        String?
   solicitacao   String?
@@ -109,12 +111,12 @@ model FreightTicket {
   deletedAt     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
   @@index([cnpj])
+  @@index([deleted, createdAt])
 }
 
 model Procedimento {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   titulo      String
   descricao   String?
   categoria   String?
@@ -124,7 +126,7 @@ model Procedimento {
 }
 
 model Lixeira {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   originalId  String   
   tipo        String   
   conteudo    String   
@@ -132,10 +134,10 @@ model Lixeira {
 }
 
 model AuthToken {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   code        String   @unique
   tokenType   String   // "REGISTRATION" ou "PASSWORD_RESET"
-  userId      String
+  userId      Int
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -146,8 +148,24 @@ model AuthToken {
   @@index([userId])
 }
 
+model Ponto {
+  id           Int   @id @default(autoincrement())
+  data         String?
+  entrada      String?
+  saida        String?
+  resultado    String?
+  saldoMinutos Int?      @default(0)
+  type         String    @default("ponto_record")
+  deleted      Boolean   @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([deleted, createdAt])
+}
+
 model Permission {
-  id          String   @id @default(cuid())
+  id          Int   @id @default(autoincrement())
   name        String   @unique 
   teams       Team[]
   createdAt   DateTime @default(now())
@@ -156,4 +174,16 @@ model Permission {
   deleted     Boolean  @default(false)
 
   @@index([name])
+}
+
+model RefreshToken {
+  id          Int   @id @default(autoincrement())
+  token       String   @unique
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
 }

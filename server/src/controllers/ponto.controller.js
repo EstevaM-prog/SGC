@@ -2,9 +2,32 @@ import prisma from '../db.js';
 
 export const getPonto = async (req, res) => {
   try {
-    const tickets = await prisma.chamado.findMany({
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [tickets, total] = await Promise.all([
+        prisma.ponto.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.ponto.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items: tickets,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
+    const tickets = await prisma.ponto.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(tickets);
   } catch (error) {
@@ -16,7 +39,7 @@ export const getPonto = async (req, res) => {
 export const createPonto = async (req, res) => {
   try {
     const ticketData = req.body;
-    const ticket = await prisma.chamado.create({
+    const ticket = await prisma.ponto.create({
       data: ticketData
     });
     res.status(201).json(ticket);
@@ -28,9 +51,9 @@ export const createPonto = async (req, res) => {
 
 export const updatePonto = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const ticketData = req.body;
-    const ticket = await prisma.chamado.update({
+    const ticket = await prisma.ponto.update({
       where: { id },
       data: ticketData
     });
@@ -43,8 +66,8 @@ export const updatePonto = async (req, res) => {
 
 export const deletePonto = async (req, res) => {
   try {
-    const { id } = req.params;
-    await prisma.chamado.update({
+    const id = parseInt(req.params.id, 10);
+    await prisma.ponto.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
     });

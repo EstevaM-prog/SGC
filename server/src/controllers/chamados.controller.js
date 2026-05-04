@@ -31,9 +31,32 @@ export const createChamados = async (req, res) => {
 
 export const getChamados = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [items, total] = await Promise.all([
+        prisma.chamado.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.chamado.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
     const items = await prisma.chamado.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {
@@ -43,12 +66,25 @@ export const getChamados = async (req, res) => {
 
 export const updateChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
+    
+    // SECURITY: Mapeamento de colunas explícito (Elimina o Mass Assignment / Injeção)
     const chamado = await prisma.chamado.update({
       where: { id },
       data: {
-        ...data,
+        situacao: data.situacao,
+        numero: data.numero,
+        pedido: data.pedido,
+        notaFiscal: data.notaFiscal,
+        valor: data.valor !== undefined && data.valor !== null ? parseFloat(data.valor) : undefined,
+        forma: data.forma,
+        razao: data.razao,
+        cnpj: data.cnpj,
+        setor: data.setor,
+        codEtica: data.codEtica,
+        requisitante: data.requisitante,
+        obs: data.obs,
         dataEmissao: data.dataEmissao ? new Date(data.dataEmissao) : undefined,
         vencimento: data.vencimento ? new Date(data.vencimento) : undefined,
       }
@@ -61,7 +97,7 @@ export const updateChamados = async (req, res) => {
 
 export const deleteChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.chamado.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -74,7 +110,7 @@ export const deleteChamados = async (req, res) => {
 
 export const restoreChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const chamado = await prisma.chamado.update({
       where: { id },
       data: { deleted: false, deletedAt: null }
@@ -87,13 +123,28 @@ export const restoreChamados = async (req, res) => {
 
 export const permanentDeleteChamados = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.chamado.delete({
       where: { id }
     });
     res.json({ message: 'Chamado removido permanentemente' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao excluir definitivamente' });
+  }
+};
+
+export const getTrashChamados = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 200;
+    
+    const items = await prisma.chamado.findMany({
+      where: { deleted: true },
+      orderBy: { deletedAt: 'desc' },
+      take: limit
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lixeira de chamados' });
   }
 };
 

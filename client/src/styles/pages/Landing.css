@@ -3,8 +3,7 @@
 ═══════════════════════════════════════════════════════════════ */
 /* Hero Section */
 .hero {
-  position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  overflow: hidden; background: var(--gradient-hero, linear-gradient(180deg, #0a0c14, #16191e));
+  overflow: hidden; background: #0a0c14;
 }
 
 .hero-bg { position: absolute; inset: 0; overflow: hidden; }
@@ -34,8 +33,7 @@
 
 .hero-title {
   font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #1898d9, #1793a3);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  color: #1898d9;
 }
 
 .hero-description {
@@ -46,7 +44,7 @@
 /* Features grid on landing page */
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
 .feature-card {
-  position: relative; background: linear-gradient(145deg, #1c202a, #13171f);
+  position: relative; background: #1c202a;
   border: 1px solid rgba(189, 95, 52, 0.1); border-radius: 1rem; padding: 2rem;
   overflow: hidden; transition: all 0.3s ease;
 }

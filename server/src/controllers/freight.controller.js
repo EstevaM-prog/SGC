@@ -28,9 +28,32 @@ export const createFreight = async (req, res) => {
 
 export const getFreight = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [items, total] = await Promise.all([
+        prisma.freightTicket.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.freightTicket.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
     const items = await prisma.freightTicket.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {
@@ -40,7 +63,7 @@ export const getFreight = async (req, res) => {
 
 export const updateFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
     const freight = await prisma.freightTicket.update({
       where: { id },
@@ -58,7 +81,7 @@ export const updateFreight = async (req, res) => {
 
 export const deleteFreight = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.freightTicket.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -69,9 +92,49 @@ export const deleteFreight = async (req, res) => {
   }
 };
 
+export const restoreFreight = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const freight = await prisma.freightTicket.update({
+      where: { id },
+      data: { deleted: false, deletedAt: null }
+    });
+    res.json(freight);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao restaurar frete' });
+  }
+};
+
+export const permanentDeleteFreight = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await prisma.freightTicket.delete({
+      where: { id }
+    });
+    res.json({ message: 'Frete removido permanentemente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir definitivamente' });
+  }
+};
+
+export const getTrashFreight = async (req, res) => {
+  try {
+    const items = await prisma.freightTicket.findMany({
+      where: { deleted: true },
+      orderBy: { deletedAt: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lixeira de fretes' });
+  }
+};
+
 export default {
     createFreight,
     getFreight,
     updateFreight,
-    deleteFreight
+    deleteFreight,
+    restoreFreight,
+    permanentDeleteFreight,
+    getTrashFreight
 };

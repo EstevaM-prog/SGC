@@ -59,7 +59,15 @@ export default function Docs({ onBack }) {
           </div>
           <div className="docs-section">
              <h3>🏢 Gestão de Equipe</h3>
-             <p>Encontrado na seção de Perfil, este módulo permite que administradores criem grupos de trabalho, gerem códigos de convite e configurem permissões granulares.</p>
+             <p>Encontrado na seção de Perfil, este módulo permite que administradores criem grupos de trabalho, gerem códigos de convite e configurem permissões granulares, incluindo *Feature Flags* para controle de funcionalidades específicas.</p>
+          </div>
+          <div className="docs-section">
+             <h3>🗑️ Lixeira (Soft Delete)</h3>
+             <p>Acesse o módulo de Lixeira para recuperar chamados, itens de compra ou fretes que foram excluídos. O sistema mantém os dados por tempo indeterminado em estado 'arquivado', permitindo restauração imediata ou exclusão permanente.</p>
+          </div>
+          <div className="docs-section">
+             <h3>🛠️ Central de Suporte</h3>
+             <p>Interface dedicada para suporte técnico. Categorize suas solicitações (Erro, Dúvida, Financeiro) para um atendimento mais ágil e rastreável.</p>
           </div>
         </section>
       )
@@ -109,6 +117,31 @@ export default function Docs({ onBack }) {
           <div className="docs-section">
              <h3>🔒 Proteção de Dados (LGPD)</h3>
              <p>O SGC utiliza criptografia simétrica AES-256-GCM para proteger campos sensíveis no banco de dados. E-mails e códigos de convite usam IVs determinísticos para busca, enquanto dados de chamados usam IVs randômicos para máxima segurança.</p>
+          </div>
+        </section>
+      )
+    },
+    {
+      id: "auditing",
+      title: "Auditoria e Logs",
+      icon: <ShieldCheck size={18} />,
+      content: (
+        <section className="docs-section">
+          <h2>Auditoria e Logs</h2>
+          <p>O SGC v2.1 implementa transparência total sobre ações sensíveis no sistema.</p>
+          <div className="docs-grid">
+             <div className="docs-card">
+                <h4>Logs de Acesso</h4>
+                <p>Monitoramento de logins bem-sucedidos e tentativas de intrusão (brute force) com rotação diária de arquivos.</p>
+             </div>
+             <div className="docs-card">
+                <h4>Logs de Permissão</h4>
+                <p>Rastreia quem alterou as *Feature Flags* de um membro da equipe e quando isso ocorreu.</p>
+             </div>
+             <div className="docs-card">
+                <h4>Conformidade</h4>
+                <p>Todos os logs seguem padrões ISO de auditoria para fins de compliance e segurança da informação.</p>
+             </div>
           </div>
         </section>
       )

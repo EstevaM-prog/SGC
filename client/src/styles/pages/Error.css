@@ -5,9 +5,6 @@
   justify-content: center;
   padding: 2rem;
   background-color: #030712;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0, transparent 50%), 
-    radial-gradient(at 100% 100%, rgba(34, 211, 238, 0.05) 0, transparent 50%);
   color: #f9fafb;
   font-family: 'Inter', sans-serif;
 }
@@ -44,11 +41,7 @@
 }
 
 .error-icon-wrap::after {
-  content: '';
-  position: absolute;
-  inset: -10px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent 70%);
-  z-index: -1;
+  content: none;
 }
 
 .error-code {
@@ -82,7 +75,7 @@
 
 .error-btn-primary {
   padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  background: #6366f1;
   border: none;
   border-radius: 12px;
   color: white;

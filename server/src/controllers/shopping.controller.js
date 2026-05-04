@@ -28,9 +28,32 @@ export const createShopping = async (req, res) => {
 
 export const getShopping = async (req, res) => {
   try {
+    const limit = parseInt(req.query.limit) || 200; 
+    const page = req.query.page ? parseInt(req.query.page) : null;
+
+    if (page) {
+      const skip = (page - 1) * limit;
+      const [items, total] = await Promise.all([
+        prisma.shoppingTicket.findMany({
+          where: { deleted: false },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit
+        }),
+        prisma.shoppingTicket.count({ where: { deleted: false } })
+      ]);
+      return res.json({
+        items,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit)
+      });
+    }
+
     const items = await prisma.shoppingTicket.findMany({
       where: { deleted: false },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: limit
     });
     res.json(items);
   } catch (error) {
@@ -40,7 +63,7 @@ export const getShopping = async (req, res) => {
 
 export const updateShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     const data = req.body;
     const shopping = await prisma.shoppingTicket.update({
       where: { id },
@@ -58,7 +81,7 @@ export const updateShopping = async (req, res) => {
 
 export const deleteShopping = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id, 10);
     await prisma.shoppingTicket.update({
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
@@ -69,9 +92,49 @@ export const deleteShopping = async (req, res) => {
   }
 };
 
+export const restoreShopping = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const shopping = await prisma.shoppingTicket.update({
+      where: { id },
+      data: { deleted: false, deletedAt: null }
+    });
+    res.json(shopping);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao restaurar compra' });
+  }
+};
+
+export const permanentDeleteShopping = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await prisma.shoppingTicket.delete({
+      where: { id }
+    });
+    res.json({ message: 'Compra removida permanentemente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao excluir definitivamente' });
+  }
+};
+
+export const getTrashShopping = async (req, res) => {
+  try {
+    const items = await prisma.shoppingTicket.findMany({
+      where: { deleted: true },
+      orderBy: { deletedAt: 'desc' }
+    });
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar lixeira de compras' });
+  }
+};
+
 export default {
     createShopping,
     getShopping,
     updateShopping,
-    deleteShopping
+    deleteShopping,
+    restoreShopping,
+    permanentDeleteShopping,
+    getTrashShopping
 };

@@ -1,8 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+import morgan from 'morgan';
+import compression from 'compression';
+import logger from './src/utils/logger.js';
+import auditLogger from './src/utils/audit.logger.js';
 
 // Import routes
 import userRoutes from './src/routes/user.routes.js';
@@ -12,6 +17,9 @@ import shoppingRoutes from './src/routes/ticketShopping.js';
 import freightRoutes from './src/routes/ticketFreight.js';
 import procedureRoutes from './src/routes/ticketProdureceres.js';
 import pontoRoutes from './src/routes/ticketPonto.js';
+import trashRoutes from './src/routes/trash.routes.js';
+import dashboardRoutes from './src/routes/dashboard.routes.js';
+import { checkHealth } from './src/routes/health.js';
 
 import { sendSupportEmail } from './src/utils/mailer.js';
 
@@ -20,9 +28,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Trust reverse proxy (required for Render, Heroku, Nginx, etc.)
+// Allows express-rate-limit to correctly identify IPs via X-Forwarded-For
+app.set('trust proxy', 1);
+
 // Middlewares
-app.use(cors());
+app.use(morgan('dev'));
+app.use(morgan('combined', { 
+  stream: { 
+    write: message => auditLogger.info(message.trim()) 
+  } 
+}));
+app.use(cors({
+  origin: '*', // Permite qualquer origem (ideal para dev e deploy inicial)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Service-ID', 'X-Access-Token'],
+  exposedHeaders: ['Authorization', 'X-Access-Token']
+}));
+app.use(compression());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Swagger Configuration
 const swaggerOptions = {
@@ -38,6 +63,25 @@ const swaggerOptions = {
         url: `http://localhost:${PORT}`,
       },
     ],
+    tags: [
+      { name: 'Auth', description: 'Autenticação e sessão (JWT)' },
+      { name: 'Users', description: 'Gestão de usuários e perfis' },
+      { name: 'Teams', description: 'Gestão de equipes e permissões' },
+      { name: 'Tickets', description: 'Operações de chamados (Geral)' },
+      { name: 'Shopping', description: 'Chamados de Compras corporativas' },
+      { name: 'Freight', description: 'Chamados de Fretes de carga' },
+      { name: 'Trash', description: 'Recuperação de itens excluídos' },
+      { name: 'System', description: 'Infraestrutura e Saúde' },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
   apis: ['./index.js', './src/routes/*.js'],
 };
@@ -53,10 +97,28 @@ app.use('/api/shopping', shoppingRoutes);
 app.use('/api/freights', freightRoutes);
 app.use('/api/procedures', procedureRoutes);
 app.use('/api/ponto', pontoRoutes);
+app.use('/api/trash', trashRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'SGC Backend is running' });
-});
+/**
+ * @openapi
+ * /api/health:
+ *   get:
+ *     tags: [System]
+ *     description: Health Check avançado que valida a saúde da API e pinga o Banco de Dados para reportar latência
+ *     parameters:
+ *       - in: query
+ *         name: external
+ *         schema:
+ *           type: boolean
+ *         description: Passar true para pingar e checar o status das APIs em Produção (Render/Railway)
+ *     responses:
+ *       200:
+ *         description: Todos os sistemas operantes
+ *       503:
+ *         description: Conexão com o Banco de Dados falhou
+ */
+app.get('/api/health', checkHealth);
 
 app.post('/api/support', async (req, res) => {
   const success = await sendSupportEmail(req.body);
@@ -67,11 +129,26 @@ app.post('/api/support', async (req, res) => {
   }
 });
 
+import prisma from './src/db.js';
+
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, () => {
-    console.log(`\n🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
-    console.log(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
+    logger.info(`🚀 Servidor SGC rodando em: http://localhost:${PORT}`);
+    logger.info(`📚 Documentação Swagger: http://localhost:${PORT}/api-docs`);
   });
+
+  // Graceful shutdown: disconnect Prisma to avoid connection leaks on Render restarts
+  const shutdown = async () => {
+    logger.info('🛑 Encerrando servidor...');
+    server.close(async () => {
+      await prisma.$disconnect();
+      logger.info('✅ Conexão com banco encerrada.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
 }
 
 export { app };

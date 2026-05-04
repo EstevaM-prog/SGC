@@ -1,7 +1,9 @@
-import React from 'react';
-import { Edit, Trash, RotateCcw, XCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Edit, Trash, RotateCcw, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPermanentDelete, isTrash }) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const formatCurrency = (val) => {
     if (val === null || val === undefined || isNaN(val)) return '';
     return Number(val).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -65,6 +67,18 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
     );
   }
 
+  const totalPages = Math.ceil(tickets.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentTickets = tickets.slice(startIndex, startIndex + itemsPerPage);
+
+  const handlePrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+  
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <div className="table-wrapper">
       <table className="data-table">
@@ -86,7 +100,7 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
           </tr>
         </thead>
         <tbody>
-          {tickets.map(t => {
+          {currentTickets.map(t => {
             const dueInfo = getDueInfo(t.vencimento);
             return (
               <tr key={t.id}>
@@ -139,6 +153,35 @@ export default function DataTable({ tickets, onEdit, onDelete, onRestore, onPerm
           })}
         </tbody>
       </table>
+      
+      {totalPages > 1 && (
+        <div style={{ padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)' }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--muted-foreground)' }}>
+            Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, tickets.length)} de {tickets.length} registros
+          </span>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button 
+              onClick={handlePrevPage} 
+              disabled={currentPage === 1}
+              className="sgc-btn-ghost" 
+              style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === 1 ? 0.5 : 1 }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <span style={{ display: 'flex', alignItems: 'center', fontSize: '0.9rem', fontWeight: 600 }}>
+              {currentPage} / {totalPages}
+            </span>
+            <button 
+              onClick={handleNextPage} 
+              disabled={currentPage === totalPages}
+              className="sgc-btn-ghost" 
+              style={{ padding: '0.5rem', height: 'auto', opacity: currentPage === totalPages ? 0.5 : 1 }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
