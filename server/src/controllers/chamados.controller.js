@@ -72,30 +72,35 @@ export const updateChamados = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const data = req.body;
     
+    // Filtramos apenas campos que foram enviados no body para permitir updates parciais (ex: apenas situacao)
+    const updateData = {};
+    const fields = [
+      'situacao', 'numero', 'pedido', 'notaFiscal', 'forma', 
+      'razao', 'cnpj', 'setor', 'codEtica', 'requisitante', 'obs'
+    ];
+
+    fields.forEach(field => {
+      if (data[field] !== undefined) updateData[field] = data[field];
+    });
+
+    if (data.valor !== undefined && data.valor !== null) {
+      updateData.valor = parseFloat(data.valor);
+    }
+
+    if (data.dataEmissao) updateData.dataEmissao = new Date(data.dataEmissao);
+    if (data.vencimento) updateData.vencimento = new Date(data.vencimento);
+
     const chamado = await prisma.chamado.update({
       where: { id },
-      data: {
-        situacao: data.situacao,
-        numero: data.numero,
-        pedido: data.pedido,
-        notaFiscal: data.notaFiscal,
-        valor: data.valor !== undefined && data.valor !== null ? parseFloat(data.valor) : undefined,
-        forma: data.forma,
-        razao: data.razao,
-        cnpj: data.cnpj,
-        setor: data.setor,
-        codEtica: data.codEtica,
-        requisitante: data.requisitante,
-        obs: data.obs,
-        dataEmissao: data.dataEmissao ? new Date(data.dataEmissao) : undefined,
-        vencimento: data.vencimento ? new Date(data.vencimento) : undefined,
-      }
+      data: updateData
     });
+
     res.json({ 
       data: chamado, 
       message: 'Chamado atualizado com sucesso!' 
     });
   } catch (error) {
+    console.error('Erro no update:', error);
     res.status(500).json({ error: 'Erro ao atualizar chamado' });
   }
 };

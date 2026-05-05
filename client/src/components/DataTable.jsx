@@ -14,8 +14,8 @@ const Highlight = ({ text, query }) => {
     <span>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() 
-          ? <mark key={i} style={{ background: '#FDE047', color: '#854D0E', padding: '0 2px', borderRadius: '2px' }}>{part}</mark> 
-          : part
+          ? <mark key={`h-${i}`} style={{ background: '#FDE047', color: '#854D0E', padding: '0 2px', borderRadius: '2px' }}>{part}</mark> 
+          : <span key={`t-${i}`}>{part}</span>
       )}
     </span>
   );
@@ -126,7 +126,7 @@ export default function DataTable({
             </tr>
           </thead>
           <tbody>
-            {currentTickets.map(t => {
+            {currentTickets.map((t, idx) => {
               const dueInfo = getDueInfo(t.vencimento);
               const isSelected = selectedIds.has(t.id);
               const isActive = activeRowId === t.id;
@@ -135,7 +135,7 @@ export default function DataTable({
               
               return (
                 <tr 
-                  key={t.id} 
+                  key={`${t.id}-${idx}`} 
                   className={`${isSelected ? 'selected' : ''} ${isActive ? 'active-nav' : ''} ${isHighValue ? 'row-high-value' : ''} ${isCancelled ? 'row-cancelled' : ''}`}
                   onClick={() => onPreview(t)}
                 >

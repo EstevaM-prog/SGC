@@ -238,7 +238,8 @@ function App() {
         return (
           <Dashboard 
             tickets={allTickets} 
-            loading={chamados.loading || shopping.loading || freight.loading || ponto.loading} 
+            loading={chamados.loading || shopping.loading || freight.loading || ponto.loading}
+            onNavigate={navigateTo}
           />
         );
       }
