@@ -4,6 +4,19 @@ O **SGC** é uma plataforma fullstack moderna, segura e de alta performance, pro
 
 ---
 
+## ✨ Novidades v2.2 (Ticket Management v3) ⚡
+
+A tela de gestão de chamados foi elevada para um nível de performance enterprise:
+
+- **Navegação Power User**: Atalhos de teclado completos (`Setas`, `Enter`, `Tab`, `Esc`) para navegar, visualizar, editar e trocar páginas sem tocar no mouse.
+- **Split-View Interativo**: Layout lado a lado redimensionável que permite analisar detalhes de chamados em tempo real enquanto navega na lista principal.
+- **Inteligência Financeira**: Barra de performance no topo com cálculos dinâmicos em tempo real (**Soma da Página** e **Total Geral Filtrado**).
+- **Workflow Kanban v2**: Gestão visual com suporte a *Drag-and-Drop* nativo para mudança de status e organização de prioridades.
+- **Ações em Massa Modernas**: Barra de ferramentas inline para gestão de múltiplos registros simultaneamente com feedback instantâneo.
+- **Histórico de Auditoria Visual**: Linha do tempo detalhada dentro de cada chamado mostrando quem alterou o status e quando.
+
+---
+
 ## ✨ Novidades v2.1
 
 O sistema foi atualizado para uma arquitetura mais robusta e transparente:

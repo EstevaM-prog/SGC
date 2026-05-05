@@ -76,6 +76,39 @@ body.dark .sgc-tb-sep {
   background: var(--border);
 }
 
+/* Breadcrumbs */
+.sgc-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.breadcrumb-item {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.breadcrumb-item:hover {
+  color: var(--primary);
+}
+
+.breadcrumb-item.active {
+  color: var(--foreground);
+  font-weight: 800;
+  cursor: default;
+}
+
+.breadcrumb-sep {
+  font-size: 0.8rem;
+  color: var(--border);
+  font-weight: 400;
+}
+
 /* ─────────────────────────────────────────────────────────────
    ICON BUTTONS
 ───────────────────────────────────────────────────────────── */

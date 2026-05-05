@@ -46,7 +46,7 @@ export default function Notification({ onNavigateTo, notifications = [], unreadC
       >
         <span className="sgc-tb-btn-bg" />
         <Bell size={18} />
-        {unreadCount > 0 && <span className="tb-notif-dot" />}
+        {unreadCount > 0 && <span className="tb-notif-dot">{unreadCount > 99 ? '99+' : unreadCount}</span>}
       </button>
 
 

@@ -10,6 +10,7 @@
   --card-foreground:    #111827;
 
   --primary:            #2563EB;          /* Indigo Blue — calm & trustworthy */
+  --primary-rgb:        37, 99, 235;
   --primary-deep:       #1D4ED8;
   --primary-faded:      rgba(37, 99, 235, 0.08);
   --primary-foreground: #FFFFFF;
@@ -21,6 +22,7 @@
   --muted-foreground:   #6B7280;
 
   --accent:             #059669;          /* Emerald Green — subtle confirmation */
+  --accent-rgb:         5, 150, 105;
   --success:            #059669;
   --warning:            #D97706;
   --destructive:        #DC2626;
@@ -58,6 +60,7 @@ body.dark {
   --card-foreground:    #F9FAFB;
 
   --primary:            #3B82F6;          /* Soft Blue — stands out without shouting */
+  --primary-rgb:        59, 130, 246;
   --primary-deep:       #2563EB;
   --primary-faded:      rgba(59, 130, 246, 0.10);
   --primary-foreground: #FFFFFF;
@@ -69,6 +72,7 @@ body.dark {
   --muted-foreground:   #9CA3AF;
 
   --accent:             #10B981;
+  --accent-rgb:         16, 185, 129;
   --success:            #10B981;
   --warning:            #F59E0B;
   --destructive:        #EF4444;

@@ -22,7 +22,10 @@ export const createChamados = async (req, res) => {
         deleted: false
       }
     });
-    res.status(201).json(chamado);
+    res.status(201).json({ 
+      data: chamado, 
+      message: 'Chamado criado com sucesso!' 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao criar chamado' });
@@ -69,28 +72,35 @@ export const updateChamados = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const data = req.body;
     
-    // SECURITY: Mapeamento de colunas explícito (Elimina o Mass Assignment / Injeção)
+    // Filtramos apenas campos que foram enviados no body para permitir updates parciais (ex: apenas situacao)
+    const updateData = {};
+    const fields = [
+      'situacao', 'numero', 'pedido', 'notaFiscal', 'forma', 
+      'razao', 'cnpj', 'setor', 'codEtica', 'requisitante', 'obs'
+    ];
+
+    fields.forEach(field => {
+      if (data[field] !== undefined) updateData[field] = data[field];
+    });
+
+    if (data.valor !== undefined && data.valor !== null) {
+      updateData.valor = parseFloat(data.valor);
+    }
+
+    if (data.dataEmissao) updateData.dataEmissao = new Date(data.dataEmissao);
+    if (data.vencimento) updateData.vencimento = new Date(data.vencimento);
+
     const chamado = await prisma.chamado.update({
       where: { id },
-      data: {
-        situacao: data.situacao,
-        numero: data.numero,
-        pedido: data.pedido,
-        notaFiscal: data.notaFiscal,
-        valor: data.valor !== undefined && data.valor !== null ? parseFloat(data.valor) : undefined,
-        forma: data.forma,
-        razao: data.razao,
-        cnpj: data.cnpj,
-        setor: data.setor,
-        codEtica: data.codEtica,
-        requisitante: data.requisitante,
-        obs: data.obs,
-        dataEmissao: data.dataEmissao ? new Date(data.dataEmissao) : undefined,
-        vencimento: data.vencimento ? new Date(data.vencimento) : undefined,
-      }
+      data: updateData
     });
-    res.json(chamado);
+
+    res.json({ 
+      data: chamado, 
+      message: 'Chamado atualizado com sucesso!' 
+    });
   } catch (error) {
+    console.error('Erro no update:', error);
     res.status(500).json({ error: 'Erro ao atualizar chamado' });
   }
 };
@@ -102,7 +112,7 @@ export const deleteChamados = async (req, res) => {
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
     });
-    res.json({ message: 'Chamado movido para a lixeira' });
+    res.json({ message: 'Chamado movido para a lixeira com sucesso!' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao deletar chamado' });
   }
@@ -115,7 +125,10 @@ export const restoreChamados = async (req, res) => {
       where: { id },
       data: { deleted: false, deletedAt: null }
     });
-    res.json(chamado);
+    res.json({ 
+      data: chamado, 
+      message: 'Chamado restaurado com sucesso!' 
+    });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao restaurar chamado' });
   }
@@ -127,7 +140,7 @@ export const permanentDeleteChamados = async (req, res) => {
     await prisma.chamado.delete({
       where: { id }
     });
-    res.json({ message: 'Chamado removido permanentemente' });
+    res.json({ message: 'Chamado removido permanentemente!' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao excluir definitivamente' });
   }

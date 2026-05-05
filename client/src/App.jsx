@@ -226,13 +226,23 @@ function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'dashboard':
+      case 'dashboard': {
+        console.log('Rendering Dashboard, currentView:', currentView);
         const allTickets = [
           ...(Array.isArray(chamados.tickets) ? chamados.tickets.map(t => ({ ...t, source: 'chamado' })) : []),
           ...(Array.isArray(shopping.tickets) ? shopping.tickets.map(t => ({ ...t, source: 'shopping' })) : []),
-          ...(Array.isArray(freight.tickets) ? freight.tickets.map(t => ({ ...t, source: 'freight' })) : [])
+          ...(Array.isArray(freight.tickets) ? freight.tickets.map(t => ({ ...t, source: 'freight' })) : []),
+          ...(Array.isArray(ponto.tickets) ? ponto.tickets.map(t => ({ ...t, source: 'ponto' })) : [])
         ];
-        return <Dashboard tickets={allTickets} />;
+        console.log('Total tickets for dashboard:', allTickets.length);
+        return (
+          <Dashboard 
+            tickets={allTickets} 
+            loading={chamados.loading || shopping.loading || freight.loading || ponto.loading}
+            onNavigate={navigateTo}
+          />
+        );
+      }
 
       case 'list':
         return (
@@ -240,8 +250,10 @@ function App() {
             tickets={chamados.tickets}
             searchTerm={searchTerm}
             onNewTicket={handleNewTicket}
+            onAddTicket={chamados.addTicket}
             onEdit={handleEdit}
             onDelete={chamados.softDeleteTicket}
+            onUpdateTicket={chamados.updateTicket}
           />
         );
 
@@ -453,6 +465,7 @@ function App() {
           notifications={activities}
           unreadCount={unreadCount}
           onMarkRead={markAllAsRead}
+          currentView={currentView}
         />
         <div className="content-area">
           {renderView()}

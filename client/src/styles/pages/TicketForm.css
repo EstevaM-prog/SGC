@@ -1,89 +1,300 @@
 /* ═══════════════════════════════════════════════════════════════
-   TICKET FORM STYLES
+   SGC TICKET FORM — PREMIUM REDESIGN
 ═══════════════════════════════════════════════════════════════ */
-.form-container {
-  max-width: 1200px;
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.tf-wrapper {
+  max-width: 900px;
   margin: 0 auto;
+  animation: fadeUp 0.4s ease-out;
+  padding-bottom: 4rem;
 }
 
-.form-grid {
+/* ── Top Bar (Sticky) ── */
+.tf-topbar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.3s ease-out;
+}
+
+body.dark .tf-topbar {
+  background: rgba(30, 30, 30, 0.85);
+}
+
+.tf-title-area h1 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tf-title-area p {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  margin: 2px 0 0;
+}
+
+.tf-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Form Body ── */
+.tf-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Section ── */
+.tf-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.4s ease-out both;
+}
+
+.tf-section:nth-child(1) { animation-delay: 0.1s; }
+.tf-section:nth-child(2) { animation-delay: 0.2s; }
+.tf-section:nth-child(3) { animation-delay: 0.3s; }
+
+.tf-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px dashed var(--border);
+}
+
+.tf-section-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--primary-faded);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tf-section-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.tf-section-subtitle {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+}
+
+/* ── Form Grid ── */
+.tf-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
 }
 
-@media (max-width: 1024px) {
-  .form-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.tf-grid.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 @media (max-width: 768px) {
-  .form-grid {
+  .tf-grid, .tf-grid.cols-3 {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 }
 
-.form-group {
+.tf-group {
   display: flex;
   flex-direction: column;
+  gap: 6px;
 }
 
-.form-group.full-width {
+.tf-group.full {
   grid-column: 1 / -1;
 }
 
-.form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--muted-foreground);
-  margin-bottom: 0.5rem;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--input);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+.tf-label {
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--foreground);
-  font-size: 0.875rem;
-  font-family: inherit;
-  outline: none;
-  transition: var(--transition);
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px hsla(199, 89%, 48%, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-actions {
   display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+  align-items: center;
+  gap: 6px;
 }
 
-@media (max-width: 640px) {
-  .form-actions {
-    flex-direction: column-reverse;
-  }
+.tf-required {
+  color: var(--destructive);
+}
 
-  .form-actions .btn-primary,
-  .form-actions .btn-outline {
-    width: 100%;
-    justify-content: center;
-  }
+/* ── Inputs ── */
+.tf-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.tf-input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.tf-input, .tf-select, .tf-textarea {
+  width: 100%;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.tf-input, .tf-select {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.tf-input.has-icon {
+  padding-left: 38px;
+}
+
+.tf-textarea {
+  padding: 12px;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.tf-input:hover, .tf-select:hover, .tf-textarea:hover {
+  border-color: var(--primary-faded);
+}
+
+.tf-input:focus, .tf-select:focus, .tf-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+}
+
+.tf-input.error {
+  border-color: var(--destructive);
+  background: rgba(239, 68, 68, 0.02);
+}
+
+.tf-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.tf-error-text {
+  font-size: 0.7rem;
+  color: var(--destructive);
+  font-weight: 600;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: slideInRight 0.2s ease-out;
+}
+
+/* ── Tags / Notas Fiscais ── */
+.tf-tags-input {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 42px;
+  transition: all 0.2s;
+}
+
+.tf-tags-input:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.15);
+}
+
+.tf-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--primary-faded);
+  color: var(--primary);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  animation: scaleIn 0.2s ease-out;
+}
+
+.tf-tag-remove {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.tf-tag-remove:hover {
+  opacity: 1;
+}
+
+.tf-tag-input-field {
+  flex: 1;
+  min-width: 120px;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.85rem;
+  color: var(--foreground);
+  padding: 4px;
+}
+
+/* ── Progress Bar ── */
+.tf-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--primary);
+  transition: width 0.3s ease;
+  border-radius: 0 4px 0 0;
+}
+
+/* ── Helper ── */
+.tf-helper {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
