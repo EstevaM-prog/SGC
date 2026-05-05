@@ -9,25 +9,25 @@ const NAV_GROUPS = [
   {
     section: 'Visão Geral',
     items: [
-      { id: 'dashboard', label: 'Dashboard',   Icon: BarChart3,  badge: null },
-      { id: 'list',      label: 'Chamados',    Icon: List,       badge: null },
+      { id: 'dashboard', label: 'Dashboard', Icon: BarChart3, badge: null },
+      { id: 'list', label: 'Chamados', Icon: List, badge: null },
     ]
   },
   {
     section: 'Operacional',
     items: [
-      { id: 'shopping',  label: 'Compras',     Icon: ShoppingCart, badge: null },
-      { id: 'freight',   label: 'Fretes',      Icon: Truck,        badge: null },
-      { id: 'ponto',     label: 'Ponto',       Icon: Clock,        badge: null },
-      { id: 'cnpj',      label: 'Tabela CNPJ', Icon: Table,        badge: null },
+      { id: 'shopping', label: 'Compras', Icon: ShoppingCart, badge: null },
+      { id: 'freight', label: 'Fretes', Icon: Truck, badge: null },
+      { id: 'ponto', label: 'Ponto', Icon: Clock, badge: null },
+      { id: 'cnpj', label: 'Tabela CNPJ', Icon: Table, badge: null },
     ]
   },
   {
     section: 'Recursos',
     items: [
-      { id: 'procedures', label: 'Procedimentos', Icon: Workflow,   badge: null },
-      { id: 'suporte',    label: 'Suporte',       Icon: Headphones, badge: 'Novo' },
-      { id: 'trash',      label: 'Lixeira',       Icon: Trash2,     badge: null },
+      { id: 'procedures', label: 'Procedimentos', Icon: Workflow, badge: null },
+      { id: 'suporte', label: 'Suporte', Icon: Headphones, badge: 'Novo' },
+      { id: 'trash', label: 'Lixeira', Icon: Trash2, badge: null },
     ]
   }
 ];
@@ -129,7 +129,7 @@ export default function Sidebar({
             <Settings size={15} />
           </div>
           <div className="sgc-footer-info">
-            <span className="sgc-footer-version">v2.1 · SGC Platform</span>
+            <span className="sgc-footer-version">v2.2 · SGC Platform</span>
           </div>
         </div>
       </div>
