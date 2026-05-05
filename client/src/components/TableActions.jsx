@@ -1,40 +1,68 @@
-import React, { useRef } from 'react';
-import { Upload, Download, FileSpreadsheet, FileText } from 'lucide-react';
+import React, { useRef, useState, useEffect } from 'react';
+import { Upload, Download, FileSpreadsheet, FileText, ChevronDown } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 export default function TableActions({ data, onImport, filename = 'relatorio' }) {
   const fileInputRef = useRef(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // --- EXPORT LOGIC ---
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dados");
-    XLSX.writeFile(wb, `${filename}.xlsx`);
+    try {
+      if (!data || data.length === 0) return alert('Nenhum dado para exportar');
+      
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Dados");
+      XLSX.writeFile(wb, `${filename}.xlsx`);
+      setShowDropdown(false);
+    } catch (err) {
+      console.error('Erro ao exportar Excel:', err);
+      alert('Erro ao gerar arquivo Excel');
+    }
   };
 
   const exportToPDF = () => {
-    const doc = new jsPDF('l', 'mm', 'a4');
-    
-    // Prepare data for autotable
-    if (data.length === 0) return alert('Nenhum dado para exportar');
-    
-    const headers = Object.keys(data[0]);
-    const body = data.map(item => Object.values(item));
+    try {
+      if (!data || data.length === 0) return alert('Nenhum dado para exportar');
+      
+      const doc = new jsPDF('l', 'mm', 'a4');
+      const headers = Object.keys(data[0]);
+      const body = data.map(item => Object.values(item));
 
-    doc.text(filename.toUpperCase(), 14, 15);
-    
-    doc.autoTable({
-      head: [headers],
-      body: body,
-      startY: 20,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 }
-    });
-    
-    doc.save(`${filename}.pdf`);
+      doc.setFontSize(16);
+      doc.text(filename.replace(/-/g, ' ').toUpperCase(), 14, 15);
+      
+      doc.autoTable({
+        head: [headers],
+        body: body,
+        startY: 22,
+        styles: { fontSize: 7, cellPadding: 2 },
+        headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        margin: { top: 20 },
+      });
+      
+      doc.save(`${filename}.pdf`);
+      setShowDropdown(false);
+    } catch (err) {
+      console.error('Erro ao exportar PDF:', err);
+      alert('Erro ao gerar arquivo PDF');
+    }
   };
 
   // --- IMPORT LOGIC ---
@@ -44,13 +72,22 @@ export default function TableActions({ data, onImport, filename = 'relatorio' })
 
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const bstr = evt.target.result;
-      const wb = XLSX.read(bstr, { type: 'binary' });
-      const wsname = wb.SheetNames[0];
-      const ws = wb.Sheets[wsname];
-      const importedData = XLSX.utils.sheet_to_json(ws);
-      
-      if (onImport) onImport(importedData);
+      try {
+        const bstr = evt.target.result;
+        const wb = XLSX.read(bstr, { type: 'binary' });
+        const wsname = wb.SheetNames[0];
+        const ws = wb.Sheets[wsname];
+        const importedData = XLSX.utils.sheet_to_json(ws);
+        
+        if (onImport && importedData.length > 0) {
+          onImport(importedData);
+        } else {
+          alert('O arquivo parece estar vazio ou em formato inválido.');
+        }
+      } catch (err) {
+        console.error('Erro ao importar arquivo:', err);
+        alert('Erro ao ler o arquivo. Certifique-se de que é um Excel ou CSV válido.');
+      }
       
       // Reset input
       e.target.value = '';
@@ -59,7 +96,7 @@ export default function TableActions({ data, onImport, filename = 'relatorio' })
   };
 
   return (
-    <div className="table-actions-toolbar" style={{ display: 'flex', gap: '8px' }}>
+    <div className="table-actions-container" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
       <input 
         type="file" 
         accept=".xlsx, .xls, .csv" 
@@ -72,56 +109,114 @@ export default function TableActions({ data, onImport, filename = 'relatorio' })
         type="button" 
         className="btn-outline" 
         onClick={() => fileInputRef.current.click()}
-        title="Importar Excel/CSV"
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px', 
+          padding: '8px 14px', 
+          fontSize: '0.8rem', 
+          height: '38px',
+          borderRadius: '10px'
+        }}
+        title="Importar de Excel/CSV"
       >
-        <Upload size={16} />
-        <span>Importar</span>
+        <Upload size={14} />
+        <span className="desktop-only">Importar</span>
       </button>
 
-      <div className="dropdown" style={{ position: 'relative' }}>
+      <div className="export-dropdown-wrapper" ref={dropdownRef} style={{ position: 'relative' }}>
         <button 
           type="button" 
-          className="btn-outline dropdown-toggle" 
-          onClick={(e) => {
-            const menu = e.currentTarget.nextSibling;
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+          className="btn-outline" 
+          onClick={() => setShowDropdown(!showDropdown)}
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            padding: '8px 14px', 
+            fontSize: '0.8rem', 
+            height: '38px',
+            borderRadius: '10px'
           }}
           title="Exportar dados"
         >
-          <Download size={16} />
-          <span>Exportar</span>
+          <Download size={14} />
+          <span className="desktop-only">Exportar</span>
+          <ChevronDown size={12} style={{ transform: showDropdown ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
         </button>
-        <div 
-          className="dropdown-menu card" 
-          style={{ 
-            display: 'none', 
-            position: 'absolute', 
-            top: '100%', 
-            right: 0, 
-            zIndex: 100, 
-            minWidth: '150px',
-            padding: '8px',
-            marginTop: '4px'
-          }}
-          onMouseLeave={(e) => e.currentTarget.style.display = 'none'}
-        >
-          <button 
-            className="action-item" 
-            onClick={exportToExcel}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--foreground)' }}
+
+        {showDropdown && (
+          <div 
+            className="dropdown-menu shadow-lg" 
+            style={{ 
+              display: 'block', 
+              position: 'absolute', 
+              top: 'calc(100% + 6px)', 
+              right: 0, 
+              zIndex: 1000, 
+              minWidth: '180px',
+              padding: '6px',
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              animation: 'fadeUp 0.2s ease-out'
+            }}
           >
-            <FileSpreadsheet size={16} color="#1D6F42" />
-            Excel (.xlsx)
-          </button>
-          <button 
-            className="action-item" 
-            onClick={exportToPDF}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--foreground)' }}
-          >
-            <FileText size={16} color="#E74C3C" />
-            PDF (.pdf)
-          </button>
-        </div>
+            <div style={{ padding: '6px 12px', fontSize: '0.65rem', fontWeight: 800, color: 'var(--muted-foreground)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Formato de saída
+            </div>
+            <button 
+              className="dropdown-item" 
+              onClick={exportToExcel}
+              style={{ 
+                width: '100%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                padding: '10px 12px', 
+                background: 'none', 
+                border: 'none', 
+                cursor: 'pointer', 
+                textAlign: 'left', 
+                color: 'var(--foreground)',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+            >
+              <FileSpreadsheet size={16} color="#10B981" />
+              Excel (.xlsx)
+            </button>
+            <button 
+              className="dropdown-item" 
+              onClick={exportToPDF}
+              style={{ 
+                width: '100%', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                padding: '10px 12px', 
+                background: 'none', 
+                border: 'none', 
+                cursor: 'pointer', 
+                textAlign: 'left', 
+                color: 'var(--foreground)',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--secondary)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+            >
+              <FileText size={16} color="#EF4444" />
+              PDF (.pdf)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
