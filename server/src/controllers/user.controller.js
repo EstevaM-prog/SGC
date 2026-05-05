@@ -273,11 +273,15 @@ export const getMyProfile = async (req, res) => {
 
 export const updateMyProfile = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatarUrl } = req.body;
     let dataToUpdate = { name, email };
 
     if (password) {
       dataToUpdate.password = await bcrypt.hash(password, 10);
+    }
+    
+    if (avatarUrl) {
+      dataToUpdate.avatarUrl = avatarUrl;
     }
 
     const user = await prisma.user.update({

@@ -96,20 +96,34 @@ const TicketPreview = ({ ticket, onClose, onEdit, onDelete, onUpdateTicket, isSp
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState([]);
   const [activeTab, setActiveTab] = useState('notes');
-  useEffect(() => { if (ticket) setNotes(ticket.comments || []); }, [ticket]);
+
+  useEffect(() => { 
+    if (ticket) {
+      // Tenta buscar no localStorage primeiro
+      const localNotes = localStorage.getItem(`sgc_notes_${ticket.id}`);
+      if (localNotes) {
+        setNotes(JSON.parse(localNotes));
+      } else {
+        setNotes(ticket.comments || []); 
+      }
+    }
+  }, [ticket]);
   if (!ticket) return isSplit ? <div className="tl-preview-placeholder"><Inbox size={48} /><p>Selecione um chamado</p></div> : null;
   const st = STATUS_CONFIG[(ticket.situacao || '').toLowerCase()] || STATUS_CONFIG.aberto;
   const handleAddNote = () => {
     if (!note.trim()) return;
     const newNote = { id: Date.now(), text: note, user: 'Você', date: new Date().toISOString() };
     const updatedNotes = [newNote, ...notes];
-    setNotes(updatedNotes); setNote('');
-    onUpdateTicket?.(ticket.id, { comments: updatedNotes });
+    setNotes(updatedNotes); 
+    setNote('');
+    // Salva no localStorage por enquanto
+    localStorage.setItem(`sgc_notes_${ticket.id}`, JSON.stringify(updatedNotes));
   };
+
   const handleDeleteNote = (noteId) => {
     const updatedNotes = notes.filter(n => n.id !== noteId);
     setNotes(updatedNotes);
-    onUpdateTicket?.(ticket.id, { comments: updatedNotes });
+    localStorage.setItem(`sgc_notes_${ticket.id}`, JSON.stringify(updatedNotes));
   };
   return (
     <div className={isSplit ? "tl-split-preview" : "tl-drawer-overlay"} onClick={!isSplit ? onClose : undefined}>

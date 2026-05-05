@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   ArrowLeft, User, Mail, Lock, Camera, LogOut, Edit, Save, X, Eye, EyeOff,
   ShieldCheck, UserCircle2, Users, Settings, RefreshCw, Key, Share2, Plus, Check,
-  Layout, Building2, Zap, Truck, ClipboardList, Briefcase, AlertCircle
+  Layout, Building2, Zap, Truck, ClipboardList, Briefcase, AlertCircle, Clock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api, { formatImageUrl } from '../Axios/conect.js';
@@ -14,7 +14,7 @@ const PAGE_OPTIONS = [
   { id: 'activities', label: 'Atividades',        Icon: Zap },
   { id: 'shopping',   label: 'Compras',           Icon: Building2 },
   { id: 'freight',    label: 'Fretes',            Icon: Truck },
-  { id: 'ponto',      label: 'Ponto',             Icon: Clock => <Clock size={14}/> /* fallback */ },
+  { id: 'ponto',      label: 'Ponto',             Icon: Clock },
   { id: 'procedures', label: 'Procedimentos',     Icon: Settings },
 ];
 
