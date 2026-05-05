@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'https://sgc-production-railway.up.railway.app/api' : 'https://sgc-production-railway.up.railway.app/api')
@@ -60,9 +61,20 @@ api.interceptors.request.use((config) => {
 }, (error) => Promise.reject(error));
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Notificação de Sucesso vinda da API
+    if (response.data && response.data.message) {
+      toast.success(response.data.message);
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
+
+    // Notificação de Erro vinda da API
+    if (error.response?.data?.error || error.response?.data?.message) {
+      toast.error(error.response.data.error || error.response.data.message);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {

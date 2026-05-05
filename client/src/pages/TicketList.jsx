@@ -105,13 +105,11 @@ const TicketPreview = ({ ticket, onClose, onEdit, onDelete, onUpdateTicket, isSp
     const updatedNotes = [newNote, ...notes];
     setNotes(updatedNotes); setNote('');
     onUpdateTicket?.(ticket.id, { comments: updatedNotes });
-    toast.success('Nota adicionada!');
   };
   const handleDeleteNote = (noteId) => {
     const updatedNotes = notes.filter(n => n.id !== noteId);
     setNotes(updatedNotes);
     onUpdateTicket?.(ticket.id, { comments: updatedNotes });
-    toast.success('Nota excluída');
   };
   return (
     <div className={isSplit ? "tl-split-preview" : "tl-drawer-overlay"} onClick={!isSplit ? onClose : undefined}>
@@ -295,7 +293,6 @@ export default function TicketList({ tickets = [], searchTerm, onNewTicket, onAd
     const ticket = validTickets.find(t => t.id === id);
     const history = [...(ticket.history || []), { user: 'Você', action: `alterou status para ${newStatus}`, date: new Date().toISOString() }];
     onUpdateTicket(id, { situacao: newStatus, history }); 
-    toast.success(`Status: ${newStatus}`);
   };
 
   const startResizing = useCallback(() => { isResizing.current = true; document.body.style.cursor = 'col-resize'; }, []);
@@ -415,7 +412,7 @@ export default function TicketList({ tickets = [], searchTerm, onNewTicket, onAd
                 <div className="tl-bulk-bar">
                   <div className="tl-bulk-info"><strong>{selectedIds.size}</strong> itens</div>
                   <div className="tl-bulk-btns">
-                    <button className="tl-bulk-btn danger" onClick={() => { Array.from(selectedIds).forEach(id => onDelete(id)); setSelectedIds(new Set()); toast.success('Removidos'); }}><Trash size={14}/></button>
+                    <button className="tl-bulk-btn danger" onClick={() => { Array.from(selectedIds).forEach(id => onDelete(id)); setSelectedIds(new Set()); }}><Trash size={14}/></button>
                     <button className="tl-bulk-btn ghost" onClick={() => setSelectedIds(new Set())}><X size={14}/></button>
                   </div>
                 </div>

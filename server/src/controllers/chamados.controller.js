@@ -22,7 +22,10 @@ export const createChamados = async (req, res) => {
         deleted: false
       }
     });
-    res.status(201).json(chamado);
+    res.status(201).json({ 
+      data: chamado, 
+      message: 'Chamado criado com sucesso!' 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Erro ao criar chamado' });
@@ -69,7 +72,6 @@ export const updateChamados = async (req, res) => {
     const id = parseInt(req.params.id, 10);
     const data = req.body;
     
-    // SECURITY: Mapeamento de colunas explícito (Elimina o Mass Assignment / Injeção)
     const chamado = await prisma.chamado.update({
       where: { id },
       data: {
@@ -89,7 +91,10 @@ export const updateChamados = async (req, res) => {
         vencimento: data.vencimento ? new Date(data.vencimento) : undefined,
       }
     });
-    res.json(chamado);
+    res.json({ 
+      data: chamado, 
+      message: 'Chamado atualizado com sucesso!' 
+    });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao atualizar chamado' });
   }
@@ -102,7 +107,7 @@ export const deleteChamados = async (req, res) => {
       where: { id },
       data: { deleted: true, deletedAt: new Date() }
     });
-    res.json({ message: 'Chamado movido para a lixeira' });
+    res.json({ message: 'Chamado movido para a lixeira com sucesso!' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao deletar chamado' });
   }
@@ -115,7 +120,10 @@ export const restoreChamados = async (req, res) => {
       where: { id },
       data: { deleted: false, deletedAt: null }
     });
-    res.json(chamado);
+    res.json({ 
+      data: chamado, 
+      message: 'Chamado restaurado com sucesso!' 
+    });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao restaurar chamado' });
   }
@@ -127,7 +135,7 @@ export const permanentDeleteChamados = async (req, res) => {
     await prisma.chamado.delete({
       where: { id }
     });
-    res.json({ message: 'Chamado removido permanentemente' });
+    res.json({ message: 'Chamado removido permanentemente!' });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao excluir definitivamente' });
   }
